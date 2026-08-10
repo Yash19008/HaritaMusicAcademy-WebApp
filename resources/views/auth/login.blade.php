@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Harita Music Academy Admin Panel</title>
-  <link rel="stylesheet" href="{{ asset('admin/css/') }}/style.css">
+  <link rel="stylesheet" href="{{ asset('admin-assets/css/') }}/style.css">
   <style>
     body {
       background-color: #f8fafc;
@@ -153,7 +153,7 @@
   <!-- PRELOADER -->
   <div id="preloader" class="preloader-overlay">
     <div class="preloader-content">
-      <img src="{{ asset('admin/assets/') }}/logo.png" class="preloader-logo" alt="Harita Logo">
+      <img src="{{ asset('admin-assets/assets/') }}/logo.png" class="preloader-logo" alt="Harita Logo">
       <div class="preloader-spinner"></div>
     </div>
   </div>
@@ -161,35 +161,39 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-logo">
-        <img src="{{ asset('admin/assets/') }}/logo.png" width="80" height="80" alt="Harita Logo" style="object-fit: contain;">
+        <img src="{{ asset('admin-assets/assets/') }}/logo.png" width="80" height="80" alt="Harita Logo" style="object-fit: contain;">
         <h1 class="login-title">Harita Music Academy</h1>
         <p class="login-subtitle">Academy Portal & Administrative Panel</p>
       </div>
 
-      <form id="loginForm" onsubmit="handleLogin(event)">
+      <form id="loginForm" method="POST" action="{{ route('login.store') }}">
+        @csrf
 
-        <div class="form-group">
-          <label class="form-label" style="font-size:10px;">Simulated Role Selection</label>
-          <div class="role-select-grid">
-            <div class="role-btn selected" data-role="admin" onclick="selectRole('admin')">Admin</div>
-            <div class="role-btn" data-role="teacher" onclick="selectRole('teacher')">Teacher</div>
-            <div class="role-btn" data-role="student" onclick="selectRole('student')">Student</div>
+        @if ($errors->any())
+          <div class="alert alert-danger" style="padding: 0.65rem 0.9rem; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-size: 12.5px; margin-bottom: 1rem;">
+            {{ $errors->first() }}
           </div>
-        </div>
+        @endif
+
+        @if (session('success'))
+          <div style="padding: 0.65rem 0.9rem; border-radius: 8px; background: #d1fae5; color: #065f46; font-size: 12.5px; margin-bottom: 1rem;">
+            {{ session('success') }}
+          </div>
+        @endif
 
         <div class="form-group">
-          <label class="form-label" for="username">Username / Email</label>
-          <input type="text" id="username" class="form-control" placeholder="Enter username or email" required>
+          <label class="form-label" for="email">Email Address</label>
+          <input type="email" id="email" name="email" class="form-control" placeholder="admin@haritamusic.com" value="{{ old('email') }}" required autocomplete="email">
         </div>
 
         <div class="form-group">
           <label class="form-label" for="password">Password</label>
-          <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+          <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
         </div>
 
         <div class="d-flex align-center justify-between mb-3">
           <label class="checkbox-label" style="font-size:11.5px;">
-            <input type="checkbox" id="rememberMe"> Remember me
+            <input type="checkbox" name="remember"> Remember me
           </label>
           <a href="{{ route('password.request') }}" class="btn-link">Forgot password?</a>
         </div>
@@ -205,67 +209,12 @@
     </div>
   </div>
 
-  <script src="{{ asset('admin/js/') }}/app.js"></script>
   <script>
-    let activeRole = 'admin';
-
-    function selectRole(role) {
-      activeRole = role;
-      document.querySelectorAll('.role-btn').forEach(btn => {
-        if (btn.getAttribute('data-role') === role) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-      });
-
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
-
-      const users = db.getUsers() || [];
-      const foundUser = users.find(u => u.role.toLowerCase() === role.toLowerCase());
-      if (foundUser) {
-        usernameInput.value = foundUser.email;
-        passwordInput.value = foundUser.password;
-      } else {
-        usernameInput.value = '';
-        passwordInput.value = '';
-      }
-    }
-
-    selectRole('admin');
-
-    function handleLogin(event) {
-      event.preventDefault();
-      const usernameInput = document.getElementById('username').value.trim();
-      const passwordInput = document.getElementById('password').value;
-
-      const users = db.getUsers() || [];
-      const matchedUser = users.find(u => u.email.toLowerCase() === usernameInput.toLowerCase() && u.password === passwordInput);
-
-      if (!matchedUser) {
-        alert("Invalid username/email or password! Please check and try again.");
-        return;
-      }
-
-      if (matchedUser.status === "Inactive") {
-        alert("Your account is currently disabled. Please contact the administrator.");
-        return;
-      }
-
-      // Login success
-      const userRole = matchedUser.role.toLowerCase();
-      db.setCurrentRole(userRole);
-      localStorage.setItem("harita_logged_user", JSON.stringify(matchedUser));
-
-      if (userRole === 'admin') {
-        window.location.href = 'admin/dashboard.html';
-      } else if (userRole === 'teacher') {
-        window.location.href = 'teacher/dashboard.html';
-      } else if (userRole === 'student') {
-        window.location.href = 'student/dashboard.html';
-      }
-    }
+    // Hide preloader once page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const pre = document.getElementById('preloader');
+      if (pre) setTimeout(() => { pre.style.opacity = 0; setTimeout(() => pre.remove(), 400); }, 300);
+    });
   </script>
 </body>
 

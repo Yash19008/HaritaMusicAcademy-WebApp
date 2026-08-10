@@ -1,8 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'leaves')
+
 @section('content')
-
-
-      <div class="grid grid-3 gap-4">
+<div class="grid grid-3 gap-4">
         <!-- LEAVES REGISTER LIST (All Roles) -->
         <div class="card grid-2-col-span-2" style="grid-column: span 3;" id="leaveRegisterSection">
           <div class="card-header">
@@ -30,9 +30,6 @@
 
       <!-- Developed by Sitesoch footer -->
       <footer class="footer">
-        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
-            target="_blank">Sitesoch</a></p>
+        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com" target="_blank">Sitesoch</a></p>
       </footer>
-
-    
 @endsection

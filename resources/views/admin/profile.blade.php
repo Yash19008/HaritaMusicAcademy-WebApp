@@ -1,17 +1,105 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'profile')
+
+@push('styles')
+<style>
+.profile-hero {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      padding: 2rem 1.5rem;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      color: var(--text-white);
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--primary-light);
+    }
+
+    @media (max-width: 768px) {
+      .profile-hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem 1rem;
+      }
+    }
+
+    .profile-avatar-box .avatar-lg {
+      border: 3px solid var(--secondary);
+      background-color: var(--bg-card);
+      color: var(--primary);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .profile-meta h2 {
+      color: var(--secondary-light);
+      font-size: 1.6rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .profile-meta p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 0.9rem;
+    }
+
+    .profile-tabs-container {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.25rem;
+    }
+
+    .profile-tab {
+      background: transparent;
+      border: none;
+      padding: 0.5rem 1.25rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .profile-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .profile-grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 1.25rem;
+      animation: fadeIn var(--transition-speed);
+    }
+
+    @media (max-width: 992px) {
+      .profile-grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .info-list-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.85rem;
+    }
+
+    .info-list-item:last-child {
+      border-bottom: none;
+    }
+</style>
+@endpush
+
 @section('content')
-
-
-      <!-- HERO -->
+<!-- HERO -->
       <div class="profile-hero slide-up">
-        <div class="profile-avatar-box" style="position: relative; display: inline-block; cursor: pointer;"
-          onclick="document.getElementById('profileImageInput').click()">
+        <div class="profile-avatar-box" style="position: relative; display: inline-block; cursor: pointer;" onclick="document.getElementById('profileImageInput').click()">
           <div class="avatar avatar-lg" id="profileInitials">AD</div>
-          <div class="profile-avatar-overlay"
-            style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: var(--shadow-sm); z-index: 5;">
+          <div class="profile-avatar-overlay" style="position: absolute; bottom: 0; right: 0; background: var(--primary); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: var(--shadow-sm); z-index: 5;">
             📷</div>
-          <input type="file" id="profileImageInput" style="display: none;" accept="image/*"
-            onchange="uploadProfileImage(event)">
+          <input type="file" id="profileImageInput" accept="image/*" onchange="uploadProfileImage(event)">
         </div>
         <div class="profile-meta">
           <h2 id="profileName">Administrator</h2>
@@ -83,7 +171,7 @@
       <!-- ==========================================
            TEACHER PROFILE VIEW
            ========================================== -->
-      <div id="teacherProfileView" class="profile-grid-layout tab-content" style="display:none;">
+      <div id="teacherProfileView" class="profile-grid-layout tab-content">
         <div class="card">
           <div class="card-header">
             <h4 class="font-semibold">Academic Profile</h4>
@@ -133,7 +221,7 @@
       <!-- ==========================================
            STUDENT PROFILE VIEW
            ========================================== -->
-      <div id="studentProfileView" class="profile-grid-layout tab-content" style="display:none;">
+      <div id="studentProfileView" class="profile-grid-layout tab-content">
         <div class="card">
           <div class="card-header">
             <h4 class="font-semibold">Enrolment Overview</h4>
@@ -189,9 +277,6 @@
 
       <!-- Developed by Sitesoch footer -->
       <footer class="footer">
-        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
-            target="_blank">Sitesoch</a></p>
+        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com" target="_blank">Sitesoch</a></p>
       </footer>
-
-    
 @endsection

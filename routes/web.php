@@ -2,43 +2,27 @@
 
 use Illuminate\Support\Facades\Route;
 
-// Landing Pages
-Route::get('/', function () { return view('landing.index'); });
-Route::get('/privacy', function () { return view('landing.privacy'); });
+// ── Landing ───────────────────────────────────────────────────────────────────
+Route::get('/', fn () => view('landing.index'));
+Route::get('/privacy', fn () => view('landing.privacy'));
+Route::post('/book-demo', [\App\Http\Controllers\PublicController::class, 'storeDemo'])->name('public.book-demo');
 
-// Auth Pages
-Route::get('/login', function () { return view('auth.login'); })->name('login');
-Route::get('/forgot-password', function () { return view('auth.forgot-password'); })->name('password.request');
-
-// Admin Pages
-Route::prefix('admin')->group(function () {
-    Route::get('/', function () { return view('admin.dashboard'); });
-    Route::get('/{page}', function ($page) { 
-        if (view()->exists("admin.$page")) {
-            return view("admin.$page");
-        }
-        abort(404);
-    });
+// TEMPORARY LOGOUT FOR DEV
+Route::get('/force-logout', function () {
+    auth()->logout();
+    session()->invalidate();
+    session()->regenerateToken();
+    return redirect('/');
 });
 
-// Student Pages
-Route::prefix('student')->group(function () {
-    Route::get('/', function () { return view('student.dashboard'); });
-    Route::get('/{page}', function ($page) { 
-        if (view()->exists("student.$page")) {
-            return view("student.$page");
-        }
-        abort(404);
-    });
-});
+// ── Auth ──────────────────────────────────────────────────────────────────────
+require __DIR__ . '/web/auth.php';
 
-// Teacher Pages
-Route::prefix('teacher')->group(function () {
-    Route::get('/', function () { return view('teacher.dashboard'); });
-    Route::get('/{page}', function ($page) { 
-        if (view()->exists("teacher.$page")) {
-            return view("teacher.$page");
-        }
-        abort(404);
-    });
-});
+// ── Admin ─────────────────────────────────────────────────────────────────────
+require __DIR__ . '/web/admin.php';
+
+// ── Student ───────────────────────────────────────────────────────────────────
+require __DIR__ . '/web/student.php';
+
+// ── Teacher ───────────────────────────────────────────────────────────────────
+require __DIR__ . '/web/teacher.php';

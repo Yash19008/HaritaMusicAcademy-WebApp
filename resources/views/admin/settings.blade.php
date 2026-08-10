@@ -1,8 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'settings')
+
 @section('content')
-
-
-      <div class="grid grid-2 gap-4 slide-up">
+<div class="grid grid-2 gap-4 slide-up">
         <!-- ACADEMY PROFILE (Admin Only) -->
         <div class="card" data-role-limit="admin">
           <div class="card-header">
@@ -25,8 +25,7 @@
             </div>
             <div class="form-group">
               <label class="form-label" for="acAddress">Address</label>
-              <input type="text" id="acAddress" class="form-control"
-                value="12, Veena Avenue, Carnatic Nagar, Chennai - 600028" required>
+              <input type="text" id="acAddress" class="form-control" value="12, Veena Avenue, Carnatic Nagar, Chennai - 600028" required>
             </div>
             <button type="submit" class="btn btn-primary">Update Academy Details</button>
           </form>
@@ -85,18 +84,16 @@
             <div class="grid grid-2 gap-3">
               <div class="form-group">
                 <label class="form-label" for="usrPassword">New Password</label>
-                <input type="password" id="usrPassword" class="form-control"
-                  placeholder="Leave blank to keep unchanged">
+                <input type="password" id="usrPassword" class="form-control" placeholder="Leave blank to keep unchanged">
               </div>
               <div class="form-group">
                 <label class="form-label" for="usrPasswordConfirm">Confirm Password</label>
-                <input type="password" id="usrPasswordConfirm" class="form-control"
-                  placeholder="Leave blank to keep unchanged">
+                <input type="password" id="usrPasswordConfirm" class="form-control" placeholder="Leave blank to keep unchanged">
               </div>
             </div>
 
             <!-- Teacher-specific Fields -->
-            <div id="teacherFields" style="display: none; border-top: 1px solid var(--border-light); padding-top: 1.25rem; margin-top: 1.25rem;">
+            <div id="teacherFields" style="border-top: 1px solid var(--border-light); padding-top: 1.25rem; margin-top: 1.25rem;">
               <h5 class="font-bold text-serif text-primary mb-3" style="font-size: 0.95rem;">Teacher Profile Public Details</h5>
               <div class="form-group mb-3">
                 <label class="form-label" for="usrYoutube">YouTube Video Link (Showcase your talent)</label>
@@ -125,18 +122,15 @@
               <div class="form-group">
                 <label class="form-label" for="oppTeacher">Opportunity Teacher</label>
                 <div style="position: relative; display: flex; align-items: center;">
-                  <input type="number" id="oppTeacher" class="form-control" value="10" min="0" max="100"
-                    style="padding-right: 2.5rem;" required>
+                  <input type="number" id="oppTeacher" class="form-control" value="10" min="0" max="100" style="padding-right: 2.5rem;" required>
                   <span style="position: absolute; right: 1rem; font-weight: bold; color: var(--text-muted);">%</span>
                 </div>
               </div>
               <div class="form-group">
                 <label class="form-label" for="oppStudent">Opportunity Student</label>
                 <div style="position: relative; display: flex; align-items: center;">
-                  <input type="number" id="oppStudent" class="form-control" value="2" min="0"
-                    style="padding-right: 5.5rem;" required>
-                  <span
-                    style="position: absolute; right: 1rem; font-weight: bold; color: var(--text-muted);">Credits</span>
+                  <input type="number" id="oppStudent" class="form-control" value="2" min="0" style="padding-right: 5.5rem;" required>
+                  <span style="position: absolute; right: 1rem; font-weight: bold; color: var(--text-muted);">Credits</span>
                 </div>
               </div>
             </div>
@@ -147,9 +141,6 @@
 
       <!-- Developed by Sitesoch footer -->
       <footer class="footer">
-        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
-            target="_blank">Sitesoch</a></p>
+        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com" target="_blank">Sitesoch</a></p>
       </footer>
-
-    
 @endsection

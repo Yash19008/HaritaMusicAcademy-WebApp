@@ -214,13 +214,10 @@
                             </div>
 
                             <div style="margin-top: 1.5rem;">
-                                <a href="https://wa.me/+918796823332?text=Hi%2C%20I%20would%20like%20to%20book%20a%20paid%20demo%20class%20at%20Harita%20Music%20Academy%20on%20"
-                                    id="book-demo-btn" target="_blank" class="btn btn-primary"
+                                <button onclick="openDemoModal()" class="btn btn-primary"
                                     style="width: 100%; padding: 0.85rem 1rem; font-size: 0.85rem; border-radius: 50px;">
                                     Book Demo
-                                </a>
-
-
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -228,6 +225,67 @@
                 </div>
             </div>
         </section>
+
+        <!-- DEMO BOOKING MODAL -->
+        <div id="publicDemoModal" class="modal-backdrop">
+            <div class="modal" style="max-width: 500px; position: relative;">
+                <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                    <h3 class="font-semibold text-serif" style="margin:0; font-size: 1.5rem; color: #111;">Book Your Demo Class</h3>
+                    <button class="modal-close" onclick="closeDemoModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                </div>
+                <form action="{{ route('public.book-demo') }}" method="POST">
+                    @csrf
+                    <div class="modal-body" style="padding: 1.5rem 0;">
+                        <p style="color: #666; font-size: 0.9rem; margin-bottom: 1.5rem;">Please fill in your details to book a demo. (Simulated Payment)</p>
+
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #333;">Full Name</label>
+                            <input type="text" name="student_name" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #333;">Email Address</label>
+                            <input type="email" name="email" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #333;">Phone Number</label>
+                            <input type="text" name="phone" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #333;">Instrument / Course</label>
+                            <select name="instrument" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px; background: white;">
+                                <option value="Hindustani Classical Vocal">Hindustani Classical Vocal</option>
+                                <option value="Bollywood Singing">Bollywood Singing</option>
+                                <option value="Keyboard">Keyboard</option>
+                                <option value="Harmonium">Harmonium</option>
+                                <option value="Tabla">Tabla</option>
+                                <option value="Piano">Piano</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.85rem; color: #333;">Preferred Date & Time</label>
+                            <input type="datetime-local" name="scheduled_at" required style="width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 8px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="display: flex; gap: 1rem; border-top: 1px solid #eee; padding-top: 1rem;">
+                        <button type="button" onclick="closeDemoModal()" style="flex: 1; padding: 0.85rem; background: #f3f4f6; border: none; border-radius: 50px; font-weight: 600; cursor: pointer; color: #333;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="flex: 2; padding: 0.85rem; border-radius: 50px; font-weight: 600;">Pay ₹499 & Book Demo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Success Message Toast (Hidden by default) -->
+        @if(session('demo_success'))
+        <div id="demoSuccessToast" style="position: fixed; bottom: 30px; right: 30px; background: #0d9488; color: white; padding: 1rem 1.5rem; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 9999; display: flex; align-items: center; gap: 10px; animation: slideInUp 0.5s ease forwards;">
+            <span style="font-size: 1.5rem;">✓</span>
+            <div>
+                <strong>Payment Successful!</strong><br>
+                Your demo class is booked. We will contact you shortly.
+            </div>
+            <button onclick="document.getElementById('demoSuccessToast').style.display='none'" style="background:none; border:none; color:white; cursor:pointer; margin-left:15px; font-size:1.2rem;">&times;</button>
+        </div>
+        @endif
 
         <!-- 4. Courses Offered Section (Explore by Category design preference) -->
         <section class="section reveal" id="courses">
@@ -1608,5 +1666,65 @@
             </div>
         </section>
 
-    
+            <style>
+            /* Modal Styles */
+            .modal-backdrop {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(5px);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .modal-backdrop.show {
+                display: flex;
+                opacity: 1;
+            }
+            .modal {
+                background: white;
+                border-radius: 12px;
+                padding: 2rem;
+                width: 90%;
+                max-width: 500px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                transform: translateY(-20px);
+                transition: transform 0.3s ease;
+            }
+            .modal-backdrop.show .modal {
+                transform: translateY(0);
+            }
+            @keyframes slideInUp {
+                from { transform: translateY(100px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        </style>
+        <script>
+            function openDemoModal() {
+                const modal = document.getElementById('publicDemoModal');
+                modal.style.display = 'flex';
+                // Trigger reflow to restart animation
+                void modal.offsetWidth;
+                modal.classList.add('show');
+            }
+
+            function closeDemoModal() {
+                const modal = document.getElementById('publicDemoModal');
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300); // match transition duration
+            }
+
+            // Optional: Auto-hide the success toast after 5 seconds
+            const toast = document.getElementById('demoSuccessToast');
+            if(toast) {
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 5000);
+            }
+        </script>
 @endsection

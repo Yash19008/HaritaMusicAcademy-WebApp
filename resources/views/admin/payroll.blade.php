@@ -1,8 +1,31 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'payroll')
+
+@push('styles')
+<style>
+.payroll-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .payroll-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .payroll-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+</style>
+@endpush
+
 @section('content')
-
-
-      <!-- Stats Summary -->
+<!-- Stats Summary -->
       <div class="payroll-stats">
         <div class="card p-3 d-flex align-center gap-3">
           <div class="stat-icon" style="background-color: var(--warning-bg); color: var(--warning)">📅</div>
@@ -45,7 +68,7 @@
             <thead>
               <tr>
                 <th>Teacher Name</th>
-                <th>Month & Year</th>
+                <th>Month &amp; Year</th>
                 <th>Per Class Rate (INR)</th>
                 <th>Classes Taken</th>
                 <th>Opportunity Taken</th>
@@ -60,6 +83,4 @@
           </table>
         </div>
       </div>
-
-    
 @endsection

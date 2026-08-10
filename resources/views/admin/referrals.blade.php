@@ -1,8 +1,8 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'referrals')
+
 @section('content')
-
-
-      <!-- Metrics Widgets -->
+<!-- Metrics Widgets -->
       <div class="stat-card-grid mb-4">
         <!-- Metric 1: Total Referrals -->
         <div class="card stat-card">
@@ -77,6 +77,4 @@
           </tbody>
         </table>
       </div>
-
-    
 @endsection

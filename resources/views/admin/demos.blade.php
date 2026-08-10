@@ -1,8 +1,52 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'demos')
+
+@push('styles')
+<style>
+.stat-card-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .stat-card-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .stat-card-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .badge-select {
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      outline: none;
+      transition: all 0.2s;
+    }
+</style>
+@endpush
+
 @section('content')
-
-
-      <!-- KPI Stats -->
+<!-- KPI Stats -->
       <div class="stat-card-grid">
         <div class="card stat-card p-3 d-flex align-center gap-3">
           <div class="stat-icon" style="background-color: #eff6ff; color: #1e40af">📅</div>
@@ -48,7 +92,7 @@
                 <th data-priority="1">Student Name</th>
                 <th data-priority="3">Instrument</th>
                 <th data-priority="4">Assigned Teacher</th>
-                <th data-priority="5">Scheduled Date & Time</th>
+                <th data-priority="5">Scheduled Date &amp; Time</th>
                 <th data-priority="6">Duration</th>
                 <th data-priority="1">Status (Update Inline)</th>
               </tr>
@@ -59,6 +103,4 @@
           </table>
         </div>
       </div>
-
-    
 @endsection

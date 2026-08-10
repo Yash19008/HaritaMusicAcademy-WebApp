@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forgot Password - Harita Music Academy</title>
-  <link rel="stylesheet" href="{{ asset('admin/css/') }}/style.css">
+  <link rel="stylesheet" href="{{ asset('admin-assets/css/') }}/style.css">
   <style>
     body {
       background-color: #f8fafc;
@@ -138,7 +138,7 @@
   <!-- PRELOADER -->
   <div id="preloader" class="preloader-overlay">
     <div class="preloader-content">
-      <img src="{{ asset('admin/assets/') }}/logo.png" class="preloader-logo" alt="Harita Logo">
+      <img src="{{ asset('admin-assets/assets/') }}/logo.png" class="preloader-logo" alt="Harita Logo">
       <div class="preloader-spinner"></div>
     </div>
   </div>
@@ -149,7 +149,7 @@
       <!-- Primary Input Form -->
       <div id="formPanel">
         <div class="forgot-logo">
-          <img src="{{ asset('admin/assets/') }}/logo.png" width="80" height="80" alt="Harita Logo" style="object-fit: contain;">
+          <img src="{{ asset('admin-assets/assets/') }}/logo.png" width="80" height="80" alt="Harita Logo" style="object-fit: contain;">
           <h1 class="forgot-title">Reset Password</h1>
           <p class="forgot-subtitle">Enter your registered email address and we'll send you instructions to reset your
             password.</p>
@@ -187,7 +187,7 @@
     </div>
   </div>
 
-  <script src="{{ asset('admin/js/') }}/app.js"></script>
+  <script src="{{ asset('admin-assets/js/') }}/app.js"></script>
   <script>
     function handleReset(event) {
       event.preventDefault();

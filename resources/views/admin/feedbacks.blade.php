@@ -1,10 +1,11 @@
-@extends('layouts.admin')
-@section('content')
+@extends('layouts.main')
+@section('page', 'feedbacks')
 
-      <div class="card">
+@section('content')
+<div class="card">
         <div class="card-header d-flex align-center justify-between">
           <h4 class="font-semibold" style="font-family: var(--font-serif); font-size: 1.25rem;">All Submitted Feedbacks
-            & Issues</h4>
+            &amp; Issues</h4>
         </div>
         <div class="card-body p-3">
           <table class="table display responsive nowrap" id="adminFbTable" style="width:100%">
@@ -26,5 +27,4 @@
           </table>
         </div>
       </div>
-    
 @endsection

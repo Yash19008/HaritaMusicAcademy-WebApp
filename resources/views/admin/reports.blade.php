@@ -1,8 +1,31 @@
-@extends('layouts.admin')
+@extends('layouts.main')
+@section('page', 'reports')
+
+@push('styles')
+<style>
+.reports-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 992px) {
+      .reports-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 576px) {
+      .reports-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+</style>
+@endpush
+
 @section('content')
-
-
-      <!-- Stats Summary -->
+<!-- Stats Summary -->
       <div class="reports-stats">
         <div class="card p-3 d-flex align-center gap-2">
           <div class="stat-icon">📈</div>
@@ -77,7 +100,7 @@
       <!-- Searchable Class History Log (Jquery DataTables) -->
       <div class="card">
         <div class="card-header">
-          <h4 class="font-semibold">Class Attendance & History Report</h4>
+          <h4 class="font-semibold">Class Attendance &amp; History Report</h4>
         </div>
         <div class="card-body p-3">
           <table class="table display responsive nowrap" id="reportsHistoryTable" style="width:100%">
@@ -87,7 +110,7 @@
                 <th>Student</th>
                 <th>Teacher</th>
                 <th>Instrument</th>
-                <th>Date & Time</th>
+                <th>Date &amp; Time</th>
                 <th>Duration</th>
                 <th>Status</th>
               </tr>
@@ -101,9 +124,6 @@
 
       <!-- Developed by Sitesoch footer -->
       <footer class="footer">
-        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
-            target="_blank">Sitesoch</a></p>
+        <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com" target="_blank">Sitesoch</a></p>
       </footer>
-
-    
 @endsection
