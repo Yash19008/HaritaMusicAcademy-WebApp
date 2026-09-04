@@ -61,10 +61,11 @@ class RoleController extends Controller
         ]);
 
         // Create user
+        $rawPassword = $data['password'];
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => \Hash::make($rawPassword),
             'status' => strtolower($data['status']),
         ]);
 
@@ -72,23 +73,35 @@ class RoleController extends Controller
         $user->assignRole($data['role']);
 
         // If Teacher role, create teacher record
-        if ($data['role'] === 'Teacher') {
+        if ($data['role'] === 'Teacher' || $data['role'] === 'teacher') {
             \App\Models\Teacher::create([
                 'user_id' => $user->id,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'status' => 'active',
             ]);
+            
+            try {
+                \Mail::to($user->email)->send(new \App\Mail\TeacherCreatedMail($user, $rawPassword));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send teacher credentials email: ' . $e->getMessage());
+            }
         }
 
         // If Student role, create student record
-        if ($data['role'] === 'Student') {
+        if ($data['role'] === 'Student' || $data['role'] === 'student') {
             \App\Models\Student::create([
                 'user_id' => $user->id,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'status' => 'active',
             ]);
+            
+            try {
+                \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $rawPassword));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send student credentials email: ' . $e->getMessage());
+            }
         }
 
         return back()->with('success', 'User created successfully!');
@@ -134,6 +147,10 @@ class RoleController extends Controller
         if ($user->id === 1) {
             return back()->with('error', 'Cannot delete the primary administrator account!');
         }
+
+        // Delete associated Teacher or Student
+        \App\Models\Teacher::where('user_id', $user->id)->delete();
+        \App\Models\Student::where('user_id', $user->id)->delete();
 
         // Delete user
         $user->delete();

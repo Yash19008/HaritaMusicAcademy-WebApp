@@ -155,10 +155,24 @@
             password.</p>
         </div>
 
-        <form id="forgotForm" onsubmit="handleReset(event)">
+        <form id="forgotForm" method="POST" action="{{ route('password.email') }}">
+          @csrf
+
+          @if (session('status') || session('success'))
+            <div style="padding: 0.65rem 0.9rem; border-radius: 8px; background: #d1fae5; color: #065f46; font-size: 12.5px; margin-bottom: 1rem;">
+              {{ session('status') ?? session('success') }}
+            </div>
+          @endif
+
+          @if ($errors->any())
+            <div class="alert alert-danger" style="padding: 0.65rem 0.9rem; border-radius: 8px; background: #fee2e2; color: #b91c1c; font-size: 12.5px; margin-bottom: 1rem;">
+              {{ $errors->first() }}
+            </div>
+          @endif
+
           <div class="form-group">
             <label class="form-label" for="email">Email Address</label>
-            <input type="email" id="email" class="form-control" placeholder="name@example.com" required>
+            <input type="email" id="email" name="email" class="form-control" placeholder="name@example.com" value="{{ old('email') }}" required>
           </div>
 
           <button type="submit" class="btn btn-primary w-100 mb-3">Send Reset Instructions</button>
@@ -167,15 +181,6 @@
             <a href="{{ route('login') }}" class="btn-link">Back to Sign In</a>
           </div>
         </form>
-      </div>
-
-      <!-- Success Screen -->
-      <div id="successPanel" class="success-panel">
-        <div class="success-icon">✓</div>
-        <h1 class="forgot-title">Check Your Email</h1>
-        <p class="forgot-subtitle">We have sent password recovery instructions to <strong id="sentEmail">your
-            email</strong>.</p>
-        <button onclick="window.location.href='{{ route('login') }}'" class="btn btn-primary w-100 mb-2">Return to Login</button>
       </div>
 
     </div>
@@ -188,15 +193,6 @@
   </div>
 
   <script src="{{ asset('admin-assets/js/') }}/app.js"></script>
-  <script>
-    function handleReset(event) {
-      event.preventDefault();
-      const email = document.getElementById('email').value;
-      document.getElementById('sentEmail').textContent = email;
-      document.getElementById('formPanel').style.display = 'none';
-      document.getElementById('successPanel').style.display = 'block';
-    }
-  </script>
 </body>
 
 </html>

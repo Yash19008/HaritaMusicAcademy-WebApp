@@ -1,0 +1,4 @@
+Now I want you to create a Link reuse mechanism to reuse the previous under 30 days meet link for that student teacher combination or group teacher combination for classes.. This helps to reduce the API load I guess...
+Also make sure I can enable or disable this mechanism from env
+
+Give me a proper plan

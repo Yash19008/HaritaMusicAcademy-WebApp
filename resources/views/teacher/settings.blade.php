@@ -2,21 +2,7 @@
 @section('page', 'settings')
 
 @section('content')
-@if(session('success'))
-    <div style="background: var(--success-bg); color: var(--success); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-        {{ session('success') }}
-    </div>
-@endif
 
-@if($errors->any())
-    <div style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-        <ul style="margin: 0; padding-left: 1.5rem;">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <div class="grid grid-2 gap-4 slide-up mb-4">
     <div class="card grid-2-col-span-2" style="grid-column: span 2;">

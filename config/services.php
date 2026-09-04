@@ -28,11 +28,33 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    'google' => [
+        // OAuth (used for Google Login)
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URL', '/auth/google/callback'),
+
+        // Calendar / Meet (used for class bookings)
+        'calendar_id'          => env('GOOGLE_CALENDAR_ID', 'primary'),
+        'timezone'             => env('GOOGLE_CALENDAR_TIMEZONE', env('APP_TIMEZONE', 'Asia/Kolkata')),
+        'service_account_path' => env('GOOGLE_SERVICE_ACCOUNT_PATH'),
+        'service_account_json' => env('GOOGLE_SERVICE_ACCOUNT_JSON'),
+        'impersonate_user'     => env('GOOGLE_IMPERSONATE_USER'),
+        'access_token'         => env('GOOGLE_ACCESS_TOKEN'), // for dev/testing only
+        'send_updates'         => env('GOOGLE_SEND_UPDATES', 'all'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
-            'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
+            'channel'             => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+
+    'razorpay' => [
+        'key'            => env('RAZORPAY_KEY'),
+        'secret'         => env('RAZORPAY_SECRET'),
+        'webhook_secret' => env('RAZORPAY_WEBHOOK_SECRET'),
     ],
 
 ];

@@ -13,7 +13,7 @@ class CreditController extends Controller
 {
     public function index(): View
     {
-        $students     = Student::with('course:id,name')->select('id', 'name', 'course_id', 'credits')->get();
+        $students     = Student::with('course:id,name')->select('id', 'name', 'phone', 'course_id', 'credits')->get();
         $transactions = CreditTransaction::with('student:id,name')->latest()->limit(100)->get();
         return view('admin.credits.index', compact('students', 'transactions'));
     }
@@ -28,6 +28,11 @@ class CreditController extends Controller
 
         $student = Student::findOrFail($data['student_id']);
         $student->increment('credits', $data['quantity']);
+        
+        // Reset renewal interest if credits increase above the threshold
+        if ($data['quantity'] > 0 && $student->fresh()->credits > 2) {
+            $student->update(['renewal_interest' => null]);
+        }
 
         CreditTransaction::create([
             'student_id' => $student->id,

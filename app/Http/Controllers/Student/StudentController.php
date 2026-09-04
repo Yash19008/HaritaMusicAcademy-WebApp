@@ -8,6 +8,11 @@ use App\Models\CreditTransaction;
 use App\Models\Feedback;
 use App\Models\Referral;
 use App\Models\Student;
+use App\Models\Teacher;
+use App\Services\BookingService;
+use App\Mail\ClassBookedMail;
+use App\Mail\RecurringClassesBookedMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,15 +28,22 @@ class StudentController extends Controller
     public function dashboard(): View
     {
         $student   = $this->student();
+        $groupIds = $student ? $student->groups()->pluck('student_groups.id')->toArray() : [];
         $nextClass = $student
-            ? ClassBooking::where('student_id', $student->id)
+            ? ClassBooking::where(function($query) use ($student, $groupIds) {
+                  $query->where('student_id', $student->id)
+                        ->orWhereIn('student_group_id', $groupIds);
+              })
                 ->where('status', 'scheduled')
                 ->with('teacher.user')
                 ->orderBy('starts_at')->first()
             : null;
 
         $completedClassesCount = $student
-            ? ClassBooking::where('student_id', $student->id)->where('status', 'completed')->count()
+            ? ClassBooking::where(function($query) use ($student, $groupIds) {
+                  $query->where('student_id', $student->id)
+                        ->orWhereIn('student_group_id', $groupIds);
+              })->where('status', 'completed')->count()
             : 0;
             
         $totalClassesCount = $student ? max($student->credits + $completedClassesCount, 1) : 1;
@@ -43,86 +55,66 @@ class StudentController extends Controller
         return view('student.dashboard', compact('student', 'nextClass', 'completedClassesCount', 'totalClassesCount', 'transactions'));
     }
 
-    public function myClasses(): View
+    public function myClasses(Request $request): View
     {
         $student  = $this->student();
-        $bookings = $student
-            ? ClassBooking::where('student_id', $student->id)->with('teacher.user')->orderBy('starts_at', 'desc')->get()
-            : collect();
-            
+        $groupIds = $student ? $student->groups()->pluck('student_groups.id')->toArray() : [];
+        
+        $query = ClassBooking::where(function($query) use ($student, $groupIds) {
+                  $query->where('student_id', $student->id)
+                        ->orWhereIn('student_group_id', $groupIds);
+              })->with('teacher.user')->orderBy('starts_at', 'asc');
+
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereBetween('starts_at', [$request->start_date . ' 00:00:00', $request->end_date . ' 23:59:59']);
+        } else {
+            $query->whereDate('starts_at', today());
+        }
+
+        $bookings = $student ? $query->get() : collect();
+
         $teachers = \App\Models\Teacher::with('user')->get();
-        $courses = \App\Models\Course::where('status', 'active')->get();
-        return view('student.my-classes', compact('bookings', 'student', 'teachers', 'courses'));
+
+        $reschedulesThisMonth = $student
+            ? \App\Models\ClassBooking::where(function($query) use ($student, $groupIds) {
+                  $query->where('student_id', $student->id)
+                        ->orWhereIn('student_group_id', $groupIds);
+              })
+                ->where('rescheduled_by', 'Student')
+                ->whereMonth('reschedule_requested_datetime', now()->month)
+                ->whereYear('reschedule_requested_datetime', now()->year)
+                ->count()
+            : 0;
+
+        $studentCountry = $student->country ?? '';
+        $isIndian = stripos($studentCountry, 'India') !== false;
+        
+        $lockHours = $isIndian 
+            ? (int) \App\Models\Setting::get('indian_reschedule_cutoff_hours', 10)
+            : (int) \App\Models\Setting::get('intl_reschedule_cutoff_hours', 12);
+
+        return view('student.my-classes', compact('bookings', 'student', 'teachers', 'reschedulesThisMonth', 'lockHours'));
     }
 
-    public function bookClass(Request $request): RedirectResponse
+    public function getAvailableSlots(Teacher $teacher, Request $request, BookingService $bookingService)
     {
-        $student = $this->student();
-        if (!$student) return back()->withErrors(['error' => 'Student not found.']);
-        
-        $request->validate([
-            'teacher_id' => 'required|exists:teachers,id',
-            'instrument' => 'required|string',
-            'starts_at'  => 'required|date',
-        ]);
-        
-        if ($student->credits <= 0) {
-            return back()->withErrors(['error' => 'Insufficient credits. Please purchase a package.']);
-        }
+        $request->validate(['date' => 'required|date']);
+        $slots = $bookingService->getAvailableSlots($teacher, $request->date);
+        return response()->json(['slots' => $slots]);
+    }
 
-        $startsAt = \Carbon\Carbon::parse($request->starts_at);
-        $endsAt = $startsAt->copy()->addMinutes(40);
-
-        // Check for teacher double booking conflict
-        $conflict = ClassBooking::where('teacher_id', $request->teacher_id)
-            ->where('status', 'scheduled')
-            ->where('starts_at', '<', $endsAt)
-            ->where('ends_at', '>', $startsAt)
-            ->exists();
-
-        $onLeave = \App\Models\TeacherLeave::where('teacher_id', $request->teacher_id)
-            ->where('status', 'approved')
-            ->where('from_date', '<=', $startsAt->toDateString())
-            ->where('to_date', '>=', $startsAt->toDateString())
-            ->exists();
-
-        if ($conflict) {
-            return back()->withErrors(['error' => 'The selected teacher is already booked during this time slot. Please choose another time.']);
-        }
-        
-        if ($onLeave) {
-            return back()->withErrors(['error' => 'The selected teacher is on an approved leave on this date. Please choose another date.']);
-        }
-
-        // Deduct credit
-        $student->decrement('credits');
-        
-        // Log transaction
-        CreditTransaction::create([
-            'student_id' => $student->id,
-            'action' => 'Deducted',
-            'quantity' => -1,
-            'reason' => 'Booked Class (' . $request->instrument . ')'
-        ]);
-
-        ClassBooking::create([
-            'student_id' => $student->id,
-            'teacher_id' => $request->teacher_id,
-            'instrument' => $request->instrument,
-            'starts_at' => $startsAt,
-            'ends_at' => $endsAt,
-            'duration_minutes' => 40,
-            'status' => 'scheduled',
-            'type' => 'one-time'
-        ]);
-
-        return back()->with('success', 'Class booked successfully! 1 credit deducted.');
+    public function bookClass(Request $request, BookingService $bookingService): RedirectResponse
+    {
+        return back()->with('error', 'Students cannot book classes on their own. Please contact admin.');
     }
 
     public function requestReschedule(Request $request, ClassBooking $booking): RedirectResponse
     {
         $student = $this->student();
-        if (!$student || $booking->student_id !== $student->id) {
+        $isOwner = $booking->student_id === $student->id;
+        $isGroupMember = $booking->student_group_id && $student->groups()->where('student_groups.id', $booking->student_group_id)->exists();
+        
+        if (!$student || (!$isOwner && !$isGroupMember)) {
             return back()->withErrors(['error' => 'Unauthorized']);
         }
 
@@ -133,6 +125,17 @@ class StudentController extends Controller
         ]);
 
         $newDateTime = \Carbon\Carbon::parse($request->reschedule_date . ' ' . $request->reschedule_time);
+        
+        $studentCountry = $student->country ?? '';
+        $isIndian = stripos($studentCountry, 'India') !== false;
+        
+        $lockHours = $isIndian 
+            ? (int) \App\Models\Setting::get('indian_reschedule_cutoff_hours', 10)
+            : (int) \App\Models\Setting::get('intl_reschedule_cutoff_hours', 12);
+
+        if ($booking->starts_at && now()->diffInHours($booking->starts_at, false) < $lockHours) {
+            return back()->withErrors(['error' => "You cannot reschedule within {$lockHours} hours of the scheduled class time."]);
+        }
 
         $booking->update([
             'status' => 'reschedule_requested',
@@ -202,10 +205,12 @@ class StudentController extends Controller
             'interest_role'  => ['nullable', 'string'],
         ]);
 
+        $quantity = (int) \App\Models\Setting::get('referral_bonus_student_credits', 2);
+
         Referral::create([
             'referrer_id'   => auth()->id(),
             'referrer_role' => 'student',
-            'bonus_reward'  => '1 Free Class',
+            'bonus_reward'  => "{$quantity} Free Class" . ($quantity > 1 ? 'es' : ''),
         ] + $data);
 
         return back()->with('success', 'Referral submitted!');
@@ -236,5 +241,50 @@ class StudentController extends Controller
         $user->save();
 
         return back()->with('success', 'Settings saved.');
+    }
+
+    public function uploadIntroVideo(Request $request): RedirectResponse
+    {
+        $student = $this->student();
+        if (! $student) return back()->withErrors(['error' => 'Student profile not found.']);
+
+        $request->validate([
+            'intro_video' => ['required', 'file', 'mimes:mp4,mov,avi,webm', 'max:102400'],
+        ]);
+
+        // Delete old video if exists
+        if ($student->intro_video_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($student->intro_video_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($student->intro_video_path);
+        }
+
+        $path = $request->file('intro_video')->store('intro-videos', 'public');
+
+        $student->update([
+            'intro_video_path'        => $path,
+            'intro_video_uploaded_at' => now(),
+        ]);
+
+        return back()->with('success', 'Your intro video has been uploaded successfully!');
+    }
+
+    public function submitRenewalInterest(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $student = $this->student();
+        if (!$student) {
+            return response()->json(['success' => false, 'message' => 'Student not found']);
+        }
+
+        $interest = $request->input('interest'); // 'interested' or 'declined'
+
+        if (in_array($interest, ['interested', 'declined'])) {
+            $student->update(['renewal_interest' => $interest]);
+
+            if ($interest === 'interested') {
+                $adminEmail = \App\Models\Setting::get('admin_email', 'admin@harita.com');
+                \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \App\Mail\RenewalInterestMail($student));
+            }
+        }
+
+        return response()->json(['success' => true]);
     }
 }

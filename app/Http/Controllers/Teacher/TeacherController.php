@@ -13,6 +13,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Notifications\LeaveRequestedNotification;
 
 class TeacherController extends Controller
 {
@@ -48,7 +50,23 @@ class TeacherController extends Controller
         $teacher = auth()->user()->teacher;
         $classes = ClassBooking::where('teacher_id', $teacher->id)->with('student')->latest('starts_at')->paginate(15);
         $demos = \App\Models\DemoBooking::where('teacher_id', $teacher->id)->latest('scheduled_at')->paginate(15);
-        return view('teacher.my-classes', compact('classes', 'demos'));
+        
+        $reschedulesThisMonth = \App\Models\ClassBooking::where('teacher_id', $teacher->id)
+            ->where('status', 'rescheduled')
+            ->whereMonth('reschedule_requested_datetime', now()->month)
+            ->whereYear('reschedule_requested_datetime', now()->year)
+            ->count();
+            
+        $lockHours = (int) \App\Models\Setting::get('reschedule_lock_hours', 24);
+
+        return view('teacher.my-classes', compact('classes', 'demos', 'reschedulesThisMonth', 'lockHours'));
+    }
+
+    public function demoClasses(): View
+    {
+        $teacher = auth()->user()->teacher;
+        $demos = \App\Models\DemoBooking::where('teacher_id', $teacher->id)->latest('scheduled_at')->paginate(15);
+        return view('teacher.demo-classes', compact('demos'));
     }
 
     public function leaves(): View
@@ -69,7 +87,13 @@ class TeacherController extends Controller
         ]);
 
         $teacher = auth()->user()->teacher;
-        TeacherLeave::create($data + ['teacher_id' => $teacher->id, 'status' => 'pending']);
+        $leave = TeacherLeave::create($data + ['teacher_id' => $teacher->id, 'status' => 'pending']);
+        
+        $admin = User::role('admin')->first();
+        if ($admin) {
+            $admin->notify(new LeaveRequestedNotification(['leave' => $leave]));
+        }
+
         return back()->with('success', 'Leave applied successfully.');
     }
 
@@ -156,10 +180,12 @@ class TeacherController extends Controller
             'interest_role'  => ['required', 'string'],
         ]);
 
+        $bonusRs = (int) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+
         Referral::create($data + [
             'referrer_id' => auth()->id(),
             'referrer_role' => 'teacher',
-            'bonus_reward' => 'Rs 500 Bonus',
+            'bonus_reward' => "Rs {$bonusRs} Bonus",
             'status' => 'pending'
         ]);
         return back()->with('success', 'Referral submitted.');
@@ -187,5 +213,74 @@ class TeacherController extends Controller
         $user->save();
 
         return back()->with('success', 'Settings saved.');
+    }
+
+    public function calculateLoss(Request $request)
+    {
+        $start = $request->query('start');
+        $end = $request->query('end');
+
+        if (!$start || !$end) {
+            return response()->json(['loss' => 0, 'rate' => 0, 'classes' => 0]);
+        }
+
+        $startDate = \Carbon\Carbon::parse($start);
+        $endDate = \Carbon\Carbon::parse($end);
+        
+        $days = $startDate->diffInDays($endDate) + 1;
+        
+        // 8am to 2am (next day) = 18 hours. 18 hours * 60 = 1080 mins. 1080 / 40 = 27 classes per day
+        $classes = $days * 27;
+
+        $teacher = auth()->user()->teacher;
+        $currentMonthName = now()->format('F Y');
+        
+        $payroll = TeacherPayroll::where('teacher_id', $teacher->id)
+                                 ->where('month', $currentMonthName)
+                                 ->first();
+                                 
+        $rate = $payroll ? $payroll->per_class_rate : 500;
+        
+        $loss = $classes * $rate;
+
+        return response()->json([
+            'loss' => $loss,
+            'rate' => $rate,
+            'classes' => $classes
+        ]);
+    }
+
+    public function resources(): View
+    {
+        $directory = 'teacher_resources';
+        $disk = \Illuminate\Support\Facades\Storage::disk('public');
+        
+        if (!$disk->exists($directory)) {
+            $disk->makeDirectory($directory);
+        }
+        
+        $files = $disk->files($directory);
+        
+        $resources = [];
+        foreach ($files as $file) {
+            $resources[] = [
+                'name' => basename($file),
+                'path' => $file,
+                'size' => round($disk->size($file) / 1024, 2), // KB
+                'last_modified' => date("Y-m-d H:i:s", $disk->lastModified($file)),
+                'extension' => pathinfo($file, PATHINFO_EXTENSION),
+            ];
+        }
+
+        return view('teacher.resources.index', compact('resources'));
+    }
+
+    public function downloadResource($filename)
+    {
+        $path = 'teacher_resources/' . $filename;
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->download($path);
+        }
+        return abort(404, 'File not found');
     }
 }

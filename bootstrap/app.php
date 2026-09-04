@@ -11,6 +11,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Exclude Razorpay webhook from CSRF — it's verified via X-Razorpay-Signature header
+        $middleware->validateCsrfTokens(except: [
+            'payment/webhook',
+        ]);
+
         $middleware->alias([
             'role.access' => \App\Http\Middleware\RoleAccess::class,
         ]);

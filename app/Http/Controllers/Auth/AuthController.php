@@ -43,6 +43,26 @@ class AuthController extends Controller
                 ->onlyInput('email');
         }
 
+        if ($user->hasRole('teacher') && $user->teacher && $user->teacher->status !== 'active') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withErrors(['email' => 'Your teacher profile is inactive. Please contact the administrator.'])
+                ->onlyInput('email');
+        }
+
+        if ($user->hasRole('student') && $user->student && $user->student->status !== 'active') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withErrors(['email' => 'Your student profile is inactive. Please contact the administrator.'])
+                ->onlyInput('email');
+        }
+
         return redirect($this->redirectPathFor($user));
     }
 

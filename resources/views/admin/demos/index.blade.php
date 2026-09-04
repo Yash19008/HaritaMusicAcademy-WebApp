@@ -50,27 +50,6 @@
 
 @section('content')
 
-@if(session('success'))
-    <div class="alert alert-success" style="background-color: #d1fae5; color: #065f46; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        {{ session('success') }}
-    </div>
-@endif
-
-@if(session('error'))
-    <div class="alert alert-danger" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        {{ session('error') }}
-    </div>
-@endif
-
-@if($errors->any())
-    <div class="alert alert-danger" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem;">
-        <ul style="margin: 0; padding-left: 1.5rem;">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <!-- KPI Stats -->
       <div class="stat-card-grid">
@@ -119,6 +98,7 @@
                 <th data-priority="4">Assigned Teacher</th>
                 <th data-priority="5">Scheduled Date &amp; Time</th>
                 <th data-priority="6">Duration</th>
+                <th data-priority="2">Meet Link</th>
                 <th data-priority="1">Status (Update Inline)</th>
               </tr>
             </thead>
@@ -132,10 +112,19 @@
                   <td>{{ $demo->scheduled_at->format('M d, Y h:i A') }}</td>
                   <td>{{ $demo->duration_minutes }} mins</td>
                   <td>
-                    <form action="{{ route('admin.demos.status', $demo) }}" method="POST" style="display: inline;">
+                    @if($demo->google_meet_link)
+                      <a href="{{ $demo->google_meet_link }}" target="_blank" class="btn btn-sm" style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                        Join
+                      </a>
+                    @else
+                      <span class="text-muted" style="font-size: 0.75rem;">N/A</span>
+                    @endif
+                  </td>
+                  <td>
+                    <form onsubmit="event.preventDefault();" style="display: inline;">
                         @csrf
-                        @method('PUT')
-                        <select name="status" class="form-control badge-select" onchange="this.form.submit()" style="
+                        <select name="status" class="form-control badge-select" onchange="updateDemoStatus(this, '{{ route('admin.demos.status', $demo) }}')" style="
                             @if($demo->status == 'scheduled') background-color: #eff6ff; color: #1e40af; border: 1px solid #3b82f6;
                             @elseif($demo->status == 'completed') background-color: var(--success-bg); color: var(--success); border: 1px solid var(--success);
                             @elseif($demo->status == 'converted') background-color: #fef3c7; color: #b45309; border: 1px solid #f59e0b;
@@ -179,5 +168,121 @@ $(document).ready(function() {
         }
     });
 });
+
+function updateDemoStatus(selectElement, url) {
+    const status = selectElement.value;
+    const form = selectElement.closest('form');
+    const token = form.querySelector('input[name="_token"]').value;
+
+    // Apply colors based on selection right away for instant feedback
+    const colors = {
+        'scheduled': { bg: '#eff6ff', color: '#1e40af', border: '#3b82f6' },
+        'completed': { bg: 'var(--success-bg)', color: 'var(--success)', border: 'var(--success)' },
+        'converted': { bg: '#fef3c7', color: '#b45309', border: '#f59e0b' },
+        'cancelled': { bg: '#f3f4f6', color: '#374151', border: '#9ca3af' },
+        'no-show': { bg: '#fee2e2', color: '#b91c1c', border: '#ef4444' }
+    };
+
+    if(colors[status]) {
+        selectElement.style.backgroundColor = colors[status].bg;
+        selectElement.style.color = colors[status].color;
+        selectElement.style.border = `1px solid ${colors[status].border}`;
+    }
+
+    fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({ status: status })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            console.log(data.message);
+            
+            // Create a toast notification
+            const toast = document.createElement('div');
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.backgroundColor = '#10b981'; // Success green
+            toast.style.color = '#ffffff';
+            toast.style.padding = '12px 16px 12px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            toast.style.zIndex = '9999';
+            toast.style.fontFamily = 'var(--font-sans, sans-serif)';
+            toast.style.fontSize = '14px';
+            toast.style.fontWeight = '500';
+            toast.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out';
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-20px)';
+            toast.style.display = 'flex';
+            toast.style.alignItems = 'center';
+            toast.style.gap = '12px';
+
+            // Message text
+            const msgText = document.createElement('span');
+            msgText.innerText = data.message;
+            toast.appendChild(msgText);
+
+            // Dismiss button
+            const closeBtn = document.createElement('button');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.background = 'transparent';
+            closeBtn.style.border = 'none';
+            closeBtn.style.color = '#ffffff';
+            closeBtn.style.fontSize = '20px';
+            closeBtn.style.lineHeight = '1';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.opacity = '0.8';
+            closeBtn.style.padding = '0';
+            closeBtn.style.marginLeft = '8px';
+            
+            closeBtn.onmouseover = () => closeBtn.style.opacity = '1';
+            closeBtn.onmouseout = () => closeBtn.style.opacity = '0.8';
+            
+            closeBtn.onclick = () => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.remove(), 300);
+            };
+            
+            toast.appendChild(closeBtn);
+            document.body.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0)';
+            }, 10);
+            
+            // Remove after 3 seconds automatically
+            setTimeout(() => {
+                if(document.body.contains(toast)) {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        if(document.body.contains(toast)) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+
+            // Optionally update the stat counters on the page dynamically
+            if(typeof updateKpiStats === 'function') {
+                // updateKpiStats(status);
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to update status. Please try again.');
+    });
+}
 </script>
 @endpush

@@ -32,14 +32,6 @@
 <!-- Header actions -->
 <div class="d-flex justify-between align-center mb-4">
     <h2 class="font-semibold" style="font-size: 1.5rem;">Payroll Administration</h2>
-    <div class="d-flex gap-2">
-        @if(isset($payrolls) && $payrolls->where('status', 'pending')->count() > 0)
-        <form action="{{ route('admin.payroll.disburse-all') }}" method="POST">
-            @csrf
-            <button type="submit" class="btn btn-success" style="background: var(--success); border-color: var(--success);">Disburse All Pending</button>
-        </form>
-        @endif
-    </div>
 </div>
 
 <!-- Stats Summary -->
@@ -81,48 +73,37 @@
     </div>
     <div class="card-body p-3">
         <table class="table display responsive nowrap" id="adminPayrollTable" style="width:100%">
-        <thead>
-            <tr>
-            <th>Teacher Name</th>
-            <th>Month &amp; Year</th>
-            <th>Per Class Rate (INR)</th>
-            <th>Classes Taken</th>
-            <th>Opportunity Taken</th>
-            <th>Formula Salary</th>
-            <th>Actual Salary</th>
-            <th>Status</th>
-            <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
+            <thead>
+                <tr>
+                    <th>Teacher</th>
+                    <th>Month</th>
+                    <th>Class Rate</th>
+                    <th>Classes</th>
+                    <th>Demos</th>
+                    <th>Emergency</th>
+                    <th>Referrals</th>
+                    <th>Est. Standard Payout</th>
+                    <th>Actual Calculated</th>
+                </tr>
+            </thead>
+            <tbody>
             @if(isset($payrolls))
             @foreach($payrolls as $payroll)
             <tr>
                 <td class="font-bold">{{ $payroll->teacher->user->name }}</td>
                 <td>{{ $payroll->month }}</td>
                 <td>
-                    <div class="d-flex align-center gap-1">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
                         <span>₹{{ number_format($payroll->per_class_rate) }}</span>
                         <button type="button" class="btn btn-secondary btn-sm p-1" style="min-width:auto; padding:2px 6px !important; font-size:10px; border-radius:4px;" onclick="editClassRate({{ $payroll->id }}, {{ $payroll->per_class_rate }}, '{{ $payroll->teacher->user->name }}')">✏️</button>
                     </div>
                 </td>
                 <td class="font-semibold">{{ $payroll->classes_taken }} classes</td>
-                <td>{{ $payroll->opportunity_taken }}</td>
+                <td>{{ $payroll->demo_classes }}</td>
+                <td>{{ $payroll->emergency_classes }}</td>
+                <td>{{ $payroll->referrals }}</td>
                 <td class="text-muted">₹{{ number_format($payroll->formula_salary) }}</td>
                 <td class="font-bold text-primary">₹{{ number_format($payroll->calculated_salary) }}</td>
-                <td>
-                    <span class="badge {{ $payroll->status == 'paid' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($payroll->status) }}</span>
-                </td>
-                <td>
-                    @if($payroll->status !== 'paid')
-                    <form action="{{ route('admin.payroll.disburse', $payroll->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="btn btn-success btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; min-height: unset; background: var(--success); border-color: var(--success); color: white;">Disburse</button>
-                    </form>
-                    @else
-                    <span class="text-muted" style="font-size: 0.8rem;">Paid</span>
-                    @endif
-                </td>
             </tr>
             @endforeach
             @endif
@@ -131,14 +112,34 @@
     </div>
 </div>
 
-<!-- Edit Rate Form (Hidden) -->
-<form id="editRateForm" method="POST" style="display: none;">
-    @csrf
-    @method('PUT')
-    <input type="number" name="per_class_rate" id="per_class_rate_input">
-</form>
-
 @endsection
+
+@push('modals')
+<!-- Edit Rate Modal -->
+<div id="editRateModal" class="modal-backdrop">
+  <div class="modal" style="max-width: 400px;">
+    <div class="modal-header">
+      <h3 class="font-semibold text-serif">Edit Per Class Rate</h3>
+      <button class="modal-close" onclick="hideModal('editRateModal')">×</button>
+    </div>
+    <form id="editRateModalForm" method="POST">
+      @csrf
+      @method('PUT')
+      <div class="modal-body">
+        <p class="mb-3 text-muted" id="editRateTeacherName"></p>
+        <div class="form-group mb-3">
+          <label class="form-label" for="modal_per_class_rate">New Rate (INR)</label>
+          <input type="number" id="modal_per_class_rate" name="per_class_rate" class="form-control" required min="1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hideModal('editRateModal')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+@endpush
 
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
@@ -155,18 +156,16 @@ $(document).ready(function() {
 });
 
 function editClassRate(id, currentRate, name) {
-    const newRate = prompt(`Modify Per Class Rate for ${name}:`, currentRate);
-    if (newRate !== null) {
-        const rateVal = parseInt(newRate);
-        if (isNaN(rateVal) || rateVal <= 0) {
-            alert("Please enter a valid numeric rate!");
-            return;
-        }
-        
-        const form = document.getElementById('editRateForm');
-        form.action = `/admin/payroll/${id}/rate`;
-        document.getElementById('per_class_rate_input').value = rateVal;
-        form.submit();
+    const form = document.getElementById('editRateModalForm');
+    form.action = `/admin/payroll/${id}/rate`;
+    
+    document.getElementById('editRateTeacherName').innerText = `Modify Per Class Rate for ${name}:`;
+    document.getElementById('modal_per_class_rate').value = currentRate;
+    
+    if (typeof showModal === 'function') {
+        showModal('editRateModal');
+    } else {
+        document.getElementById('editRateModal').classList.add('show');
     }
 }
 </script>

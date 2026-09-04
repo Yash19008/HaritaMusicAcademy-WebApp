@@ -13,9 +13,14 @@ class Student extends Model
 
     protected $guarded = [];
 
-    public function course(): BelongsTo
+    public function courses()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsToMany(Course::class, 'course_student');
+    }
+
+    public function getCourseAttribute()
+    {
+        return $this->courses->first();
     }
 
     public function user(): BelongsTo

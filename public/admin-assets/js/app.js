@@ -3,7 +3,7 @@
    ========================================== */
 
 // Seed Data definition
-const DEFAULT_STUDENTS = [
+var DEFAULT_STUDENTS = [
   {
     "id": "STU001",
     "name": "Ananya Iyer",
@@ -565,7 +565,7 @@ const DEFAULT_STUDENTS = [
   }
 ];
 
-const DEFAULT_TEACHERS = [
+var DEFAULT_TEACHERS = [
   {
     "id": "TCH001",
     "name": "Meera Sharma",
@@ -854,7 +854,7 @@ const DEFAULT_TEACHERS = [
   }
 ];
 
-const DEFAULT_CLASSES = [
+var DEFAULT_CLASSES = [
   {
     "id": "CLS001",
     "studentName": "Rohan Malhotra",
@@ -1347,7 +1347,7 @@ const DEFAULT_CLASSES = [
   }
 ];
 
-const DEFAULT_LEAVES = [
+var DEFAULT_LEAVES = [
   {
     "id": "LEV001",
     "teacherName": "Pandit Ravi Sen",
@@ -1800,7 +1800,7 @@ const DEFAULT_LEAVES = [
   }
 ];
 
-const DEFAULT_SALES = [
+var DEFAULT_SALES = [
   {
     "id": "SAL001",
     "studentName": "Rohan Malhotra",
@@ -2205,7 +2205,7 @@ const DEFAULT_SALES = [
 
 
 // DEFAULT SEED ARRAYS FOR PORTAL ADDITIONS
-const DEFAULT_LEADS = [
+var DEFAULT_LEADS = [
   { "id": "LD001", "name": "Rajesh Khanna", "phone": "+91 98234 56789", "email": "rajesh.khanna@example.com", "instrument": "Sitar", "status": "Inquiry", "date": "2026-07-25" },
   { "id": "LD002", "name": "Kiran Bedi", "phone": "+91 97345 67890", "email": "kiran.bedi@example.com", "instrument": "Vocal (Carnatic)", "status": "Demo Taken", "date": "2026-07-24" },
   { "id": "LD003", "name": "Vikram Ambalal", "phone": "+91 96456 78901", "email": "vikram.a@example.com", "instrument": "Violin", "status": "Converted to Student", "date": "2026-07-23", "amount": 4500, "paymentMethod": "NET BANKING", "transactionDate": "2026-07-23" },
@@ -2218,7 +2218,7 @@ const DEFAULT_LEADS = [
   { "id": "LD010", "name": "A.R. Rahman", "phone": "+91 89923 45678", "email": "rahman@example.com", "instrument": "Piano/Vocal", "status": "Demo Taken", "date": "2026-07-16" }
 ];
 
-const DEFAULT_REFERRALS = [
+var DEFAULT_REFERRALS = [
   { "id": "REF001", "referrerName": "Ananya Iyer", "referrerRole": "student", "referredName": "Aditya Roy", "referredEmail": "aditya.roy@example.com", "referredRole": "student", "status": "Approved", "date": "2026-07-26", "reward": "+2 Class Credits" },
   { "id": "REF002", "referrerName": "Ananya Iyer", "referrerRole": "student", "referredName": "Kunal Kapoor", "referredEmail": "kunal@example.com", "referredRole": "student", "status": "Pending", "date": "2026-07-27", "reward": "Awaiting Conversion" },
   { "id": "REF003", "referrerName": "Meera Sharma", "referrerRole": "teacher", "referredName": "Sneha Reddy", "referredEmail": "sneha@example.com", "referredRole": "student", "status": "Approved", "date": "2026-07-25", "reward": "₹500 Payout Bonus" },
@@ -2226,7 +2226,7 @@ const DEFAULT_REFERRALS = [
   { "id": "REF005", "referrerName": "Sarah Fernandez", "referrerRole": "student", "referredName": "Nikhil Dutt", "referredEmail": "nikhil@example.com", "referredRole": "student", "status": "Approved", "date": "2026-07-22", "reward": "+2 Class Credits" }
 ];
 
-const DEFAULT_FEEDBACKS = [
+var DEFAULT_FEEDBACKS = [
   { "id": "FB001", "date": "2026-07-28 10:30", "studentName": "Ananya Iyer", "category": "Mentor", "target": "Meera Sharma", "rating": 5, "message": "Meera is an incredible mentor! Her lessons are extremely thorough and inspiring.", "status": "Active" },
   { "id": "FB002", "date": "2026-07-27 15:45", "studentName": "Aria Sharma", "category": "System", "target": "App Performance", "rating": 4, "message": "The live practice stream preloader takes a bit too long to fade out, but overall the system dashboard is fast.", "status": "Active" },
   { "id": "FB003", "date": "2026-07-26 18:20", "studentName": "Rohan Malhotra", "category": "Academy", "target": "Harita Overall", "rating": 5, "message": "Harita Music Academy is absolute heritage! Nurturing soulful talent and discipline.", "status": "Active" },
@@ -2234,7 +2234,7 @@ const DEFAULT_FEEDBACKS = [
   { "id": "FB005", "date": "2026-07-24 14:00", "studentName": "Rahul Sen", "category": "System", "target": "App Feature Request", "rating": 3, "message": "Need calendar color indicators to stand out a bit more clearly.", "status": "Resolved" }
 ];
 
-const DEFAULT_USERS = [
+var DEFAULT_USERS = [
   { "id": "USR001", "name": "Super Administrator", "email": "admin@haritamusic.com", "password": "admin123", "role": "Admin", "status": "Active" },
   { "id": "USR002", "name": "Meera Sharma", "email": "meera.sharma@haritamusic.com", "password": "teacher123", "role": "Teacher", "status": "Active" },
   { "id": "USR003", "name": "Ananya Iyer", "email": "ananya.iyer@gmail.com", "password": "student123", "role": "Student", "status": "Active" },
@@ -2247,12 +2247,12 @@ const DEFAULT_USERS = [
   { "id": "USR010", "name": "Amit Patel", "email": "amit.patel@gmail.com", "password": "student303", "role": "Student", "status": "Active" }
 ];
 
-const DEFAULT_GROUPS = [
+var DEFAULT_GROUPS = [
   { "id": "GRP001", "name": "Vocal Quartet A", "students": ["STU001", "STU003"], "status": "Active" },
   { "id": "GRP002", "name": "Guitar Ensemble Alpha", "students": ["STU002"], "status": "Active" }
 ];
 
-const DEFAULT_PAYROLL = [
+var DEFAULT_PAYROLL = [
   {
     "teacherName": "Meera Sharma",
     "monthYear": "July 2026",
@@ -2414,7 +2414,7 @@ function initializeDatabase() {
 }
 
 // Global state helper getters
-const db = {
+var db = {
   getUsers: () => JSON.parse(localStorage.getItem("harita_users")) || [],
   getGroups: () => JSON.parse(localStorage.getItem("harita_groups")) || [],
   setGroups: (data) => localStorage.setItem("harita_groups", JSON.stringify(data)),
@@ -2752,44 +2752,7 @@ function setupRoleSwitcher() {
 
 // Update the user card display on sidebar and dropdown based on role
 function updateUserInfoLayout() {
-  const role = db.getCurrentRole();
-  const nameLabel = document.querySelector(".sidebar-user-name");
-  const roleLabel = document.querySelector(".sidebar-user-role");
-
-  let userName = "Administrator";
-  let userInitials = "AD";
-  let displayRole = "Super Admin";
-
-  if (role === "teacher") {
-    userName = "Meera Sharma";
-    userInitials = "MS";
-    displayRole = "Vocal Lead";
-  } else if (role === "student") {
-    userName = "Ananya Iyer";
-    userInitials = "AI";
-    displayRole = "Carnatic Student";
-  }
-
-  if (nameLabel) nameLabel.textContent = userName;
-  if (roleLabel) roleLabel.textContent = displayRole;
-  
-  // Render custom profile image if stored
-  const savedImg = localStorage.getItem("harita_profile_image_" + role);
-  
-  document.querySelectorAll(".avatar").forEach(avatarEl => {
-    avatarEl.innerHTML = "";
-    if (savedImg) {
-      const img = document.createElement("img");
-      img.src = savedImg;
-      img.style.width = "100%";
-      img.style.height = "100%";
-      img.style.borderRadius = "50%";
-      img.style.objectFit = "cover";
-      avatarEl.appendChild(img);
-    } else {
-      avatarEl.textContent = userInitials;
-    }
-  });
+  // Disabled as backend handles this dynamically now
 }
 
 // Apply visual filters and menu item visibility depending on the simulated role
@@ -2977,7 +2940,7 @@ document.addEventListener("click", () => {
 /* ==========================================
    HARITA MUSIC ACADEMY - POLICY MANAGEMENT
    ========================================== */
-const POLICY_STUDENT = `
+var POLICY_STUDENT = `
 <h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Student Policy</h4>
 <ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;">
   <li style="margin-bottom:0.75rem;"><strong>Acceptance of Academy Policies</strong>: By registering with Harita Music Academy, every student agrees to comply with all Academy policies, guidelines, and future updates. Continued use of Academy services constitutes acceptance of these policies.</li>
@@ -3007,7 +2970,7 @@ const POLICY_STUDENT = `
 </ol>
 `;
 
-const POLICY_TEACHER = `
+var POLICY_TEACHER = `
 <h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Teacher Policy</h4>
 <ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;">
   <li style="margin-bottom:0.75rem;"><strong>Acceptance of Policies</strong>: By joining Harita Music Academy, every teacher agrees to comply with all Academy policies, operational guidelines, and future updates.</li>
@@ -3038,7 +3001,7 @@ const POLICY_TEACHER = `
 </ol>
 `;
 
-const POLICY_STAFF = `
+var POLICY_STAFF = `
 <h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Non-Teaching Staff Policy</h4>
 <ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;">
   <li style="margin-bottom:0.75rem;"><strong>Acceptance of Policy</strong>: All staff members are required to comply with the Academy's policies, procedures, and ethical standards.</li>
@@ -3176,3 +3139,71 @@ function acceptPrivacyPolicy() {
   closePrivacyPolicyModal();
 }
 
+// ==========================================
+// GLOBAL TOAST SYSTEM (Replaces legacy alerts)
+// ==========================================
+window.showToast = function(message, type = 'info') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.style.position = 'fixed';
+        container.style.bottom = '20px';
+        container.style.right = '20px';
+        container.style.zIndex = '99999';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+        container.style.alignItems = 'flex-end';
+        container.style.pointerEvents = 'none'; // let clicks pass through container
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.style.padding = '12px 20px';
+    toast.style.marginBottom = '10px';
+    toast.style.borderRadius = '8px';
+    toast.style.color = '#fff';
+    toast.style.fontSize = '14px';
+    toast.style.fontWeight = '500';
+    toast.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+    toast.style.transition = 'opacity 0.3s ease-in-out, transform 0.3s ease';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.pointerEvents = 'auto'; // allow clicks on toast if needed
+    
+    let icon = 'ℹ️';
+    const msgLower = (message || '').toLowerCase();
+    
+    if (type === 'success' || msgLower.includes('successfully') || msgLower.includes('success')) {
+        toast.style.backgroundColor = '#10b981'; // Green
+        icon = '✅';
+    } else if (type === 'error' || msgLower.includes('error') || msgLower.includes('failed') || msgLower.includes('invalid')) {
+        toast.style.backgroundColor = '#ef4444'; // Red
+        icon = '❌';
+    } else if (type === 'warning' || msgLower.includes('please') || msgLower.includes('must') || msgLower.includes('denied') || msgLower.includes('insufficient')) {
+        toast.style.backgroundColor = '#f59e0b'; // Orange
+        icon = '⚠️';
+    } else {
+        toast.style.backgroundColor = '#3b82f6'; // Blue
+    }
+
+    toast.innerHTML = `<div style="display: flex; align-items: center; gap: 8px;"><span>${icon}</span> <span>${message}</span></div>`;
+
+    container.appendChild(toast);
+
+    // Trigger reflow
+    void toast.offsetWidth;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 4500);
+};
+
+// Override all legacy JS alerts dynamically across the app
+window.alert = function(msg) {
+    window.showToast(msg);
+};

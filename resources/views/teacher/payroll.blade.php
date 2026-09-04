@@ -66,10 +66,24 @@
         </div>
     </div>
     <div class="card p-3 d-flex align-center gap-3">
-        <div class="stat-icon" style="background-color: var(--warning-bg); color: var(--warning)">⭐</div>
+        <div class="stat-icon" style="background-color: var(--warning-bg); color: var(--warning)">🎯</div>
         <div>
-        <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Opportunities Taken</div>
-        <h3 class="font-bold">{{ $currentPayroll ? $currentPayroll->opportunity_taken : 0 }}</h3>
+        <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Demo Classes</div>
+        <h3 class="font-bold">{{ $currentPayroll ? $currentPayroll->demo_classes : 0 }}</h3>
+        </div>
+    </div>
+    <div class="card p-3 d-flex align-center gap-3">
+        <div class="stat-icon" style="background-color: var(--danger-bg); color: var(--danger)">⚠️</div>
+        <div>
+        <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Emergency Classes</div>
+        <h3 class="font-bold">{{ $currentPayroll ? $currentPayroll->emergency_classes : 0 }}</h3>
+        </div>
+    </div>
+    <div class="card p-3 d-flex align-center gap-3">
+        <div class="stat-icon" style="background-color: var(--info-bg); color: var(--info)">👥</div>
+        <div>
+        <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Referrals</div>
+        <h3 class="font-bold">{{ $currentPayroll ? $currentPayroll->referrals : 0 }}</h3>
         </div>
     </div>
     <div class="card p-3 d-flex align-center gap-3">
@@ -91,6 +105,14 @@
         </div>
         <div class="card-body p-4">
         @if($currentPayroll)
+        @php
+            $demoPct = (float) \App\Models\Setting::get('opportunity_teacher_pct', 20);
+            $refBonusRs = (float) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+            $oppBonusRs = (float) \App\Models\Setting::get('opportunity_bonus_rs', 100);
+            $demoSalary = $currentPayroll->demo_classes * ($demoPct / 100) * $currentPayroll->per_class_rate;
+            $emergencySalary = $currentPayroll->emergency_classes * $oppBonusRs;
+            $referralSalary = $currentPayroll->referrals * $refBonusRs;
+        @endphp
         <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
             <span class="text-muted">Teacher Name</span>
             <span class="font-bold">{{ auth()->user()->name }}</span>
@@ -100,28 +122,30 @@
             <span class="badge {{ $currentPayroll->status == 'paid' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($currentPayroll->status) }}</span>
         </div>
         <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
-            <span class="text-muted">Base Salary (Dynamic)</span>
+            <span class="text-muted">Base Salary</span>
             <span class="font-semibold">₹{{ number_format($currentPayroll->per_class_rate * $currentPayroll->classes_taken) }} <small class="text-muted">(Rate × {{ $currentPayroll->classes_taken }} Classes)</small></span>
         </div>
         <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
-            <span class="text-muted">Opportunities Bonus</span>
-            <span class="font-semibold">₹{{ number_format(0.20 * $currentPayroll->per_class_rate * $currentPayroll->opportunity_taken) }} <small class="text-muted">(20% Rate × {{ $currentPayroll->opportunity_taken }} Demos)</small></span>
+            <span class="text-muted">Demo Classes Bonus</span>
+            <span class="font-semibold">₹{{ number_format($demoSalary) }} <small class="text-muted">({{ $demoPct }}% Rate × {{ $currentPayroll->demo_classes }} Demos)</small></span>
+        </div>
+        <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+            <span class="text-muted">Emergency Classes Bonus</span>
+            <span class="font-semibold">₹{{ number_format($emergencySalary) }} <small class="text-muted">(₹{{ $oppBonusRs }} × {{ $currentPayroll->emergency_classes }} Emergency)</small></span>
+        </div>
+        <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+            <span class="text-muted">Referral Bonus</span>
+            <span class="font-semibold">₹{{ number_format($referralSalary) }} <small class="text-muted">(₹{{ $refBonusRs }} × {{ $currentPayroll->referrals }} Referrals)</small></span>
         </div>
 
         <!-- Calculation Box -->
-        <div class="salary-calc-box">
+        <div class="salary-calc-box mt-3">
             <div class="font-bold text-primary mb-2" style="font-size: 0.85rem; text-transform: uppercase;">Academy Ledger Formula</div>
-
-            <div class="mb-2" style="font-size:0.8rem; line-height: 1.45;">
-            <span class="font-medium">Standard Pack Salary (Estimate):</span><br>
-            <code>(Rate * 10) + (20% of Rate * 5)</code><br>
-            = <code>({{ $currentPayroll->per_class_rate }} * 10) + ({{ 0.20 * $currentPayroll->per_class_rate }} * 5)</code> = <b class="text-serif font-bold">₹{{ number_format($currentPayroll->formula_salary) }}</b>
-            </div>
 
             <div style="font-size:0.8rem; line-height: 1.45; border-top: 1px solid var(--primary); padding-top: 0.5rem; margin-top: 0.5rem;">
             <span class="text-muted font-medium">This Month Actual Payout:</span><br>
-            <code>(Rate * {{ $currentPayroll->classes_taken }}) + (20% of Rate * {{ $currentPayroll->opportunity_taken }})</code><br>
-            = <code>({{ $currentPayroll->per_class_rate }} * {{ $currentPayroll->classes_taken }}) + ({{ 0.20 * $currentPayroll->per_class_rate }} * {{ $currentPayroll->opportunity_taken }})</code> = <b class="text-serif font-bold" style="font-size:1.1rem; color: var(--secondary);">₹{{ number_format($currentPayroll->calculated_salary) }}</b>
+            <code>(Rate * {{ $currentPayroll->classes_taken }}) + ({{ $demoPct }}% of Rate * {{ $currentPayroll->demo_classes }}) + (₹{{ $oppBonusRs }} * {{ $currentPayroll->emergency_classes }}) + (₹{{ $refBonusRs }} * {{ $currentPayroll->referrals }})</code><br>
+            = <b class="text-serif font-bold" style="font-size:1.1rem; color: var(--secondary);">₹{{ number_format($currentPayroll->calculated_salary) }}</b>
             </div>
         </div>
         @else
@@ -177,7 +201,9 @@
                     <th>Month & Year</th>
                     <th>Rate</th>
                     <th>Classes</th>
-                    <th>Opportunities</th>
+                    <th>Demos</th>
+                    <th>Emergency</th>
+                    <th>Referrals</th>
                     <th>Total Payout</th>
                     <th>Status</th>
                 </tr>
@@ -188,7 +214,9 @@
                     <td class="font-bold">{{ $p->month }}</td>
                     <td>₹{{ number_format($p->per_class_rate) }}</td>
                     <td>{{ $p->classes_taken }}</td>
-                    <td>{{ $p->opportunity_taken }}</td>
+                    <td>{{ $p->demo_classes }}</td>
+                    <td>{{ $p->emergency_classes }}</td>
+                    <td>{{ $p->referrals }}</td>
                     <td class="font-bold text-primary">₹{{ number_format($p->calculated_salary) }}</td>
                     <td><span class="badge {{ $p->status == 'paid' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($p->status) }}</span></td>
                 </tr>

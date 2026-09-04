@@ -54,9 +54,11 @@ class AdminController extends Controller
 
         $recentLeads = \App\Models\Payment::latest()->limit(5)->get();
 
+        $renewalInterests = Student::where('renewal_interest', 'interested')->latest('updated_at')->get();
+
         return view('admin.dashboard.index', compact(
             'totalStudents', 'totalTeachers', 'todayClasses', 'monthlySales',
-            'recentActivity', 'topTeachers', 'recentLeads',
+            'recentActivity', 'topTeachers', 'recentLeads', 'renewalInterests',
             'chartLabels', 'revenueData', 'studentsData', 'teachersData',
             'instrumentData', 'instrumentCount'
         ));
@@ -66,24 +68,30 @@ class AdminController extends Controller
 
     public function students(): View
     {
-        $students = Student::with(['course', 'teacher', 'groups'])->latest()->get();
+        $students = Student::with(['courses', 'teacher', 'groups'])->latest()->get();
         $teachers = Teacher::select('id', 'name')->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
         $groups   = StudentGroup::with('members')->withCount('members')->get();
-        return view('admin.students.index', compact('students', 'teachers', 'groups', 'courses'));
+        $creditPackages = \App\Models\CreditPackage::all();
+        return view('admin.students.index', compact('students', 'teachers', 'groups', 'courses', 'creditPackages'));
     }
 
     public function storeStudent(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'name'       => ['required', 'string', 'max:255'],
-            'email'      => ['required', 'email', 'unique:students,email'],
+            'email'      => ['required', 'email', 'unique:students,email', 'unique:users,email'],
             'phone'      => ['nullable', 'string'],
-            'course_id'  => ['nullable', 'exists:courses,id'],
+            'age'        => ['nullable', 'integer', 'min:1'],
+            'country'    => ['nullable', 'string'],
+            'timezone'   => ['nullable', 'string'],
+            'courses'    => ['nullable', 'array'],
+            'courses.*'  => ['exists:courses,id'],
             'teacher_id' => ['nullable', 'exists:teachers,id'],
             'credits'    => ['nullable', 'integer', 'min:0'],
             'status'     => ['required', 'in:active,inactive'],
             'joining_date' => ['nullable', 'date'],
+            'end_date'   => ['nullable', 'date'],
             'enrolled_level' => ['nullable', 'string'],
             'referral_source' => ['nullable', 'string'],
             'emergency_contact_name' => ['nullable', 'string'],
@@ -92,26 +100,59 @@ class AdminController extends Controller
             'assigned_group' => ['nullable', 'exists:student_groups,id'],
         ]);
 
-        $student = Student::create(collect($data)->except('assigned_group')->toArray());
+        $password = \Str::random(10);
+
+        $user = User::create([
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'password' => \Hash::make($password),
+            'timezone' => $data['timezone'] ?? 'Asia/Kolkata',
+            'status' => $data['status'],
+        ]);
+
+        $user->assignRole('student');
+
+        $studentData = collect($data)->except(['assigned_group', 'timezone', 'courses'])->toArray();
+        $studentData['user_id'] = $user->id;
+        $student = Student::create($studentData);
         
         if ($data['enrolled_format'] === 'Group' && !empty($data['assigned_group'])) {
             $student->groups()->attach($data['assigned_group']);
         }
+        if (!empty($data['courses'])) {
+            $student->courses()->attach($data['courses']);
+        }
 
-        return back()->with('success', 'Student added successfully.');
+        try {
+            \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $password));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send student credentials email: ' . $e->getMessage());
+        }
+
+        return back()->with('success', 'Student added successfully. Login credentials sent to ' . $user->email);
     }
 
     public function updateStudent(Request $request, Student $student): RedirectResponse
     {
+        $emailRules = ['required', 'email', 'unique:students,email,' . $student->id];
+        if ($student->user_id) {
+            $emailRules[] = 'unique:users,email,' . $student->user_id;
+        }
+
         $data = $request->validate([
             'name'       => ['required', 'string', 'max:255'],
-            'email'      => ['required', 'email', 'unique:students,email,' . $student->id],
+            'email'      => $emailRules,
             'phone'      => ['nullable', 'string'],
-            'course_id'  => ['nullable', 'exists:courses,id'],
+            'age'        => ['nullable', 'integer', 'min:1'],
+            'country'    => ['nullable', 'string'],
+            'timezone'   => ['nullable', 'string'],
+            'courses'    => ['nullable', 'array'],
+            'courses.*'  => ['exists:courses,id'],
             'teacher_id' => ['nullable', 'exists:teachers,id'],
             'credits'    => ['nullable', 'integer', 'min:0'],
             'status'     => ['required', 'in:active,inactive'],
             'joining_date' => ['nullable', 'date'],
+            'end_date'   => ['nullable', 'date'],
             'enrolled_level' => ['nullable', 'string'],
             'referral_source' => ['nullable', 'string'],
             'emergency_contact_name' => ['nullable', 'string'],
@@ -120,7 +161,16 @@ class AdminController extends Controller
             'assigned_group' => ['nullable', 'exists:student_groups,id'],
         ]);
 
-        $student->update(collect($data)->except('assigned_group')->toArray());
+        if ($student->user) {
+            $student->user->update([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'timezone' => $data['timezone'] ?? 'Asia/Kolkata',
+                'status' => $data['status'],
+            ]);
+        }
+
+        $student->update(collect($data)->except(['assigned_group', 'timezone', 'courses'])->toArray());
         
         if ($data['enrolled_format'] === 'Group' && !empty($data['assigned_group'])) {
             $student->groups()->sync([$data['assigned_group']]);
@@ -128,13 +178,44 @@ class AdminController extends Controller
             $student->groups()->detach();
         }
 
+        if (isset($data['courses'])) {
+            $student->courses()->sync($data['courses']);
+        } else {
+            $student->courses()->detach();
+        }
+
         return back()->with('success', 'Student updated successfully.');
     }
 
     public function destroyStudent(Student $student): RedirectResponse
     {
+        $user = $student->user;
         $student->delete();
+        if ($user) {
+            $user->delete();
+        }
         return back()->with('success', 'Student removed.');
+    }
+
+    public function resendCredentials(Student $student): RedirectResponse
+    {
+        if (!$student->user) {
+            return back()->with('error', 'Student does not have an associated user account.');
+        }
+
+        $password = \Str::random(10);
+        $student->user->update([
+            'password' => \Hash::make($password)
+        ]);
+
+        try {
+            \Mail::to($student->user->email)->send(new \App\Mail\StudentCreatedMail($student->user, $password));
+        } catch (\Exception $e) {
+            \Log::error('Failed to resend student credentials email: ' . $e->getMessage());
+            return back()->with('error', 'Password updated but failed to send email.');
+        }
+
+        return back()->with('success', 'New credentials generated and sent to ' . $student->user->email);
     }
 
     public function bulkImportStudents(Request $request)
@@ -217,13 +298,15 @@ class AdminController extends Controller
         $data = $request->validate([
             'name'       => ['required', 'string'],
             'status'     => ['required', 'in:active,inactive'],
+            'teacher_id' => ['nullable', 'exists:teachers,id'],
             'student_ids' => ['nullable', 'array'],
             'student_ids.*' => ['exists:students,id'],
         ]);
 
         $group = StudentGroup::create([
             'name' => $data['name'],
-            'status' => $data['status']
+            'status' => $data['status'],
+            'teacher_id' => $data['teacher_id'] ?? null
         ]);
         if (! empty($data['student_ids'])) {
             $group->members()->sync($data['student_ids']);
@@ -237,13 +320,15 @@ class AdminController extends Controller
         $data = $request->validate([
             'name'       => ['required', 'string'],
             'status'     => ['required', 'in:active,inactive'],
+            'teacher_id' => ['nullable', 'exists:teachers,id'],
             'student_ids' => ['nullable', 'array'],
             'student_ids.*' => ['exists:students,id'],
         ]);
 
         $studentGroup->update([
             'name' => $data['name'],
-            'status' => $data['status']
+            'status' => $data['status'],
+            'teacher_id' => $data['teacher_id'] ?? null
         ]);
         if (! empty($data['student_ids'])) {
             $studentGroup->members()->sync($data['student_ids']);
@@ -273,7 +358,7 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name'           => ['required', 'string', 'max:255'],
-            'email'          => ['required', 'email', 'unique:teachers,email'],
+            'email'          => ['required', 'email', 'unique:teachers,email', 'unique:users,email'],
             'phone'          => ['nullable', 'string'],
             'course_id'      => ['nullable', 'exists:courses,id'],
             'week_off'       => ['nullable', 'array'],
@@ -295,7 +380,26 @@ class AdminController extends Controller
             $data['week_off'] = implode(',', $data['week_off']);
         }
 
+        $password = \Illuminate\Support\Str::random(10);
+        
+        $user = \App\Models\User::create([
+            'name'     => $data['name'],
+            'email'    => $data['email'],
+            'password' => \Hash::make($password),
+            'status'   => $data['status'] === 'active' ? 'active' : 'inactive',
+        ]);
+        
+        $user->assignRole('teacher');
+
+        $data['user_id'] = $user->id;
+
         Teacher::create($data);
+
+        try {
+            \Mail::to($user->email)->send(new \App\Mail\TeacherCreatedMail($user, $password));
+        } catch (\Exception $e) {
+            \Log::error('Failed to send teacher credentials email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Teacher added successfully.');
     }
@@ -335,7 +439,11 @@ class AdminController extends Controller
 
     public function destroyTeacher(Teacher $teacher): RedirectResponse
     {
+        $user = $teacher->user;
         $teacher->delete();
+        if ($user) {
+            $user->delete();
+        }
         return back()->with('success', 'Teacher removed.');
     }
 
@@ -400,8 +508,11 @@ class AdminController extends Controller
 
         $teachers = Teacher::with('user')->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
+        $creditPackages = \App\Models\CreditPackage::all();
 
-        return view('admin.sales.index', compact('leads', 'grossSales', 'enrolled', 'avgTx', 'labels', 'revenue', 'teachers', 'courses'));
+        return view('admin.sales.index', compact(
+            'leads', 'grossSales', 'enrolled', 'avgTx', 'labels', 'revenue', 'teachers', 'courses', 'creditPackages'
+        ));
     }
 
     public function storeLead(Request $request): RedirectResponse
@@ -434,11 +545,13 @@ class AdminController extends Controller
             'email' => 'required|email|unique:students,email',
             'phone' => 'required|string',
             'enrolled_level' => 'required|string',
-            'course_id' => 'required|exists:courses,id',
+            'courses' => 'required|array',
+            'courses.*' => 'exists:courses,id',
             'teacher_id' => 'required|exists:teachers,id',
             'credits' => 'required|integer|min:1',
             'amount' => 'required|numeric',
             'payment_mode' => 'required|string',
+            'end_date' => 'nullable|date',
         ]);
 
         // Generate random password
@@ -462,13 +575,17 @@ class AdminController extends Controller
             'email' => $data['email'],
             'phone' => $data['phone'],
             'enrolled_level' => $data['enrolled_level'],
-            'course_id' => $data['course_id'],
             'teacher_id' => $data['teacher_id'],
             'credits' => $data['credits'],
             'status' => 'active',
             'joining_date' => today(),
+            'end_date' => $data['end_date'] ?? null,
             'enrolled_format' => 'Individual',
         ]);
+
+        if (!empty($data['courses'])) {
+            $student->courses()->attach($data['courses']);
+        }
 
         // Update payment/lead to represent the conversion
         $payment->update([
@@ -528,13 +645,35 @@ class AdminController extends Controller
 
     // ─── Reports ──────────────────────────────────────────────────────────────
 
-    public function reports(): View
+    public function reports(Request $request): View
     {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
         $totalStudents    = Student::count();
-        $activeStudents   = Student::where('status', 'active')->count();
+        
+        $activeQuery = Student::where('status', 'active');
+        if ($startDate && $endDate) {
+            $activeQuery->whereBetween('joining_date', [$startDate, $endDate]);
+        }
+        $activeStudents   = $activeQuery->count();
         $activeRatio      = $totalStudents > 0 ? round(($activeStudents / $totalStudents) * 100, 1) : 0;
 
-        $pastBookings     = ClassBooking::where('starts_at', '<', now())->get();
+        // Calculate yearly enrollment growth
+        $thisYearStudents = Student::whereYear('created_at', now()->year)->count();
+        $lastYearStudents = Student::whereYear('created_at', now()->subYear()->year)->count();
+        if ($lastYearStudents > 0) {
+            $enrollmentGrowth = round((($thisYearStudents - $lastYearStudents) / $lastYearStudents) * 100, 1);
+        } else {
+            $enrollmentGrowth = $thisYearStudents > 0 ? 100 : 0;
+        }
+
+        $pastBookingsQuery = ClassBooking::where('starts_at', '<', now());
+        if ($startDate && $endDate) {
+            $pastBookingsQuery->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
+        }
+        $pastBookings     = $pastBookingsQuery->get();
+        
         $total            = $pastBookings->count();
         $completed        = $pastBookings->where('status', 'completed')->count();
         $showRate         = $total > 0 ? round(($completed / $total) * 100, 1) : 0;
@@ -549,16 +688,39 @@ class AdminController extends Controller
         $demosData        = $months->map(fn ($m) => DemoBooking::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count())->values()->toArray();
         $conversionData   = $months->map(fn ($m) => DemoBooking::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->where('status', 'converted')->count())->values()->toArray();
 
-        $instruments      = ['Vocal', 'Sitar', 'Violin', 'Flute', 'Tabla'];
-        $hoursData        = array_map(fn ($i) => ClassBooking::where('instrument', $i)->sum('duration_minutes') / 60, $instruments);
+        $instruments      = \App\Models\Course::where('status', 'active')->pluck('name')->toArray();
+        
+        $hoursData = [];
+        foreach($instruments as $i) {
+            $q = ClassBooking::where('instrument', $i);
+            if ($startDate && $endDate) {
+                $q->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
+            }
+            $hoursData[] = $q->sum('duration_minutes') / 60;
+        }
 
-        $classHistory     = ClassBooking::with(['student', 'teacher'])->latest()->limit(100)->get();
+        $historyQuery = ClassBooking::with(['student.user', 'teacher.user', 'studentGroup'])->latest();
+        if ($startDate && $endDate) {
+            $historyQuery->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
+        }
+        $classHistory = $historyQuery->limit(100)->get();
 
         return view('admin.reports.index', compact(
-            'activeRatio', 'showRate', 'leaveCoverRate',
+            'enrollmentGrowth', 'activeRatio', 'showRate', 'leaveCoverRate',
             'labels', 'signupsData', 'demosData', 'conversionData',
-            'instruments', 'hoursData', 'classHistory'
+            'instruments', 'hoursData', 'classHistory',
+            'startDate', 'endDate'
         ));
+    }
+
+    public function exportReports(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        
+        $fileName = 'harita_academy_report_' . date('Y-m-d') . '.xlsx';
+        
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ReportsExport($startDate, $endDate), $fileName);
     }
 
 
@@ -591,14 +753,18 @@ class AdminController extends Controller
                     ->whereBetween('scheduled_at', [$startOfMonth, $endOfMonth])
                     ->count();
 
-                // 1 Approved Referral = Rs 500 bonus = 5 opportunities
-                $referralOpportunities = \App\Models\Referral::where('referrer_id', $teacher->user_id)
+                $approvedReferrals = \App\Models\Referral::where('referrer_id', $teacher->user_id)
                     ->where('referrer_role', 'teacher')
                     ->where('status', 'approved')
                     ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
-                    ->count() * 5;
+                    ->count();
 
-                $opportunityTaken = $demoOpportunities + $referralOpportunities;
+                $acceptedOpportunities = \App\Models\Opportunity::where('accepted_teacher_id', $teacher->id)
+                    ->where('status', 'accepted')
+                    ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+                    ->count();
+
+                $opportunityTaken = $demoOpportunities + $approvedReferrals + $acceptedOpportunities;
 
                 if (!$payroll->exists || $payroll->per_class_rate == 0) {
                     $payroll->per_class_rate = 500; 
@@ -606,9 +772,21 @@ class AdminController extends Controller
 
                 $rate = $payroll->per_class_rate;
                 $payroll->classes_taken = $classesTaken;
+                $payroll->demo_classes = $demoOpportunities;
+                $payroll->emergency_classes = $acceptedOpportunities;
+                $payroll->referrals = $approvedReferrals;
                 $payroll->opportunity_taken = $opportunityTaken;
-                $payroll->formula_salary = ($rate * 10) + (0.20 * $rate * 5);
-                $payroll->calculated_salary = ($rate * $classesTaken) + (0.20 * $rate * $opportunityTaken);
+                
+                $demoPct = (float) \App\Models\Setting::get('opportunity_teacher_pct', 20);
+                $refBonusRs = (float) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+                $oppBonusRs = (float) \App\Models\Setting::get('opportunity_bonus_rs', 100);
+                
+                $demoSalary = $demoOpportunities * ($demoPct / 100) * $rate;
+                $referralSalary = $approvedReferrals * $refBonusRs;
+                $emergencyOppSalary = $acceptedOpportunities * $oppBonusRs;
+                
+                $payroll->formula_salary = ($rate * 10) + (($demoPct / 100) * $rate * 5);
+                $payroll->calculated_salary = ($rate * $classesTaken) + $demoSalary + $referralSalary + $emergencyOppSalary;
                 
                 if (!$payroll->exists) {
                     $payroll->status = 'pending';
@@ -633,8 +811,18 @@ class AdminController extends Controller
 
         $rate = $request->per_class_rate;
         $payroll->per_class_rate = $rate;
-        $payroll->formula_salary = ($rate * 10) + (0.20 * $rate * 5);
-        $payroll->calculated_salary = ($rate * $payroll->classes_taken) + (0.20 * $rate * $payroll->opportunity_taken);
+        
+        $demoPct = (float) \App\Models\Setting::get('opportunity_teacher_pct', 20);
+        $refBonusRs = (float) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+        $oppBonusRs = (float) \App\Models\Setting::get('opportunity_bonus_rs', 100);
+        
+        $demoSalary = $payroll->demo_classes * ($demoPct / 100) * $rate;
+        $referralSalary = $payroll->referrals * $refBonusRs;
+        $emergencyOppSalary = $payroll->emergency_classes * $oppBonusRs;
+
+        $payroll->formula_salary = ($rate * 10) + (($demoPct / 100) * $rate * 5);
+        $payroll->calculated_salary = ($rate * $payroll->classes_taken) + $demoSalary + $referralSalary + $emergencyOppSalary;
+        
         $payroll->save();
 
         return back()->with('success', 'Class rate updated and salary recalculated!');
@@ -673,14 +861,12 @@ class AdminController extends Controller
     {
         $data = $request->validate(['status' => ['required', 'in:pending,approved,rejected']]);
         
-        // Auto-grant reward if status changed to approved and referrer is a student
+        // Auto-grant reward if status changed to approved
         if ($data['status'] === 'approved' && $referral->status !== 'approved') {
             if ($referral->referrer_role === 'student') {
                 $student = \App\Models\Student::where('user_id', $referral->referrer_id)->first();
                 if ($student) {
-                    // Extract number from bonus_reward (e.g., "2 Free Classes" or "1 Free Class")
-                    preg_match('/\d+/', $referral->bonus_reward, $matches);
-                    $quantity = !empty($matches[0]) ? (int)$matches[0] : 1;
+                    $quantity = (int) \App\Models\Setting::get('referral_bonus_student_credits', 2);
 
                     $student->increment('credits', $quantity);
                     
@@ -690,7 +876,12 @@ class AdminController extends Controller
                         'quantity'   => $quantity,
                         'reason'     => 'Referral Reward (Auto-granted)',
                     ]);
+                    
+                    $referral->bonus_reward = "{$quantity} Credits";
                 }
+            } elseif ($referral->referrer_role === 'teacher') {
+                $bonusRs = (int) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+                $referral->bonus_reward = "₹{$bonusRs}";
             }
         }
 
@@ -773,6 +964,8 @@ class AdminController extends Controller
 
     public function destroyUser(User $user): RedirectResponse
     {
+        \App\Models\Teacher::where('user_id', $user->id)->delete();
+        \App\Models\Student::where('user_id', $user->id)->delete();
         $user->delete();
         return back()->with('success', 'User deleted.');
     }
@@ -782,8 +975,9 @@ class AdminController extends Controller
     public function settings(): View
     {
         $settings = Setting::all()->pluck('value', 'key');
+        $creditPackages = \App\Models\CreditPackage::all();
         $user     = auth()->user();
-        return view('admin.settings.index', compact('settings', 'user'));
+        return view('admin.settings.index', compact('settings', 'user', 'creditPackages'));
     }
 
     public function saveSettings(Request $request): RedirectResponse
@@ -791,7 +985,10 @@ class AdminController extends Controller
         $allowed = [
             'academy_name', 'contact_email', 'support_phone', 'address',
             'class_duration', 'reschedule_lock_hours', 'require_approval',
-            'auto_deduct_credits', 'opportunity_teacher_pct', 'opportunity_student_credits',
+            'auto_deduct_credits', 'opportunity_teacher_pct', 'opportunity_bonus_rs', 'referral_bonus_student_credits',
+            'referral_bonus_teacher_rs',
+            'indian_reschedule_cutoff_hours', 'intl_reschedule_cutoff_hours',
+            'demo_price_inr', 'demo_price_intl',
         ];
 
         foreach ($allowed as $key) {

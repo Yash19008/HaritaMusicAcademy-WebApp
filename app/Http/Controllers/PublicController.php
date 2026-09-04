@@ -20,16 +20,17 @@ class PublicController extends Controller
 
         $startsAt = Carbon::parse($validated['scheduled_at']);
 
-        // Create a lead in the Sales Dashboard (Payment table)
-        // Format: email|phone so admin can use it when booking demo or converting
         \App\Models\Payment::create([
             'student_name' => $validated['student_name'],
-            'contact' => $validated['email'] . '|' . $validated['phone'], // Format: email|phone
-            'instrument' => $validated['instrument'],
-            'amount' => 499.00,
+            'email'        => $validated['email'],
+            'phone'        => $validated['phone'],
+            'instrument'   => $validated['instrument'],
+            'amount'       => 499.00,
             'payment_mode' => 'Online',
             'transaction_date' => today(),
-            'status' => 'pending', // Changed from 'confirmed' to 'pending' so it shows as "Inquiry"
+            'status'       => 'pending',
+            'preferred_date' => $startsAt->format('Y-m-d'),
+            'preferred_time' => $startsAt->format('H:i:s'),
         ]);
 
         return back()->with('demo_success', true);

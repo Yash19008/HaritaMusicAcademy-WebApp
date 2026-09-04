@@ -72,7 +72,11 @@
 <!-- HERO -->
 <div class="profile-hero slide-up">
     <div class="profile-avatar-box" style="position: relative; display: inline-block;">
-        <div class="avatar avatar-lg" id="profileInitials">{{ strtoupper(substr($teacher->name ?? 'T', 0, 1)) }}</div>
+        @if(isset(auth()->user()->avatar) && auth()->user()->avatar)
+            <img src="{{ auth()->user()->avatar }}" class="avatar avatar-lg" style="object-fit: cover;" alt="{{ $teacher->name ?? 'T' }}">
+        @else
+            <div class="avatar avatar-lg" id="profileInitials">{{ strtoupper(substr($teacher->name ?? 'T', 0, 1)) }}</div>
+        @endif
     </div>
     <div class="profile-meta">
         <h2 id="profileName">{{ $teacher->name ?? 'N/A' }}</h2>

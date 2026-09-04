@@ -8,21 +8,7 @@
 @endpush
 
 @section('content')
-@if(session('success'))
-    <div style="background: var(--success-bg); color: var(--success); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-        {{ session('success') }}
-    </div>
-@endif
 
-@if($errors->any())
-    <div style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-        <ul style="margin: 0; padding-left: 1.5rem;">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
 
 <div class="grid grid-3 gap-4">
     <!-- LEAVE APPLY FORM (Teacher Only) -->
@@ -56,6 +42,12 @@
             <div class="form-group mb-4">
                 <label class="form-label" for="leaveReason">Reason / Notes</label>
                 <textarea name="reason" id="leaveReason" class="form-control" placeholder="e.g. Health checkup, concert..." rows="5" required></textarea>
+            </div>
+
+            <div id="potentialLossContainer" style="display: none; background: #fff3cd; border-left: 4px solid #ffc107; padding: 10px; margin-bottom: 1rem; border-radius: 4px;">
+                <strong style="color: #856404;">Potential Loss:</strong> 
+                <span id="potentialLossAmount" style="color: #856404; font-weight: bold;">₹0</span>
+                <div style="font-size: 0.8rem; color: #856404; margin-top: 4px;" id="potentialLossDetails"></div>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Submit Request</button>
@@ -123,15 +115,56 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script>
-$(document).ready(function() {
+  $(document).ready(function() {
     $('#leavesTable').DataTable({
-        "order": [[1, "desc"]],
-        "responsive": true,
+        order: [[1, 'desc']],
+        responsive: true,
         "language": {
             "search": "",
             "searchPlaceholder": "Search..."
         }
     });
-});
+
+    const leaveStart = document.getElementById('leaveStart');
+    const leaveEnd = document.getElementById('leaveEnd');
+    const lossContainer = document.getElementById('potentialLossContainer');
+    const lossAmount = document.getElementById('potentialLossAmount');
+    const lossDetails = document.getElementById('potentialLossDetails');
+
+    function calculateLoss() {
+        const start = leaveStart.value;
+        const end = leaveEnd.value;
+
+        if (start && end) {
+            if (new Date(start) > new Date(end)) {
+                lossContainer.style.display = 'none';
+                return;
+            }
+
+            fetch(`{{ route('teacher.leaves.loss') }}?start=${start}&end=${end}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.classes > 0) {
+                        lossAmount.innerText = `₹${data.loss}`;
+                        lossDetails.innerText = `(Rate per class ₹${data.rate} × ${data.classes} possible classes)`;
+                        lossContainer.style.display = 'block';
+                    } else {
+                        lossAmount.innerText = `₹0`;
+                        lossDetails.innerText = `(No scheduled classes found in this date range)`;
+                        lossContainer.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error calculating loss:', err);
+                    lossContainer.style.display = 'none';
+                });
+        } else {
+            lossContainer.style.display = 'none';
+        }
+    }
+
+    leaveStart.addEventListener('change', calculateLoss);
+    leaveEnd.addEventListener('change', calculateLoss);
+  });
 </script>
 @endpush

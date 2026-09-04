@@ -908,8 +908,8 @@ table.dataTable thead .sorting_desc::after {
 
 .modal-body {
   padding: 1.5rem;
-  height: 500px;
-  overflow-y: scroll;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .modal-footer {
@@ -1656,4 +1656,44 @@ html, body {
     font-size: 0.75rem !important;
     padding: 0.5rem 0.25rem !important;
   }
+}
+
+/* Laravel Bootstrap Pagination Override */
+.pagination {
+  display: flex;
+  gap: 4px;
+  list-style: none;
+  padding: 0;
+  margin: 1.25rem 0;
+  justify-content: center;
+}
+.page-item .page-link {
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  color: #C5A880 !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.4rem 0.85rem !important;
+  font-size: 12px !important;
+  font-weight: 200 !important;
+  text-decoration: none;
+  transition: all 0.2s !important;
+  display: block;
+}
+.page-item .page-link:hover {
+  background: #3B1319 !important;
+  background-color: #3B1319 !important;
+  border-color: #C5A880 !important;
+  color: #C5A880 !important;
+}
+.page-item.active .page-link {
+  background: #3B1319 !important;
+  background-color: #3B1319 !important;
+  border-color: #C5A880 !important;
+  color: #C5A880 !important;
+  font-weight: 600 !important;
+}
+.page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }

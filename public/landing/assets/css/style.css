@@ -3389,6 +3389,7 @@ details:focus-visible {
 
 .calendar-day:hover:not(.empty):not(.disabled) {
   background-color: #51040e;
+  color: #ffffff;
 }
 
 .calendar-day.active {

@@ -27,15 +27,15 @@ class DemoBookingController extends Controller
         return view('admin.demos.index', compact('demos', 'scheduled', 'completed', 'converted', 'cancelled', 'teachers', 'courses'));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, \App\Services\BookingService $bookingService): RedirectResponse
     {
         $data = $request->validate([
             'lead_id'       => ['nullable', 'exists:payments,id'],
             'student_name'  => ['required', 'string'],
             'instrument'    => ['nullable', 'string'],
             'teacher_id'    => ['required', 'exists:teachers,id'],
-            'scheduled_at'  => ['required', 'date'],
-            'duration_minutes' => ['required', 'integer', 'min:30', 'max:120'],
+            'scheduled_date'  => ['required', 'date'],
+            'scheduled_time'  => ['required', 'string'],
         ]);
 
         $email = '';
@@ -49,31 +49,48 @@ class DemoBookingController extends Controller
             $contacts = $payment->contact ? explode('|', $payment->contact) : ['', ''];
             $email = $contacts[0] ?? '';
             $phone = $contacts[1] ?? '';
+            
+            $data['email'] = $email;
+            $data['phone'] = $phone;
         }
 
-        // Create demo booking
-        DemoBooking::create([
-            'payment_id'    => $data['lead_id'] ?? null,
-            'student_name'  => $data['student_name'],
-            'email'         => $email,
-            'phone'         => $phone,
-            'instrument'    => $data['instrument'],
-            'teacher_id'    => $data['teacher_id'],
-            'scheduled_at'  => $data['scheduled_at'],
-            'duration_minutes' => $data['duration_minutes'],
-            'status'        => 'scheduled',
-        ]);
+        $teacher = Teacher::findOrFail($data['teacher_id']);
+        
+        $startsAt = \Carbon\Carbon::parse($data['scheduled_date'] . ' ' . $data['scheduled_time']);
+        $endsAt = $startsAt->copy()->addMinutes(40); // Hardcoded 40 mins
 
-        return back()->with('success', 'Demo class scheduled successfully!');
+        try {
+            $booking = $bookingService->bookDemo($data, $teacher, $startsAt, $endsAt);
+            
+            // Send Emails
+            if (!empty($booking->email)) {
+                \Illuminate\Support\Facades\Mail::to($booking->email)->send(new \App\Mail\DemoBookedMail($booking, false));
+            }
+            if ($teacher->user && $teacher->user->email) {
+                \Illuminate\Support\Facades\Mail::to($teacher->user->email)->send(new \App\Mail\DemoBookedMail($booking, true));
+            }
+            
+            return redirect()->route('admin.sales.index')->with('success', 'Demo class scheduled successfully! Google Meet link generated and emails sent.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.sales.index')->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
-    public function updateStatus(Request $request, DemoBooking $demo): RedirectResponse
+    public function updateStatus(Request $request, DemoBooking $demo)
     {
         $data = $request->validate([
             'status' => ['required', 'in:scheduled,completed,converted,cancelled,no-show']
         ]);
 
         $demo->update($data);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Demo status updated successfully!',
+                'status' => $demo->status
+            ]);
+        }
 
         return back()->with('success', 'Demo status updated successfully!');
     }

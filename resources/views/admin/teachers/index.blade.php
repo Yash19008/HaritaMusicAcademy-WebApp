@@ -27,12 +27,6 @@
 
 @section('content')
 
-@if(session('success'))
-  <div style="padding:.75rem 1rem;margin-bottom:1rem;background:#ecfdf5;color:#059669;border-radius:var(--radius-sm);font-size:13.5px;">✅ {{ session('success') }}</div>
-@endif
-@if(session('error'))
-  <div style="padding:.75rem 1rem;margin-bottom:1rem;background:#fef2f2;color:#dc2626;border-radius:var(--radius-sm);font-size:13.5px;">❌ {{ session('error') }}</div>
-@endif
 
 {{-- Filter / Actions --}}
 <div class="card mb-3">

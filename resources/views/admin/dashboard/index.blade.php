@@ -258,6 +258,7 @@
             <a href="{{ route('admin.students') }}" class="btn btn-secondary btn-sm">➕ Add Student</a>
             <a href="{{ route('admin.teachers') }}" class="btn btn-secondary btn-sm">➕ Add Teacher</a>
             <a href="{{ route('admin.credits') }}" class="btn btn-secondary btn-sm">🪙 Adjust Credits</a>
+            <a href="{{ route('admin.demos') }}" class="btn btn-secondary btn-sm">🎧 Demo Classes</a>
             <a href="{{ route('admin.class-booking') }}" class="btn btn-primary btn-sm">📅 Schedule Class</a>
           </div>
         </div>
@@ -303,7 +304,29 @@
         </div>
 
         <!-- Lower Information Grid -->
-        <div class="grid grid-2 gap-4 mb-4">
+        <div class="grid grid-3 gap-4 mb-4">
+          <!-- Hot Leads -->
+          <div class="card" style="border: 1px solid #f59e0b;">
+            <div class="card-header" style="background-color: #fef3c7;">
+              <h4 class="font-semibold" style="color: #d97706;">🔥 Hot Leads (Low Credits)</h4>
+            </div>
+            <div class="card-body p-0">
+              @if($renewalInterests->isEmpty())
+                <div class="p-3 text-center text-muted" style="font-size: 0.85rem;">No active leads right now.</div>
+              @else
+                @foreach($renewalInterests as $lead)
+                  <div class="d-flex align-center justify-between p-2 border-bottom" style="font-size: 13.5px;">
+                    <div>
+                      <strong>{{ $lead->user->name ?? $lead->name }}</strong>
+                      <div class="text-light" style="font-size: 11px;">Interested in renewal</div>
+                    </div>
+                    <a href="{{ route('admin.students') }}?search={{ urlencode($lead->email) }}" class="btn btn-sm btn-primary" style="padding: 2px 8px; font-size: 11px;">View</a>
+                  </div>
+                @endforeach
+              @endif
+            </div>
+          </div>
+
           <!-- Recent Activity -->
           <div class="card">
             <div class="card-header">

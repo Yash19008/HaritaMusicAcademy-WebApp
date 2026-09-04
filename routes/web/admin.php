@@ -19,6 +19,7 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::post('/students',                      [AdminController::class, 'storeStudent'])->name('students.store');
         Route::put('/students/{student}',             [AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{student}',          [AdminController::class, 'destroyStudent'])->name('students.destroy');
+        Route::post('/students/{student}/resend-credentials', [AdminController::class, 'resendCredentials'])->name('students.resend-credentials');
         Route::post('/students/bulk-import',          [AdminController::class, 'bulkImportStudents'])->name('students.bulk-import');
         Route::post('/student-groups',                [AdminController::class, 'storeGroup'])->name('groups.store');
         Route::put('/student-groups/{studentGroup}',  [AdminController::class, 'updateGroup'])->name('groups.update');
@@ -32,9 +33,15 @@ Route::middleware(['auth', 'role.access:admin'])
 
         // Class Booking
         Route::get('/class-booking',                        [\App\Http\Controllers\Admin\ClassBookingController::class, 'index'])->name('class-booking');
+        Route::get('/teachers/{teacher}/slots',             [\App\Http\Controllers\Admin\ClassBookingController::class, 'getAvailableSlots'])->name('class-booking.slots');
         Route::post('/bookings',                            [\App\Http\Controllers\Admin\ClassBookingController::class, 'store'])->name('bookings.store');
         Route::put('/bookings/{booking}/status',            [\App\Http\Controllers\Admin\ClassBookingController::class, 'updateStatus'])->name('bookings.status');
-        Route::put('/bookings/{booking}/reschedule',        [\App\Http\Controllers\Admin\ClassBookingController::class, 'reschedule'])->name('bookings.reschedule');
+        
+        // Rescheduling
+        Route::put('/bookings/{booking}/reschedule',        [\App\Http\Controllers\RescheduleController::class, 'adminReschedule'])->name('bookings.reschedule');
+        Route::post('/bookings/{booking}/approve-reschedule', [\App\Http\Controllers\RescheduleController::class, 'approveRequest'])->name('bookings.reschedule.approve');
+        Route::post('/bookings/{booking}/reject-reschedule', [\App\Http\Controllers\RescheduleController::class, 'rejectRequest'])->name('bookings.reschedule.reject');
+        Route::get('/reschedule/slots',                     [\App\Http\Controllers\RescheduleController::class, 'getAvailableSlots'])->name('reschedule.slots');
 
         // Credits
         Route::get('/credits',               [CreditController::class, 'index'])->name('credits');
@@ -54,7 +61,8 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::post('/demos/{demo}/convert',                  [\App\Http\Controllers\Admin\DemoBookingController::class, 'convert'])->name('demos.convert');
 
         // Reports
-        Route::get('/reports', [AdminController::class, 'reports'])->name('reports');
+        Route::get('/reports/export',                         [AdminController::class, 'exportReports'])->name('reports.export');
+        Route::get('/reports',                                [AdminController::class, 'reports'])->name('reports');
 
         // Leaves
         Route::get('/leaves',                                   [LeaveController::class, 'index'])->name('leaves');
@@ -94,6 +102,11 @@ Route::middleware(['auth', 'role.access:admin'])
         // Settings
         Route::get('/settings',   [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings',  [AdminController::class, 'saveSettings'])->name('settings.save');
+
+        // Credit Packages
+        Route::post('/credit-packages', [\App\Http\Controllers\Admin\CreditPackageController::class, 'store'])->name('credit-packages.store');
+        Route::put('/credit-packages/{creditPackage}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'update'])->name('credit-packages.update');
+        Route::delete('/credit-packages/{creditPackage}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'destroy'])->name('credit-packages.destroy');
 
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
