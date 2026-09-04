@@ -114,9 +114,7 @@ class StudentController extends Controller
         $isOwner = $booking->student_id === $student->id;
         $isGroupMember = $booking->student_group_id && $student->groups()->where('student_groups.id', $booking->student_group_id)->exists();
         
-        if (!$student || (!$isOwner && !$isGroupMember)) {
-            return back()->withErrors(['error' => 'Unauthorized']);
-        }
+        abort_if(!$student || (!$isOwner && !$isGroupMember), 403, 'Unauthorized access to reschedule this booking.');
 
         $request->validate([
             'reschedule_date' => 'required|date',

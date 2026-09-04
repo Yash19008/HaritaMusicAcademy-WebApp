@@ -43,14 +43,37 @@ class AdminController extends Controller
                          ->orderByDesc('class_bookings_count')
                          ->limit(3)->get();
 
-        // Chart data – last 6 months
+        // Chart data – last 6 months optimized queries
         $months = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i));
-        $chartLabels     = $months->map(fn ($m) => $m->format('M'))->values()->toArray();
-        $revenueData     = $months->map(fn ($m) => (int) Payment::whereYear('transaction_date', $m->year)->whereMonth('transaction_date', $m->month)->sum('amount'))->values()->toArray();
-        $studentsData    = $months->map(fn ($m) => Student::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count())->values()->toArray();
-        $teachersData    = $months->map(fn ($m) => Teacher::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count())->values()->toArray();
-        $instrumentData  = ['Vocal', 'Sitar', 'Violin', 'Flute', 'Tabla'];
-        $instrumentCount = array_map(fn ($i) => ClassBooking::where('instrument', $i)->count(), $instrumentData);
+        $chartLabels = $months->map(fn ($m) => $m->format('M'))->values()->toArray();
+        
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+        
+        $payments = Payment::where('transaction_date', '>=', $sixMonthsAgo)
+            ->selectRaw('YEAR(transaction_date) as year, MONTH(transaction_date) as month, SUM(amount) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            
+        $studentsGrp = Student::where('created_at', '>=', $sixMonthsAgo)
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            
+        $teachersGrp = Teacher::where('created_at', '>=', $sixMonthsAgo)
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            
+        $instrumentData = ['Vocal', 'Sitar', 'Violin', 'Flute', 'Tabla'];
+        $instrumentCounts = ClassBooking::whereIn('instrument', $instrumentData)
+            ->selectRaw('instrument, COUNT(id) as total')
+            ->groupBy('instrument')
+            ->pluck('total', 'instrument');
+            
+        $revenueData = $months->map(fn ($m) => (int) ($payments[$m->format('Y-m')]->total ?? 0))->values()->toArray();
+        $studentsData = $months->map(fn ($m) => (int) ($studentsGrp[$m->format('Y-m')]->total ?? 0))->values()->toArray();
+        $teachersData = $months->map(fn ($m) => (int) ($teachersGrp[$m->format('Y-m')]->total ?? 0))->values()->toArray();
+        $instrumentCount = array_map(fn ($i) => (int) ($instrumentCounts[$i] ?? 0), $instrumentData);
 
         $recentLeads = \App\Models\Payment::latest()->limit(5)->get();
 
@@ -68,7 +91,8 @@ class AdminController extends Controller
 
     public function students(): View
     {
-        $students = Student::with(['courses', 'teacher', 'groups'])->latest()->get();
+        $students = Student::select('id', 'name', 'email', 'phone', 'status', 'credits', 'enrolled_level', 'enrolled_format', 'teacher_id')
+            ->with(['courses', 'teacher', 'groups'])->latest()->get();
         $teachers = Teacher::select('id', 'name')->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
         $groups   = StudentGroup::with('members')->withCount('members')->get();
@@ -189,6 +213,10 @@ class AdminController extends Controller
 
     public function destroyStudent(Student $student): RedirectResponse
     {
+        if (ClassBooking::where('student_id', $student->id)->where('starts_at', '>=', now())->exists()) {
+            return back()->with('error', 'Cannot delete student: There are upcoming scheduled classes.');
+        }
+
         $user = $student->user;
         $student->delete();
         if ($user) {
@@ -244,6 +272,8 @@ class AdminController extends Controller
                 $errors[] = "Row missing email address.";
                 continue;
             }
+            $email = htmlspecialchars(trim($email), ENT_QUOTES, 'UTF-8');
+            
             if (Student::withTrashed()->where('email', $email)->exists()) {
                 $skipped++;
                 $errors[] = "Row ({$email}): Email already exists.";
@@ -253,29 +283,29 @@ class AdminController extends Controller
             // Resolve Course by name column
             $course_id = null;
             if (!empty($data['course'])) {
-                $course_id = $courses[strtolower($data['course'])]->id ?? null;
+                $course_id = $courses[strtolower(trim($data['course']))]->id ?? null;
             }
 
             // Resolve Teacher by name column
             $teacher_id = null;
             if (!empty($data['teacher'])) {
-                $teacher_id = $teachers[strtolower($data['teacher'])]->id ?? null;
+                $teacher_id = $teachers[strtolower(trim($data['teacher']))]->id ?? null;
             }
 
             try {
                 Student::create([
-                    'name'       => $data['name']       ?? 'Unknown',
+                    'name'       => htmlspecialchars(trim($data['name'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8'),
                     'email'      => $email,
-                    'phone'      => $data['phone']       ?? null,
+                    'phone'      => htmlspecialchars(trim($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
                     'course_id'  => $course_id,
                     'teacher_id' => $teacher_id,
-                    'status'     => strtolower($data['status'] ?? 'active'),
+                    'status'     => strtolower(trim($data['status'] ?? 'active')),
                     'credits'    => (int) ($data['credits'] ?? 0),
-                    'enrolled_level'  => $data['level']   ?? null,
-                    'referral_source' => $data['referral'] ?? null,
-                    'enrolled_format' => $data['format']  ?? 'Individual',
-                    'emergency_contact_name'  => $data['emergency_name'] ?? null,
-                    'emergency_contact_phone' => $data['emergency_phone'] ?? null,
+                    'enrolled_level'  => htmlspecialchars(trim($data['level'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    'referral_source' => htmlspecialchars(trim($data['referral'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    'enrolled_format' => htmlspecialchars(trim($data['format'] ?? 'Individual'), ENT_QUOTES, 'UTF-8'),
+                    'emergency_contact_name'  => htmlspecialchars(trim($data['emergency_name'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    'emergency_contact_phone' => htmlspecialchars(trim($data['emergency_phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
                 ]);
                 $imported++;
             } catch (\Throwable $e) {
@@ -1005,6 +1035,12 @@ class AdminController extends Controller
 
         // Also handle profile update
         if ($request->filled('my_name') || $request->filled('my_email')) {
+            $request->validate([
+                'my_name' => 'nullable|string|max:255',
+                'my_email' => 'nullable|email|max:255',
+                'my_password' => 'nullable|string|min:8'
+            ]);
+            
             $user = auth()->user();
             $user->name = $request->input('my_name', $user->name);
             $user->email = $request->input('my_email', $user->email);

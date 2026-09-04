@@ -11,7 +11,12 @@ class Student extends Model
 {
     use SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id', 'teacher_id', 'name', 'email', 'phone', 'enrolled_level', 
+        'course_id', 'referral_source', 'emergency_contact_name', 
+        'emergency_contact_phone', 'enrolled_format', 'credits', 'status', 
+        'joining_date', 'age', 'country', 'end_date', 'renewal_interest', 'intro_video'
+    ];
 
     public function courses()
     {
@@ -20,7 +25,7 @@ class Student extends Model
 
     public function getCourseAttribute()
     {
-        return $this->courses->first();
+        return $this->relationLoaded('courses') ? $this->courses->first() : $this->courses()->first();
     }
 
     public function user(): BelongsTo
