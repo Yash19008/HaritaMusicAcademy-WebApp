@@ -220,12 +220,13 @@ class BookingService
      */
     public function bookDemo(array $data, Teacher $teacher, Carbon $startsAt, Carbon $endsAt): \App\Models\DemoBooking
     {
-        return DB::transaction(function () use ($data, $teacher, $startsAt, $endsAt) {
+        // 1. Create booking inside transaction
+        $booking = DB::transaction(function () use ($data, $teacher, $startsAt, $endsAt) {
             if (!$this->isSlotAvailable($teacher, $startsAt, $endsAt)) {
                 throw new \Exception("The selected time slot is no longer available.");
             }
             
-            $booking = \App\Models\DemoBooking::create([
+            return \App\Models\DemoBooking::create([
                 'payment_id'    => $data['lead_id'] ?? null,
                 'student_name'  => $data['student_name'],
                 'email'         => $data['email'] ?? '',
@@ -236,24 +237,26 @@ class BookingService
                 'duration_minutes' => $startsAt->diffInMinutes($endsAt),
                 'status'        => 'scheduled',
             ]);
-            
-            $result = app(\App\Services\GoogleCalendarService::class)->createMeetEvent($booking);
-            
-            $booking->update([
-                'google_sync_status'  => $result->status,
-                'google_sync_message' => $result->message,
-                'google_event_id'     => $result->eventId,
-                'google_calendar_id'  => $result->eventId ? config('services.google.calendar_id', 'primary') : null,
-                'google_meet_link'    => $result->meetLink,
-                'google_event_payload'=> $result->payload,
-            ]);
-            
-            if ($result->status !== 'synced') {
-                Log::info('Google Calendar createMeetEvent (Demo) [' . $result->status . ']: ' . $result->message);
-            }
-            
-            return $booking;
         });
+        
+        // 2. Call external API outside of transaction
+        $result = app(\App\Services\GoogleCalendarService::class)->createMeetEvent($booking);
+        
+        // 3. Update booking with sync results
+        $booking->update([
+            'google_sync_status'  => $result->status,
+            'google_sync_message' => $result->message,
+            'google_event_id'     => $result->eventId,
+            'google_calendar_id'  => $result->eventId ? config('services.google.calendar_id', 'primary') : null,
+            'google_meet_link'    => $result->meetLink,
+            'google_event_payload'=> $result->payload,
+        ]);
+        
+        if ($result->status !== 'synced') {
+            Log::info('Google Calendar createMeetEvent (Demo) [' . $result->status . ']: ' . $result->message);
+        }
+        
+        return $booking;
     }
 
     /**

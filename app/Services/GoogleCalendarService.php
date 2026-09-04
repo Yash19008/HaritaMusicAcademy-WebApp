@@ -6,6 +6,7 @@ use App\Models\ClassBooking;
 use App\Models\DemoBooking;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -82,7 +83,7 @@ class GoogleCalendarService
                 ],
             ];
 
-            $response = Http::withToken($token)
+            $response = Http::timeout(10)->retry(2, 500)->withToken($token)
                 ->withQueryParameters([
                     'conferenceDataVersion' => 1,
                     'sendUpdates'           => config('services.google.send_updates', 'none'),
@@ -155,7 +156,7 @@ class GoogleCalendarService
                 ])),
             ];
 
-            $response = Http::withToken($token)
+            $response = Http::timeout(10)->retry(2, 500)->withToken($token)
                 ->withQueryParameters([
                     'sendUpdates' => config('services.google.send_updates', 'none'),
                 ])
@@ -195,7 +196,7 @@ class GoogleCalendarService
             $calendarId       = $impersonateEmail ? 'primary' : config('services.google.calendar_id', 'primary');
             $token            = $this->accessToken($impersonateEmail);
 
-            $response = Http::withToken($token)
+            $response = Http::timeout(10)->retry(2, 500)->withToken($token)
                 ->withQueryParameters([
                     'sendUpdates' => config('services.google.send_updates', 'none'),
                 ])
@@ -225,48 +226,52 @@ class GoogleCalendarService
             return $token;
         }
 
-        $json        = $this->serviceAccountJson();
-        $credentials = json_decode($json ?: '', true);
+        return Cache::remember('google_access_token_' . md5($impersonate ?? 'default'), 3500, function() use ($impersonate) {
+            $json        = $this->serviceAccountJson();
+            $credentials = json_decode($json ?: '', true);
 
-        if (! is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
-            return null;
-        }
-
-        $now    = time();
-        $header = $this->base64UrlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
-
-        $claimsPayload = [
-            'iss'   => $credentials['client_email'],
-            'scope' => self::SCOPE,
-            'aud'   => self::TOKEN_URL,
-            'iat'   => $now,
-            'exp'   => $now + 3600,
-        ];
-
-        if ($impersonate) {
-            $claimsPayload['sub'] = $impersonate;
-        }
-
-        $claims      = $this->base64UrlEncode(json_encode($claimsPayload));
-        $unsignedJwt = $header . '.' . $claims;
-
-        openssl_sign($unsignedJwt, $signature, $credentials['private_key'], 'sha256WithRSAEncryption');
-
-        $response = Http::asForm()->post(self::TOKEN_URL, [
-            'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-            'assertion'  => $unsignedJwt . '.' . $this->base64UrlEncode($signature),
-        ]);
-
-        if (! $response->successful()) {
-            Log::error('Google Service Account token error: ' . $response->body());
-            // If impersonation failed, retry without sub claim (use service account calendar directly)
-            if ($impersonate && str_contains($response->body(), 'invalid_grant')) {
-                return $this->accessToken(null);
+            if (! is_array($credentials) || empty($credentials['client_email']) || empty($credentials['private_key'])) {
+                return null;
             }
-            return null;
-        }
 
-        return $response->json('access_token');
+            $now    = time();
+            $header = $this->base64UrlEncode(json_encode(['alg' => 'RS256', 'typ' => 'JWT']));
+
+            $claimsPayload = [
+                'iss'   => $credentials['client_email'],
+                'scope' => self::SCOPE,
+                'aud'   => self::TOKEN_URL,
+                'iat'   => $now,
+                'exp'   => $now + 3600,
+            ];
+
+            if ($impersonate) {
+                $claimsPayload['sub'] = $impersonate;
+            }
+
+            $claims      = $this->base64UrlEncode(json_encode($claimsPayload));
+            $unsignedJwt = $header . '.' . $claims;
+
+            openssl_sign($unsignedJwt, $signature, $credentials['private_key'], 'sha256WithRSAEncryption');
+
+            $response = Http::timeout(10)->asForm()->post(self::TOKEN_URL, [
+                'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+                'assertion'  => $unsignedJwt . '.' . $this->base64UrlEncode($signature),
+            ]);
+
+            if (! $response->successful()) {
+                Log::error('Google Service Account token error: ' . $response->body());
+                // If impersonation failed, retry without sub claim (use service account calendar directly)
+                if ($impersonate && str_contains($response->body(), 'invalid_grant')) {
+                    // Temporarily bypass cache for fallback
+                    Cache::forget('google_access_token_' . md5('default'));
+                    return $this->accessToken(null);
+                }
+                return null;
+            }
+
+            return $response->json('access_token');
+        });
     }
 
     private function base64UrlEncode(string $value): string
@@ -278,13 +283,16 @@ class GoogleCalendarService
     {
         $path = config('services.google.service_account_path');
 
-        // Resolve relative paths relative to project root
-        if ($path && ! str_starts_with($path, '/') && ! str_starts_with($path, 'C:')) {
-            $path = base_path($path);
-        }
+        if ($path) {
+            // Resolve relative paths relative to project root safely
+            if (! str_starts_with($path, '/') && ! str_starts_with($path, 'C:') && ! str_starts_with($path, 'D:')) {
+                $path = base_path($path);
+            }
 
-        if ($path && is_readable($path)) {
-            return file_get_contents($path) ?: null;
+            $resolved = realpath($path);
+            if ($resolved && is_readable($resolved) && str_starts_with($resolved, base_path())) {
+                return file_get_contents($resolved) ?: null;
+            }
         }
 
         return config('services.google.service_account_json');
