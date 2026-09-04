@@ -37,11 +37,21 @@ class GoogleController extends Controller
             return redirect()->route('login')->withErrors(['email' => 'This Google account is not registered in our system. Please contact the administrator.']);
         }
 
-        // Update google_id and avatar
-        $user->update([
-            'google_id' => $googleUser->getId(),
-            'avatar' => $googleUser->getAvatar(),
-        ]);
+        // Update google_id and avatar only if changed
+        $avatarUrl = filter_var($googleUser->getAvatar(), FILTER_VALIDATE_URL) ? $googleUser->getAvatar() : null;
+        $changes = [];
+        
+        if ($user->google_id !== $googleUser->getId()) {
+            $changes['google_id'] = $googleUser->getId();
+        }
+        
+        if ($user->avatar !== $avatarUrl) {
+            $changes['avatar'] = $avatarUrl;
+        }
+        
+        if (!empty($changes)) {
+            $user->update($changes);
+        }
 
         // Perform active status checks identical to standard login
         if ($user->status !== 'active') {

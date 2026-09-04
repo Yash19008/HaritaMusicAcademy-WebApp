@@ -165,7 +165,12 @@
 
             <div class="form-group mb-3">
               <label class="form-label" for="userPassword">Login Password</label>
-              <input type="text" id="userPassword" class="form-control" placeholder="Minimum 6 characters" required>
+              <input type="text" id="userPassword" class="form-control" placeholder="Minimum 8 characters" required>
+            </div>
+
+            <div class="form-group mb-3" id="passwordConfirmGroup">
+              <label class="form-label" for="userPasswordConfirmation">Confirm Password</label>
+              <input type="text" id="userPasswordConfirmation" class="form-control" placeholder="Re-type password">
             </div>
 
             <div class="form-group mb-3">
@@ -403,6 +408,7 @@
       const name = document.getElementById("userName").value.trim();
       const email = document.getElementById("userEmail").value.trim().toLowerCase();
       const password = document.getElementById("userPassword").value;
+      const password_confirmation = document.getElementById("userPasswordConfirmation").value;
       const role = document.getElementById("userRole").value;
       const status = document.getElementById("userStatus").value.toLowerCase();
       
@@ -410,13 +416,19 @@
         const url = id ? `/admin/users/${id}` : '{{ route("admin.users.store") }}';
         const method = id ? 'PUT' : 'POST';
         
+        const payload = { name, email, role, status };
+        if (password) {
+          payload.password = password;
+          payload.password_confirmation = password_confirmation;
+        }
+
         const response = await fetch(url, {
           method: method,
           headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': '{{ csrf_token() }}'
           },
-          body: JSON.stringify({ name, email, password, role, status })
+          body: JSON.stringify(payload)
         });
 
         if (response.ok) {
@@ -451,12 +463,21 @@
     function resetUserForm() {
       document.getElementById("userAccountForm").reset();
       document.getElementById("formUserId").value = "";
+      document.getElementById("userName").value = "";
+      document.getElementById("userEmail").value = "";
+      document.getElementById("userPassword").value = "";
+      document.getElementById("userPassword").removeAttribute("required");
+      document.getElementById("userPasswordConfirmation").value = "";
+      document.getElementById("passwordConfirmGroup").style.display = "block";
+      document.getElementById("userRole").value = "Admin";
+      document.getElementById("userStatus").value = "Active";
+      
       document.getElementById("userFormTitle").textContent = "Add New System User";
       document.getElementById("btnSaveUser").textContent = "Create Account";
       document.getElementById("btnCancelEdit").style.display = "none";
+      document.getElementById("userPassword").setAttribute("required", "required");
     }
 
-    // --- TAB 2: ROLE PERMISSIONS MATRIX FLOW ---
     function renderRoleList() {
       const container = document.getElementById("roleListContainer");
       container.innerHTML = "";

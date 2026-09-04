@@ -37,7 +37,7 @@ class ClassReminderNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
     {
-        $tz = config('app.timezone', 'UTC');
+        $tz = config('app.timezone', 'Asia/Kolkata');
         if ($notifiable->hasRole('student') && $notifiable->student && $notifiable->student->timezone) {
             $tz = $notifiable->student->timezone;
         } elseif ($notifiable->hasRole('teacher') && $notifiable->teacher && $notifiable->teacher->timezone) {
