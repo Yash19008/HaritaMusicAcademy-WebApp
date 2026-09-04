@@ -6,10 +6,11 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use App\Models\ClassBooking;
+use Illuminate\Queue\SerializesModels;
 
 class ClassReminderNotification extends Notification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, SerializesModels;
 
     public $booking;
 
@@ -36,7 +37,7 @@ class ClassReminderNotification extends Notification implements ShouldQueue
      */
     public function toMail(object $notifiable): \Illuminate\Notifications\Messages\MailMessage
     {
-        $tz = 'Asia/Kolkata';
+        $tz = config('app.timezone', 'UTC');
         if ($notifiable->hasRole('student') && $notifiable->student && $notifiable->student->timezone) {
             $tz = $notifiable->student->timezone;
         } elseif ($notifiable->hasRole('teacher') && $notifiable->teacher && $notifiable->teacher->timezone) {
