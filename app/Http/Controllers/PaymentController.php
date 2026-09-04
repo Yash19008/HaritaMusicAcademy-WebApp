@@ -138,7 +138,7 @@ class PaymentController extends Controller
 
             // Send confirmation email
             try {
-                Mail::to($payment->email)->send(new PaymentConfirmationMail($payment));
+                Mail::to($payment->email)->queue(new PaymentConfirmationMail($payment));
             } catch (Throwable $e) {
                 Log::error("Failed to send payment confirmation email for Payment #{$payment->id}: " . $e->getMessage());
             }

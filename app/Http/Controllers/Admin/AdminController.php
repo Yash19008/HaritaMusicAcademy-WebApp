@@ -534,7 +534,13 @@ class AdminController extends Controller
 
     public function updateLead(Request $request, Payment $payment): RedirectResponse
     {
-        $payment->update($request->only(['status', 'payment_mode', 'amount', 'transaction_date']));
+        $data = $request->validate([
+            'status'           => ['nullable', 'in:pending,confirmed,cancelled'],
+            'payment_mode'     => ['nullable', 'string', 'max:50'],
+            'amount'           => ['nullable', 'numeric', 'min:0', 'max:9999999'],
+            'transaction_date' => ['nullable', 'date'],
+        ]);
+        $payment->update($data);
         return back()->with('success', 'Lead updated.');
     }
 

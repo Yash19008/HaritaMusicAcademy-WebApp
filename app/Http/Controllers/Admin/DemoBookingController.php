@@ -21,7 +21,7 @@ class DemoBookingController extends Controller
         $converted = $demos->where('status', 'converted')->count();
         $cancelled = $demos->where('status', 'cancelled')->count();
 
-        $teachers = Teacher::all();
+        $teachers = Teacher::with('user:id,name')->select('id', 'user_id')->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
 
         return view('admin.demos.index', compact('demos', 'scheduled', 'completed', 'converted', 'cancelled', 'teachers', 'courses'));
@@ -122,50 +122,57 @@ class DemoBookingController extends Controller
             return back()->with('error', 'No active course found. Please create a course first.');
         }
 
-        // Generate random password
-        $password = \Str::random(10);
+        $user = null;
+        $password = '';
 
-        // Create User account
-        $user = \App\Models\User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => \Hash::make($password),
-            'status' => 'active',
-        ]);
+        \Illuminate\Support\Facades\DB::transaction(function () use ($data, $credits, $course, $demo, &$user, &$password) {
+            // Generate random password
+            $password = \Str::random(10);
 
-        // Assign student role
-        $user->assignRole('student');
-
-        // Create student
-        $student = Student::create([
-            'user_id' => $user->id,
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'],
-            'enrolled_level' => $data['enrolled_level'],
-            'course_id' => $course->id,
-            'teacher_id' => $data['teacher_id'],
-            'credits' => $credits,
-            'status' => 'active',
-            'joining_date' => today(),
-            'enrolled_format' => 'Individual',
-        ]);
-
-        // Update demo booking status to converted
-        $demo->update([
-            'status' => 'converted',
-            'converted_student_id' => $student->id,
-        ]);
-
-        // If there's a linked payment/lead, update that too
-        if ($demo->payment_id) {
-            Payment::where('id', $demo->payment_id)->update([
-                'amount' => $data['amount_paid'],
-                'payment_mode' => $data['payment_mode'],
-                'status' => 'converted',
-                'transaction_date' => today(),
+            // Create User account
+            $user = \App\Models\User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => \Hash::make($password),
+                'status' => 'active',
             ]);
-        }
+
+            // Assign student role
+            $user->assignRole('student');
+
+            // Create student
+            $student = Student::create([
+                'user_id' => $user->id,
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'phone' => $data['phone'],
+                'enrolled_level' => $data['enrolled_level'],
+                'course_id' => $course->id,
+                'teacher_id' => $data['teacher_id'],
+                'credits' => $credits,
+                'status' => 'active',
+                'joining_date' => today(),
+                'enrolled_format' => 'Individual',
+            ]);
+
+            // Update demo booking status to converted
+            $demo->update([
+                'status' => 'converted',
+                'converted_student_id' => $student->id,
+            ]);
+
+            // If there's a linked payment/lead, update that too
+            if ($demo->payment_id) {
+                $payment = \App\Models\Payment::find($demo->payment_id);
+                if ($payment) {
+                    $payment->update([
+                        'status' => 'confirmed',
+                        'amount' => $data['amount_paid'],
+                        'payment_mode' => $data['payment_mode']
+                    ]);
+                }
+            }
+        });
 
         // Send credentials email
         try {
