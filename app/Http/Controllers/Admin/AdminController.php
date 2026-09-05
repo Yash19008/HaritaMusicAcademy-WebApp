@@ -683,6 +683,11 @@ class AdminController extends Controller
 
     public function reports(Request $request): View
     {
+        $request->validate([
+            'start_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
 
@@ -708,10 +713,9 @@ class AdminController extends Controller
         if ($startDate && $endDate) {
             $pastBookingsQuery->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
         }
-        $pastBookings     = $pastBookingsQuery->get();
         
-        $total            = $pastBookings->count();
-        $completed        = $pastBookings->where('status', 'completed')->count();
+        $total            = $pastBookingsQuery->count();
+        $completed        = (clone $pastBookingsQuery)->where('status', 'completed')->count();
         $showRate         = $total > 0 ? round(($completed / $total) * 100, 1) : 0;
 
         $leavesTotal      = TeacherLeave::count();
@@ -720,19 +724,43 @@ class AdminController extends Controller
 
         $months           = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i));
         $labels           = $months->map(fn ($m) => $m->format('M'))->values()->toArray();
-        $signupsData      = $months->map(fn ($m) => Student::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count())->values()->toArray();
-        $demosData        = $months->map(fn ($m) => DemoBooking::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->count())->values()->toArray();
-        $conversionData   = $months->map(fn ($m) => DemoBooking::whereYear('created_at', $m->year)->whereMonth('created_at', $m->month)->where('status', 'converted')->count())->values()->toArray();
+        
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+        
+        $studentsGrp = Student::where('created_at', '>=', $sixMonthsAgo)
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            
+        $demosGrp = DemoBooking::where('created_at', '>=', $sixMonthsAgo)
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            
+        $convertedGrp = DemoBooking::where('created_at', '>=', $sixMonthsAgo)->where('status', 'converted')
+            ->selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, COUNT(id) as total')
+            ->groupBy('year', 'month')
+            ->get()->keyBy(fn($item) => $item->year . '-' . str_pad($item->month, 2, '0', STR_PAD_LEFT));
+
+        $signupsData      = $months->map(fn ($m) => (int) ($studentsGrp[$m->format('Y-m')]->total ?? 0))->values()->toArray();
+        $demosData        = $months->map(fn ($m) => (int) ($demosGrp[$m->format('Y-m')]->total ?? 0))->values()->toArray();
+        $conversionData   = $months->map(fn ($m) => (int) ($convertedGrp[$m->format('Y-m')]->total ?? 0))->values()->toArray();
 
         $instruments      = \App\Models\Course::where('status', 'active')->pluck('name')->toArray();
         
+        $hoursQuery = ClassBooking::whereIn('instrument', $instruments)
+            ->selectRaw('instrument, SUM(duration_minutes)/60 as hours')
+            ->groupBy('instrument');
+            
+        if ($startDate && $endDate) {
+            $hoursQuery->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
+        }
+        
+        $hoursPlucked = $hoursQuery->pluck('hours', 'instrument');
+        
         $hoursData = [];
         foreach($instruments as $i) {
-            $q = ClassBooking::where('instrument', $i);
-            if ($startDate && $endDate) {
-                $q->whereBetween('starts_at', [$startDate, $endDate . ' 23:59:59']);
-            }
-            $hoursData[] = $q->sum('duration_minutes') / 60;
+            $hoursData[] = (float)($hoursPlucked[$i] ?? 0);
         }
 
         $historyQuery = ClassBooking::with(['student.user', 'teacher.user', 'studentGroup'])->latest();
