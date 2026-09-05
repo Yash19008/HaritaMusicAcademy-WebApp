@@ -1055,6 +1055,14 @@ class AdminController extends Controller
             'demo_price_inr', 'demo_price_intl',
         ];
 
+        $request->validate([
+            'contact_email' => ['nullable', 'email'],
+            'support_phone' => ['nullable', 'string', 'max:20'],
+            'opportunity_teacher_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'demo_price_inr' => ['nullable', 'numeric', 'min:0'],
+            'demo_price_intl' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
         foreach ($allowed as $key) {
             if ($request->has($key)) {
                 Setting::set($key, $request->input($key));
@@ -1063,17 +1071,18 @@ class AdminController extends Controller
 
         // Also handle profile update
         if ($request->filled('my_name') || $request->filled('my_email')) {
+            $user = auth()->user();
             $request->validate([
-                'my_name' => 'nullable|string|max:255',
-                'my_email' => 'nullable|email|max:255',
-                'my_password' => 'nullable|string|min:8'
+                'my_name' => ['nullable', 'string', 'max:255'],
+                'my_email' => ['nullable', 'email', 'max:255', 'unique:users,email,' . $user->id],
+                'current_password' => ['required_with:my_password', 'current_password'],
+                'my_password' => ['nullable', 'string', 'min:8', 'confirmed']
             ]);
             
-            $user = auth()->user();
             $user->name = $request->input('my_name', $user->name);
             $user->email = $request->input('my_email', $user->email);
             if ($request->filled('my_password')) {
-                $user->password = Hash::make($request->input('my_password'));
+                $user->password = \Illuminate\Support\Facades\Hash::make($request->input('my_password'));
             }
             $user->save();
         }

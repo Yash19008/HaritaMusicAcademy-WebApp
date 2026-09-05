@@ -232,9 +232,19 @@ class StudentController extends Controller
     public function saveSettings(Request $request): RedirectResponse
     {
         $user = auth()->user();
-        $user->name = $request->input('name', $user->name);
+        
+        $request->validate([
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'current_password' => ['required_with:password', 'current_password'],
+            'password'         => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->name = $request->input('name');
+        $user->email = $request->input('email');
+        
         if ($request->filled('password')) {
-            $user->password = Hash::make($request->input('password'));
+            $user->password = \Illuminate\Support\Facades\Hash::make($request->input('password'));
         }
         $user->save();
 

@@ -13,13 +13,7 @@ Route::post('/payment/verify',       [\App\Http\Controllers\PaymentController::c
 // Webhook: CSRF excluded via VerifyCsrfToken middleware
 Route::post('/payment/webhook',      [\App\Http\Controllers\PaymentController::class, 'webhook'])->name('payment.webhook');
 
-// TEMPORARY LOGOUT FOR DEV
-Route::get('/force-logout', function () {
-    auth()->logout();
-    session()->invalidate();
-    session()->regenerateToken();
-    return redirect('/');
-});
+// Debug routes removed for production security
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 require __DIR__ . '/web/auth.php';

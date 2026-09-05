@@ -14,32 +14,42 @@
           <div class="card-header">
             <h4 class="font-semibold">My Account Credentials</h4>
           </div>
-          <form id="userAccountForm" onsubmit="saveUserAccount(event)" class="card-body">
+          <form method="POST" action="{{ route('student.settings.save') }}" class="card-body">
+            @csrf
             <div class="grid grid-2 gap-3">
               <div class="form-group">
                 <label class="form-label" for="usrName">My Name</label>
-                <input type="text" id="usrName" class="form-control" required>
+                <input type="text" id="usrName" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
               </div>
               <div class="form-group">
                 <label class="form-label" for="usrEmail">My Email Address</label>
-                <input type="email" id="usrEmail" class="form-control" required>
+                <input type="email" id="usrEmail" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
               </div>
             </div>
+            
+            <hr class="my-4" style="border-top: 1px solid var(--border-color); margin: 1.5rem 0;">
+            <h5 class="font-semibold mb-3">Change Password</h5>
+            
+            <div class="form-group mb-3" style="max-width: 400px;">
+              <label class="form-label" for="usrCurrentPassword">Current Password <small class="text-muted" style="font-weight:normal;">(Required if changing password)</small></label>
+              <input type="password" id="usrCurrentPassword" name="current_password" class="form-control" placeholder="Enter current password">
+            </div>
+
             <div class="grid grid-2 gap-3">
               <div class="form-group">
                 <label class="form-label" for="usrPassword">New Password</label>
-                <input type="password" id="usrPassword" class="form-control" placeholder="Leave blank to keep unchanged">
+                <input type="password" id="usrPassword" name="password" class="form-control" placeholder="Leave blank to keep unchanged">
               </div>
               <div class="form-group">
                 <label class="form-label" for="usrPasswordConfirm">Confirm Password</label>
-                <input type="password" id="usrPasswordConfirm" class="form-control" placeholder="Leave blank to keep unchanged">
+                <input type="password" id="usrPasswordConfirm" name="password_confirmation" class="form-control" placeholder="Leave blank to keep unchanged">
               </div>
             </div>
 
             <!-- Teacher-specific Fields -->
             
 
-            <button type="submit" class="btn btn-primary">Update Profile Settings</button>
+            <button type="submit" class="btn btn-primary mt-3">Update Profile Settings</button>
           </form>
         </div>
       </div>
