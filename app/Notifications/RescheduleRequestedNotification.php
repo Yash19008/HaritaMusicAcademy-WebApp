@@ -38,6 +38,6 @@ class RescheduleRequestedNotification extends Notification implements ShouldQueu
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['title' => 'Reschedule Requested', 'message' => 'A reschedule was requested for ' . $this->booking->instrument . '.', 'booking_id' => $this->booking->id, 'icon' => '🔄'];
+        return ['title' => 'Reschedule Requested', 'message' => 'A reschedule was requested for ' . $this->booking->instrument . '.', 'booking_id' => $this->booking->id, 'url' => '/admin/class-booking', 'icon' => '🔄'];
     }
 }

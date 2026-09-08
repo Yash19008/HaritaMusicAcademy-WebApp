@@ -1,234 +1,303 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>@yield('title', 'Harita Music Academy')</title>
-  <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}?v=1.2">
-  <link rel="stylesheet" href="{{ asset('admin-assets/css/dashboard-layout.css') }}">
-  @stack('styles')
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Harita Music Academy')</title>
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/style.css') }}?v=1.2">
+    <link rel="stylesheet" href="{{ asset('admin-assets/css/dashboard-layout.css') }}">
+    @stack('styles')
 </head>
+
 <body>
-  <!-- PRELOADER -->
-  <div id="preloader" class="preloader-overlay">
-    <div class="preloader-content">
-      <img src="{{ asset('admin-assets/assets/logo.png') }}" class="preloader-logo" alt="Harita Logo">
-      <div class="preloader-spinner"></div>
+    <!-- PRELOADER -->
+    <div id="preloader" class="preloader-overlay">
+        <div class="preloader-content">
+            <img src="{{ asset('admin-assets/assets/logo.png') }}" class="preloader-logo" alt="Harita Logo">
+            <div class="preloader-spinner"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="app-container">
-    @include('layouts.main.sidebar')
-    @include('layouts.main.header')
+    <div class="app-container">
+        @include('layouts.main.sidebar')
+        @include('layouts.main.header')
 
-    <main class="main-content">
-      <!-- Success/Error Messages -->
-      @if(session('success'))
-        <div class="alert alert-success" style="margin-bottom: 1rem; padding: 1rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 0.375rem;">
-          <strong>✓</strong> {{ session('success') }}
-        </div>
-      @endif
+        <main class="main-content">
+            <!-- Success/Error Messages -->
+            @if (session('success'))
+                <div class="alert alert-success"
+                    style="margin-bottom: 1rem; padding: 1rem; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 0.375rem;">
+                    <strong>✓</strong> {{ session('success') }}
+                </div>
+            @endif
 
-      @if(session('error'))
-        <div class="alert alert-danger" style="margin-bottom: 1rem; padding: 1rem; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem;">
-          <strong>×</strong> {{ session('error') }}
-        </div>
-      @endif
+            @if (session('error'))
+                <div class="alert alert-danger"
+                    style="margin-bottom: 1rem; padding: 1rem; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem;">
+                    <strong>×</strong> {{ session('error') }}
+                </div>
+            @endif
 
-      @if($errors->any())
-        <div class="alert alert-danger" style="margin-bottom: 1rem; padding: 1rem; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem;">
-          <strong>Validation Errors:</strong>
-          <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
-            @foreach($errors->all() as $error)
-              <li>{{ $error }}</li>
-            @endforeach
-          </ul>
-        </div>
-      @endif
+            @if ($errors->any())
+                <div class="alert alert-danger"
+                    style="margin-bottom: 1rem; padding: 1rem; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem;">
+                    <strong>Validation Errors:</strong>
+                    <ul style="margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-      @yield('content')
+            @yield('content')
 
-      <div style="margin-top: auto; padding-top: 2rem; padding-bottom: 0.5rem; text-align: right; font-size: 0.85rem;">
-        <a href="{{ url('/privacy') }}" style="color: var(--text-muted, #6c757d); text-decoration: none; font-weight: 500;">Privacy Policy</a>
-      </div>
-    </main>
-  </div>
-
-  @stack('modals')
-
-  @if(auth()->check() && auth()->user()->hasRole('teacher'))
-  <!-- OPPORTUNITY POPUP (Hidden by default) -->
-  <div id="opportunity-popup" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; color: white;">
-    <div style="background: #fff; color: #333; padding: 2rem; border-radius: 12px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-      <h2 style="color: #2a9d8f; margin-bottom: 0.5rem;">🎉 New Class Opportunity!</h2>
-      <p style="font-size: 1.1rem; margin-bottom: 1rem;">Are you available to cover this class?</p>
-      
-      <div style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left;">
-        <strong>Subject:</strong> <span id="opp-subject"></span><br>
-        <strong>Date:</strong> <span id="opp-date"></span><br>
-        <strong>Time:</strong> <span id="opp-time"></span><br>
-        <strong>Bonus Reward:</strong> <span style="color: #2a9d8f; font-weight: bold;">&#8377;<span id="opp-bonus"></span></span>
-      </div>
-
-      <div style="display: flex; gap: 1rem; justify-content: center;">
-        <button id="opp-reject" style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #adb5bd; color: white; font-weight: bold; cursor: pointer;">Reject</button>
-        <button id="opp-accept" style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #2a9d8f; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem;">Accept Class</button>
-      </div>
+            <footer class="footer" style="margin-top: auto;">
+                <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
+                        target="_blank">Sitesoch</a> | <a id="policyLink" href="javascript:void(0)" onclick="openPrivacyModal()" style="font-weight: 600; cursor: pointer;">Privacy Policy</a></p>
+            </footer>
+        </main>
     </div>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        let opportunityPolling;
-        let currentOppId = null;
+    @stack('modals')
 
-        function checkOpportunity() {
-            if (document.getElementById('opportunity-popup').style.display === 'flex') return;
+    @if (auth()->check() && auth()->user()->hasRole('teacher'))
+        <!-- OPPORTUNITY POPUP (Hidden by default) -->
+        <div id="opportunity-popup"
+            style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; color: white;">
+            <div
+                style="background: #fff; color: #333; padding: 2rem; border-radius: 12px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+                <h2 style="color: #2a9d8f; margin-bottom: 0.5rem;">🎉 New Class Opportunity!</h2>
+                <p style="font-size: 1.1rem; margin-bottom: 1rem;">Are you available to cover this class?</p>
 
-            fetch('{{ route("teacher.opportunities.current") }}')
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.id) {
-                        showOpportunity(data);
+                <div
+                    style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left;">
+                    <strong>Subject:</strong> <span id="opp-subject"></span><br>
+                    <strong>Date:</strong> <span id="opp-date"></span><br>
+                    <strong>Time:</strong> <span id="opp-time"></span><br>
+                    <strong>Bonus Reward:</strong> <span style="color: #2a9d8f; font-weight: bold;">&#8377;<span
+                            id="opp-bonus"></span></span>
+                </div>
+
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="opp-reject"
+                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #adb5bd; color: white; font-weight: bold; cursor: pointer;">Reject</button>
+                    <button id="opp-accept"
+                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #2a9d8f; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem;">Accept
+                        Class</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                let opportunityPolling;
+                let currentOppId = null;
+
+                function checkOpportunity() {
+                    if (document.getElementById('opportunity-popup').style.display === 'flex') return;
+
+                    fetch('{{ route('teacher.opportunities.current') }}')
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data && data.id) {
+                                showOpportunity(data);
+                            }
+                        })
+                        .catch(err => console.error(err));
+                }
+
+                function showOpportunity(data) {
+                    currentOppId = data.id;
+                    document.getElementById('opp-subject').innerText = data.subject;
+                    document.getElementById('opp-date').innerText = data.date;
+                    document.getElementById('opp-time').innerText = data.time;
+                    document.getElementById('opp-bonus').innerText = data.bonus;
+
+                    document.getElementById('opportunity-popup').style.display = 'flex';
+                }
+
+                function closePopup() {
+                    document.getElementById('opportunity-popup').style.display = 'none';
+                    currentOppId = null;
+                }
+
+                document.getElementById('opp-accept').addEventListener('click', function() {
+                    if (!currentOppId) return;
+                    const btn = this;
+                    btn.innerText = 'Accepting...';
+                    btn.disabled = true;
+
+                    fetch(`/teacher/opportunities/${currentOppId}/accept`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content'),
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            closePopup();
+                            btn.innerText = 'Accept Class';
+                            btn.disabled = false;
+                            if (data.success) {
+                                alert(
+                                    'Success! The class has been assigned to you. Google Calendar updated.');
+                                window.location.reload();
+                            } else {
+                                alert(data.message || 'Someone else already accepted this opportunity.');
+                            }
+                        })
+                        .catch(err => {
+                            btn.innerText = 'Accept Class';
+                            btn.disabled = false;
+                            closePopup();
+                        });
+                });
+
+                document.getElementById('opp-reject').addEventListener('click', function() {
+                    if (!currentOppId) return;
+                    fetch(`/teacher/opportunities/${currentOppId}/reject`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                .getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    });
+                    closePopup();
+                });
+
+                // Poll every 5 seconds
+                opportunityPolling = setInterval(checkOpportunity, 5000);
+            });
+        </script>
+    @endif
+
+    @if (auth()->check() &&
+            auth()->user()->hasRole('student') &&
+            auth()->user()->student &&
+            auth()->user()->student->credits <= 2 &&
+            is_null(auth()->user()->student->renewal_interest))
+        <div id="renewal-popup" class="modal-overlay"
+            style="display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999;">
+            <div class="modal-content"
+                style="background: white; padding: 2rem; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h2 style="margin-bottom: 1rem; color: #dc2626;">Low Credits Alert!</h2>
+                <p style="margin-bottom: 1.5rem; color: #4b5563; font-size: 1.1rem;">
+                    You have only <strong>{{ auth()->user()->student->credits }} classes left!</strong><br><br>
+                    Are you interested in purchasing a new package or enrolling in another course?
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center;">
+                    <button id="renewal-yes" class="btn btn-primary" style="flex: 1;">Yes, I'm interested!</button>
+                    <button id="renewal-no" class="btn btn-secondary" style="flex: 1;">No, thanks</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                function submitRenewalInterest(interest) {
+                    const btnYes = document.getElementById('renewal-yes');
+                    const btnNo = document.getElementById('renewal-no');
+
+                    if (interest === 'interested') {
+                        btnYes.innerText = 'Submitting...';
+                        btnYes.disabled = true;
+                        btnNo.disabled = true;
+                    } else {
+                        btnNo.innerText = 'Submitting...';
+                        btnYes.disabled = true;
+                        btnNo.disabled = true;
                     }
-                })
-                .catch(err => console.error(err));
-        }
 
-        function showOpportunity(data) {
-            currentOppId = data.id;
-            document.getElementById('opp-subject').innerText = data.subject;
-            document.getElementById('opp-date').innerText = data.date;
-            document.getElementById('opp-time').innerText = data.time;
-            document.getElementById('opp-bonus').innerText = data.bonus;
-            
-            document.getElementById('opportunity-popup').style.display = 'flex';
-        }
-
-        function closePopup() {
-            document.getElementById('opportunity-popup').style.display = 'none';
-            currentOppId = null;
-        }
-
-        document.getElementById('opp-accept').addEventListener('click', function() {
-            if (!currentOppId) return;
-            const btn = this;
-            btn.innerText = 'Accepting...';
-            btn.disabled = true;
-
-            fetch(`/teacher/opportunities/${currentOppId}/accept`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
+                    fetch('{{ route('student.renewal-interest.submit') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                                    'content'),
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                interest: interest
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.success) {
+                                if (interest === 'interested') {
+                                    alert(
+                                        'Thank you! Our admin team has been notified and will contact you shortly.');
+                                }
+                                document.getElementById('renewal-popup').style.display = 'none';
+                            }
+                        })
+                        .catch(err => {
+                            console.error(err);
+                            document.getElementById('renewal-popup').style.display = 'none';
+                        });
                 }
-            })
-            .then(res => res.json())
-            .then(data => {
-                closePopup();
-                btn.innerText = 'Accept Class';
-                btn.disabled = false;
-                if (data.success) {
-                    alert('Success! The class has been assigned to you. Google Calendar updated.');
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Someone else already accepted this opportunity.');
-                }
-            })
-            .catch(err => {
-                btn.innerText = 'Accept Class';
-                btn.disabled = false;
-                closePopup();
+
+                document.getElementById('renewal-yes').addEventListener('click', function() {
+                    submitRenewalInterest('interested');
+                });
+
+                document.getElementById('renewal-no').addEventListener('click', function() {
+                    submitRenewalInterest('declined');
+                });
             });
+        </script>
+    @endif
+
+    <!-- PRIVACY POLICY MODAL -->
+    <div id="privacy-modal" class="modal-overlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 99999;">
+        <div class="modal-content" style="background: white; padding: 2rem 2rem 1.5rem; border-radius: 16px; max-width: 680px; width: 94%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;">
+            <button onclick="closePrivacyModal()" style="position: sticky; float: right; top: 0; background: transparent; border: none; font-size: 1.6rem; cursor: pointer; color: #9ca3af; line-height: 1;">&times;</button>
+            <div id="privacy-modal-body" style="font-size: 0.93rem; line-height: 1.7; color: #374151;"></div>
+            <div style="text-align: right; margin-top: 1.5rem; border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+                <button onclick="closePrivacyModal()" class="btn btn-primary" style="padding: 0.5rem 1.75rem;">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var POLICY_STUDENT = `<h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Student Policy</h4><ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;"><li style="margin-bottom:0.75rem;"><strong>Acceptance of Academy Policies</strong>: By registering with Harita Music Academy, every student agrees to comply with all Academy policies, guidelines, and future updates. Continued use of Academy services constitutes acceptance of these policies.</li><li style="margin-bottom:0.75rem;"><strong>Student Eligibility</strong>: Students must provide accurate personal information during registration. Any false or misleading information may result in account suspension or termination.</li><li style="margin-bottom:0.75rem;"><strong>Respectful Behaviour</strong>: Every student is expected to maintain courtesy, respect, and professionalism towards teachers, Academy staff, and fellow students at all times.</li><li style="margin-bottom:0.75rem;"><strong>Zero Tolerance for Misconduct</strong>: Abusive language, harassment, threats, bullying, discrimination, inappropriate behaviour, or any action that disrupts the learning environment will not be tolerated.</li><li style="margin-bottom:0.75rem;"><strong>Professional Classroom Etiquette</strong>: Students should attend classes with proper discipline, remain attentive, avoid unnecessary interruptions, and contribute positively to the learning environment.</li><li style="margin-bottom:0.75rem;"><strong>Attendance</strong>: Regular attendance is essential for consistent progress. Students are responsible for attending every scheduled class on time.</li><li style="margin-bottom:0.75rem;"><strong>Punctuality</strong>: Students are advised to join the class at least 5 minutes before the scheduled time. Late entry may reduce the effective learning duration and repeated delays may affect learning progress.</li><li style="margin-bottom:0.75rem;"><strong>Class Cancellation &amp; Rescheduling</strong>: Class cancellation or rescheduling requests must be submitted at least 10 hours before the scheduled class. Requests received after this period will not be accepted.</li><li style="margin-bottom:0.75rem;"><strong>No Show Policy</strong>: Failure to attend a scheduled class without prior notice will be recorded as a No Show. The class credit will be considered consumed and no refund, replacement, or rescheduling will be provided.</li><li style="margin-bottom:0.75rem;"><strong>Class Credits</strong>: Class credits are personal, non-transferable, and cannot be exchanged for cash. Credits remain valid only within the purchased package validity.</li><li style="margin-bottom:0.75rem;"><strong>Refund Policy</strong>: Course fees, class credits, and purchased packages are generally non-refundable unless specifically approved under the Academy's official Refund Policy.</li><li style="margin-bottom:0.75rem;"><strong>Payment Responsibility</strong>: Students are responsible for ensuring timely payment of all applicable fees. Access to Academy services may be restricted until outstanding payments are cleared.</li><li style="margin-bottom:0.75rem;"><strong>Demo Class Policy</strong>: Demo classes are intended solely for evaluation purposes and are governed by the Academy's demo class guidelines.</li><li style="margin-bottom:0.75rem;"><strong>Learning Environment</strong>: Students must attend classes from a quiet, distraction-free environment with a stable internet connection, functional microphone, and suitable learning setup.</li><li style="margin-bottom:0.75rem;"><strong>Recording &amp; Copyright</strong>: Recording, downloading, sharing, reproducing, or distributing any Academy class, study material, or digital content without prior written permission is strictly prohibited.</li><li style="margin-bottom:0.75rem;"><strong>Study Material Usage</strong>: All PDFs, recordings, videos, exercises, and learning resources are provided exclusively for personal educational use and remain the intellectual property of Harita Music Academy.</li><li style="margin-bottom:0.75rem;"><strong>Communication</strong>: All Academy-related communication should take place through authorised Academy platforms. Respectful communication is expected at all times.</li><li style="margin-bottom:0.75rem;"><strong>Privacy &amp; Account Security</strong>: Students are responsible for maintaining the confidentiality of their login credentials. Account sharing is strictly prohibited.</li><li style="margin-bottom:0.75rem;"><strong>Technical Responsibility</strong>: Students are responsible for maintaining a reliable internet connection and compatible devices. Technical issues on the student's side shall not qualify for compensation or replacement classes.</li><li style="margin-bottom:0.75rem;"><strong>Parent/Guardian Responsibility</strong>: For minor students, parents or guardians are expected to maintain respectful communication with Academy staff and support a positive learning environment.</li><li style="margin-bottom:0.75rem;"><strong>Weekly Feedback</strong>: Students may be invited to submit weekly feedback after attending classes. Constructive feedback helps improve the overall learning experience.</li><li style="margin-bottom:0.75rem;"><strong>Platform Misuse</strong>: Unauthorised access, impersonation, spam, fraudulent activity, or misuse of Academy systems is strictly prohibited.</li><li style="margin-bottom:0.75rem;"><strong>Policy Violations</strong>: Violation of Academy policies may result in verbal warnings, written warnings, temporary suspension, cancellation of class credits, or permanent account termination, depending on the severity of the violation.</li><li style="margin-bottom:0.75rem;"><strong>Academy Authority</strong>: Harita Music Academy reserves the right to modify policies, schedules, faculty assignments, fees, or operational procedures whenever necessary. The Academy's decision regarding policy interpretation and disciplinary matters shall remain final and binding.</li></ol>`;
+
+        var POLICY_TEACHER = `<h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Teacher Policy</h4><ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;"><li style="margin-bottom:0.75rem;"><strong>Acceptance of Policies</strong>: By joining Harita Music Academy, every teacher agrees to comply with all Academy policies, operational guidelines, and future updates.</li><li style="margin-bottom:0.75rem;"><strong>Professional Conduct</strong>: Teachers shall maintain the highest standards of professionalism, integrity, and ethical behaviour at all times.</li><li style="margin-bottom:0.75rem;"><strong>Respectful Behaviour</strong>: Teachers must treat every student, parent, colleague, and Academy representative with dignity, patience, and respect.</li><li style="margin-bottom:0.75rem;"><strong>Zero Tolerance for Misconduct</strong>: Harassment, abusive language, discrimination, intimidation, threats, inappropriate behaviour, or unprofessional conduct will not be tolerated under any circumstances.</li><li style="margin-bottom:0.75rem;"><strong>Punctuality</strong>: Teachers must join every scheduled class at least 5 minutes before the class begins.</li><li style="margin-bottom:0.75rem;"><strong>Class Responsibility</strong>: Every scheduled class must be conducted with proper preparation, discipline, and commitment to the approved curriculum.</li><li style="margin-bottom:0.75rem;"><strong>Attendance Submission</strong>: Attendance must be marked accurately immediately after each class. False attendance records are considered a serious policy violation.</li><li style="margin-bottom:0.75rem;"><strong>Leave Request</strong>: Planned leave or class cancellation requests must be submitted at least 6 hours before the scheduled class for approval.</li><li style="margin-bottom:0.75rem;"><strong>Teacher No Show</strong>: Failure to conduct an assigned class without prior approval will be recorded as a Teacher No Show. A ₹500 penalty may be applied for each confirmed violation.</li><li style="margin-bottom:0.75rem;"><strong>Late Joining</strong>: Repeated late joining affects student learning and may lead to warnings, performance review, or disciplinary action.</li><li style="margin-bottom:0.75rem;"><strong>Class Cancellation</strong>: Teachers shall not cancel classes without valid reasons and prior approval from the Academy except in genuine emergencies.</li><li style="margin-bottom:0.75rem;"><strong>Student Progress</strong>: Teachers are responsible for monitoring student progress, maintaining lesson continuity, and providing constructive guidance.</li><li style="margin-bottom:0.75rem;"><strong>Teaching Quality</strong>: Every class must meet the Academy's expected standards of quality, professionalism, and student engagement.</li><li style="margin-bottom:0.75rem;"><strong>Communication</strong>: All communication with students and parents must remain professional and should take place only through authorised Academy channels.</li><li style="margin-bottom:0.75rem;"><strong>Student Privacy</strong>: Teachers shall protect the confidentiality of all student information, academic records, and personal data.</li><li style="margin-bottom:0.75rem;"><strong>Recording &amp; Intellectual Property</strong>: Academy curriculum, recordings, lesson plans, presentations, PDFs, and all educational resources remain the exclusive intellectual property of Harita Music Academy and may not be copied, distributed, or used outside the Academy without written permission.</li><li style="margin-bottom:0.75rem;"><strong>Conflict of Interest</strong>: Teachers shall not encourage, solicit, or transfer Academy students to personal tuition, private classes, or competing platforms.</li><li style="margin-bottom:0.75rem;"><strong>Financial Conduct</strong>: Teachers are strictly prohibited from accepting direct payments, gifts in exchange for services, or conducting private financial transactions with Academy students.</li><li style="margin-bottom:0.75rem;"><strong>Professional Appearance</strong>: Teachers are expected to maintain a neat, professional appearance and ensure an appropriate teaching environment during online classes.</li><li style="margin-bottom:0.75rem;"><strong>Technical Responsibility</strong>: Teachers must ensure a stable internet connection, clear audio, and suitable teaching equipment before every class.</li><li style="margin-bottom:0.75rem;"><strong>Performance Review</strong>: Teaching quality, punctuality, attendance, student feedback, and overall professionalism may be reviewed periodically by the Academy.</li><li style="margin-bottom:0.75rem;"><strong>Policy Violations</strong>: Depending on the severity of the violation, disciplinary actions may include verbal warning, written warning, ₹500 penalty, temporary suspension, payment review, or permanent termination of association.</li><li style="margin-bottom:0.75rem;"><strong>Emergency Situations</strong>: In exceptional emergencies, teachers must inform the Academy immediately so that alternative teaching arrangements can be made.</li><li style="margin-bottom:0.75rem;"><strong>Academy Rights</strong>: Harita Music Academy reserves the right to modify schedules, class allocations, operational procedures, and teaching assignments whenever required.</li><li style="margin-bottom:0.75rem;"><strong>Final Decision</strong>: All decisions regarding teacher performance, disciplinary matters, penalties, suspensions, and policy interpretation shall be made solely by Harita Music Academy and shall remain final and binding.</li></ol>`;
+
+        var POLICY_STAFF = `<h4 style="font-weight:700; margin-bottom:1rem; color:var(--primary); text-transform:uppercase; font-family:var(--font-serif);">Non-Teaching Staff Policy</h4><ol style="padding-left:1.5rem; margin:0; list-style-type:decimal;"><li style="margin-bottom:0.75rem;"><strong>Acceptance of Policy</strong>: All staff members are required to comply with the Academy's policies, procedures, and ethical standards.</li><li style="margin-bottom:0.75rem;"><strong>Professional Conduct</strong>: Every employee shall perform their duties with honesty, professionalism, integrity, and accountability.</li><li style="margin-bottom:0.75rem;"><strong>Respectful Behaviour</strong>: Respectful communication with students, parents, teachers, colleagues, and management is mandatory at all times.</li><li style="margin-bottom:0.75rem;"><strong>Zero Tolerance for Misconduct</strong>: Abusive language, harassment, discrimination, bullying, threats, or any inappropriate behaviour will lead to disciplinary action.</li><li style="margin-bottom:0.75rem;"><strong>Punctuality &amp; Attendance</strong>: Employees are expected to report on time, complete assigned duties responsibly, and maintain regular attendance.</li><li style="margin-bottom:0.75rem;"><strong>Confidentiality</strong>: All student, teacher, financial, operational, and business information must remain strictly confidential during and after employment.</li><li style="margin-bottom:0.75rem;"><strong>Honest Communication</strong>: False promises, misleading information, or unauthorised commitments to students or parents are strictly prohibited.</li><li style="margin-bottom:0.75rem;"><strong>Sales &amp; Admission Ethics</strong>: Admissions and counselling must be conducted honestly. Misrepresentation for personal targets or incentives is not permitted.</li><li style="margin-bottom:0.75rem;"><strong>Financial Integrity</strong>: No employee may collect personal payments, accept unauthorised cash, or misuse Academy funds or resources.</li><li style="margin-bottom:0.75rem;"><strong>Academy Property</strong>: All documents, software, login credentials, equipment, and digital resources remain the property of Harita Music Academy and must be protected at all times.</li><li style="margin-bottom:0.75rem;"><strong>Conflict of Interest</strong>: Employees shall not promote competing businesses, misuse Academy contacts, or recruit Academy students or teachers for personal benefit.</li><li style="margin-bottom:0.75rem;"><strong>Data &amp; System Security</strong>: Unauthorised access, sharing, copying, or misuse of Academy data or systems is strictly prohibited.</li><li style="margin-bottom:0.75rem;"><strong>Social Media &amp; Public Conduct</strong>: Employees shall not publish confidential information or make public statements that may harm the Academy's reputation.</li><li style="margin-bottom:0.75rem;"><strong>Performance &amp; Responsibility</strong>: Employees are expected to perform their assigned responsibilities efficiently, maintain work quality, and cooperate with their team.</li><li style="margin-bottom:0.75rem;"><strong>Policy Violations</strong>: Depending on the seriousness of the violation, disciplinary action may include a verbal warning, written warning, suspension, salary deduction where legally applicable, or termination of employment.</li><li style="margin-bottom:0.75rem;"><strong>Academy Authority</strong>: Harita Music Academy reserves the right to modify policies, assign responsibilities, review employee performance, and take disciplinary action whenever necessary. The Academy's decision shall be final and binding.</li></ol>`;
+
+        @if(auth()->check() && auth()->user()->hasRole('admin'))
+            var ACTIVE_POLICY = POLICY_STAFF;
+        @elseif(auth()->check() && auth()->user()->hasRole('teacher'))
+            var ACTIVE_POLICY = POLICY_TEACHER;
+        @elseif(auth()->check() && auth()->user()->hasRole('student'))
+            var ACTIVE_POLICY = POLICY_STUDENT;
+        @else
+            var ACTIVE_POLICY = POLICY_STUDENT;
+        @endif
+
+        function openPrivacyModal() {
+            document.getElementById('privacy-modal-body').innerHTML = ACTIVE_POLICY;
+            document.getElementById('privacy-modal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closePrivacyModal() {
+            document.getElementById('privacy-modal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        document.getElementById('privacy-modal').addEventListener('click', function(e) {
+            if (e.target === this) closePrivacyModal();
         });
+    </script>
 
-        document.getElementById('opp-reject').addEventListener('click', function() {
-            if (!currentOppId) return;
-            fetch(`/teacher/opportunities/${currentOppId}/reject`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                }
-            });
-            closePopup();
-        });
-
-        // Poll every 5 seconds
-        opportunityPolling = setInterval(checkOpportunity, 5000);
-    });
-  </script>
-  @endif
-
-  @if(auth()->check() && auth()->user()->hasRole('student') && auth()->user()->student && auth()->user()->student->credits <= 2 && is_null(auth()->user()->student->renewal_interest))
-  <div id="renewal-popup" class="modal-overlay" style="display: flex; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 9999;">
-      <div class="modal-content" style="background: white; padding: 2rem; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
-          <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
-          <h2 style="margin-bottom: 1rem; color: #dc2626;">Low Credits Alert!</h2>
-          <p style="margin-bottom: 1.5rem; color: #4b5563; font-size: 1.1rem;">
-              You have only <strong>{{ auth()->user()->student->credits }} classes left!</strong><br><br>
-              Are you interested in purchasing a new package or enrolling in another course?
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center;">
-              <button id="renewal-yes" class="btn btn-primary" style="flex: 1;">Yes, I'm interested!</button>
-              <button id="renewal-no" class="btn btn-secondary" style="flex: 1;">No, thanks</button>
-          </div>
-      </div>
-  </div>
-
-  <script>
-      document.addEventListener('DOMContentLoaded', function() {
-          function submitRenewalInterest(interest) {
-              const btnYes = document.getElementById('renewal-yes');
-              const btnNo = document.getElementById('renewal-no');
-              
-              if (interest === 'interested') {
-                  btnYes.innerText = 'Submitting...';
-                  btnYes.disabled = true;
-                  btnNo.disabled = true;
-              } else {
-                  btnNo.innerText = 'Submitting...';
-                  btnYes.disabled = true;
-                  btnNo.disabled = true;
-              }
-
-              fetch('{{ route("student.renewal-interest.submit") }}', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                      'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                      'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ interest: interest })
-              })
-              .then(res => res.json())
-              .then(data => {
-                  if (data.success) {
-                      if (interest === 'interested') {
-                          alert('Thank you! Our admin team has been notified and will contact you shortly.');
-                      }
-                      document.getElementById('renewal-popup').style.display = 'none';
-                  }
-              })
-              .catch(err => {
-                  console.error(err);
-                  document.getElementById('renewal-popup').style.display = 'none';
-              });
-          }
-
-          document.getElementById('renewal-yes').addEventListener('click', function() {
-              submitRenewalInterest('interested');
-          });
-
-          document.getElementById('renewal-no').addEventListener('click', function() {
-              submitRenewalInterest('declined');
-          });
-      });
-  </script>
-  @endif
-
-  <script src="{{ asset('admin-assets/js/app.js') }}"></script>
-  @stack('scripts')
+    <script src="{{ asset('admin-assets/js/app.js') }}"></script>
+    @stack('scripts')
 </body>
+
 </html>

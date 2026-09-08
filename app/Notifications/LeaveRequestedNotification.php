@@ -38,6 +38,6 @@ class LeaveRequestedNotification extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['title' => 'Leave Requested', 'message' => 'Teacher ' . $this->leave->teacher->name . ' requested a leave.', 'leave_id' => $this->leave->id, 'icon' => '🏖️'];
+        return ['title' => 'Leave Requested', 'message' => 'Teacher ' . $this->leave->teacher->name . ' requested a leave.', 'leave_id' => $this->leave->id, 'url' => '/admin/leaves', 'icon' => '🏖️'];
     }
 }

@@ -100,14 +100,23 @@
                     $createdAt->setTimezone($tz);
                 }
             @endphp
+            @php $notifUrl = $data['url'] ?? null; @endphp
+            @if($notifUrl)
+            <a href="{{ $notifUrl }}" class="notification-item" style="text-decoration:none;">
+            @else
             <div class="notification-item">
+            @endif
               <div class="notification-item-icon">{{ $data['icon'] ?? '🔔' }}</div>
               <div class="notification-item-content">
                 <div class="notification-item-title">{{ $data['title'] ?? 'Notification' }}</div>
                 <div class="notification-item-message">{{ $data['message'] ?? '' }}</div>
                 <div class="notification-item-time">{{ $createdAt->diffForHumans() }}</div>
               </div>
+            @if($notifUrl)
+            </a>
+            @else
             </div>
+            @endif
             @empty
             <div class="notification-item">
               <div class="notification-item-content">

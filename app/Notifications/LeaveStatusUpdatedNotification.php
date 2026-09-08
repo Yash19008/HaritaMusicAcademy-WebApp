@@ -38,6 +38,6 @@ class LeaveStatusUpdatedNotification extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['title' => 'Leave Status Updated', 'message' => 'Your leave request has been ' . $this->leave->status . '.', 'leave_id' => $this->leave->id, 'icon' => 'ℹ️'];
+        return ['title' => 'Leave Status Updated', 'message' => 'Your leave request has been ' . $this->leave->status . '.', 'leave_id' => $this->leave->id, 'url' => '/teacher/leaves', 'icon' => 'ℹ️'];
     }
 }

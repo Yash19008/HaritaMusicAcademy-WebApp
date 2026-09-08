@@ -38,6 +38,6 @@ class ClassBookedNotification extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['title' => 'Class Booked', 'message' => 'Class for ' . $this->booking->instrument . ' has been booked.', 'booking_id' => $this->booking->id, 'icon' => '📅'];
+        return ['title' => 'Class Booked', 'message' => 'Class for ' . $this->booking->instrument . ' has been booked.', 'booking_id' => $this->booking->id, 'url' => '/admin/class-booking', 'icon' => '📅'];
     }
 }
