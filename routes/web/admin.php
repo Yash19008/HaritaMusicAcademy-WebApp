@@ -103,6 +103,12 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::get('/settings',   [AdminController::class, 'settings'])->name('settings');
         Route::post('/settings',  [AdminController::class, 'saveSettings'])->name('settings.save');
 
+        // Reminder Configs
+        Route::get('/reminder-configs', [\App\Http\Controllers\Admin\ReminderConfigController::class, 'index'])->name('reminder-configs.index');
+        Route::post('/reminder-configs', [\App\Http\Controllers\Admin\ReminderConfigController::class, 'store'])->name('reminder-configs.store');
+        Route::put('/reminder-configs/{reminderConfig}', [\App\Http\Controllers\Admin\ReminderConfigController::class, 'update'])->name('reminder-configs.update');
+        Route::delete('/reminder-configs/{reminderConfig}', [\App\Http\Controllers\Admin\ReminderConfigController::class, 'destroy'])->name('reminder-configs.destroy');
+
         // Credit Packages
         Route::post('/credit-packages', [\App\Http\Controllers\Admin\CreditPackageController::class, 'store'])->name('credit-packages.store');
         Route::put('/credit-packages/{creditPackage}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'update'])->name('credit-packages.update');

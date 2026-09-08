@@ -150,6 +150,31 @@
             </form>
         </div>
 
+        <!-- REMINDER CONFIGS (Admin Only) -->
+        <div class="card" data-role-limit="admin">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <h4 class="font-semibold">Class Reminders</h4>
+                <button type="button" class="btn btn-sm btn-primary" onclick="openAddReminderModal()">
+                    + Add Reminder
+                </button>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                <table class="table" style="margin: 0; width: 100%;">
+                    <thead style="background: var(--bg-color);">
+                        <tr>
+                            <th>Label</th>
+                            <th>Minutes Before</th>
+                            <th>Targets</th>
+                            <th>Status</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reminderConfigTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <!-- CREDIT PACKAGES (Admin Only) -->
         <div class="card" data-role-limit="admin">
             <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -254,6 +279,44 @@
         </div>
     </div>
 
+    <!-- ADD / EDIT REMINDER MODAL -->
+    <div class="modal-backdrop" id="reminderModal">
+        <div class="modal" style="max-width: 500px;">
+            <div class="modal-header">
+                <h4 class="font-semibold" id="reminderModalTitle">Add Reminder</h4>
+                <button type="button" class="modal-close" onclick="closeReminderModal()">&times;</button>
+            </div>
+            <form id="reminderForm" onsubmit="saveReminderConfig(event)">
+                <input type="hidden" id="reminderId" value="">
+                <div class="modal-body">
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="remLabel">Label</label>
+                        <input type="text" id="remLabel" class="form-control" placeholder="e.g. 10 Hours Before" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label" for="remMinutes">Minutes Before Class</label>
+                        <input type="number" id="remMinutes" class="form-control" placeholder="e.g. 600" min="1" required>
+                    </div>
+                    <div class="grid grid-2 gap-3 mb-3">
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                            <input type="checkbox" id="remNotifyStudent" checked> Notify Students
+                        </label>
+                        <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                            <input type="checkbox" id="remNotifyTeacher" checked> Notify Teachers
+                        </label>
+                    </div>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" id="remEnabled" checked> Enabled
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeReminderModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Reminder</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Developed by Sitesoch footer -->
     <footer class="footer mt-4">
         <p>© 2026 Harita Music Academy. All rights reserved. | Developed by <a href="https://sitesoch.com"
@@ -280,7 +343,122 @@
                     }
                 });
             }
+            loadReminderConfigs();
         });
+
+        function loadReminderConfigs() {
+            fetch('/admin/reminder-configs')
+                .then(r => r.json())
+                .then(data => {
+                    const tbody = document.getElementById('reminderConfigTableBody');
+                    tbody.innerHTML = '';
+                    if(!data || data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No reminders configured</td></tr>';
+                        return;
+                    }
+                    data.forEach(config => {
+                        const targets = [];
+                        if (config.notify_student) targets.push('Students');
+                        if (config.notify_teacher) targets.push('Teachers');
+                        
+                        const statusBadge = config.enabled 
+                            ? `<span class="badge badge-primary">Active</span>`
+                            : `<span class="badge badge-secondary text-muted">Disabled</span>`;
+
+                        tbody.innerHTML += `
+                            <tr>
+                                <td class="font-semibold">${config.label}</td>
+                                <td>${config.minutes_before}</td>
+                                <td>${targets.join(', ')}</td>
+                                <td>${statusBadge}</td>
+                                <td class="text-right">
+                                    <button class="btn btn-sm btn-secondary" style="padding:0.25rem 0.5rem;" onclick='openEditReminderModal(${JSON.stringify(config).replace(/'/g, "&#39;")})'>Edit</button>
+                                    <button class="btn btn-sm btn-danger" style="padding:0.25rem 0.5rem;" onclick="deleteReminder(${config.id})">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                })
+                .catch(err => console.error(err));
+        }
+
+        function openAddReminderModal() {
+            document.getElementById('reminderId').value = '';
+            document.getElementById('reminderForm').reset();
+            document.getElementById('remNotifyStudent').checked = true;
+            document.getElementById('remNotifyTeacher').checked = true;
+            document.getElementById('remEnabled').checked = true;
+            document.getElementById('reminderModalTitle').innerText = 'Add Reminder';
+            document.getElementById('reminderModal').classList.add('show');
+        }
+
+        function openEditReminderModal(config) {
+            document.getElementById('reminderId').value = config.id;
+            document.getElementById('remLabel').value = config.label;
+            document.getElementById('remMinutes').value = config.minutes_before;
+            document.getElementById('remNotifyStudent').checked = config.notify_student;
+            document.getElementById('remNotifyTeacher').checked = config.notify_teacher;
+            document.getElementById('remEnabled').checked = config.enabled;
+            document.getElementById('reminderModalTitle').innerText = 'Edit Reminder';
+            document.getElementById('reminderModal').classList.add('show');
+        }
+
+        function closeReminderModal() {
+            document.getElementById('reminderModal').classList.remove('show');
+        }
+
+        function saveReminderConfig(e) {
+            e.preventDefault();
+            const id = document.getElementById('reminderId').value;
+            const payload = {
+                label: document.getElementById('remLabel').value,
+                minutes_before: document.getElementById('remMinutes').value,
+                notify_student: document.getElementById('remNotifyStudent').checked ? 1 : 0,
+                notify_teacher: document.getElementById('remNotifyTeacher').checked ? 1 : 0,
+                enabled: document.getElementById('remEnabled').checked ? 1 : 0,
+            };
+
+            const url = id ? `/admin/reminder-configs/${id}` : '/admin/reminder-configs';
+            const method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    closeReminderModal();
+                    loadReminderConfigs();
+                } else {
+                    alert('Error saving configuration');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Server error saving config');
+            });
+        }
+
+        function deleteReminder(id) {
+            if(!confirm('Are you sure you want to delete this reminder?')) return;
+            fetch(`/admin/reminder-configs/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(r => r.json())
+            .then(res => {
+                if(res.success) {
+                    loadReminderConfigs();
+                }
+            });
+        }
 
         function openAddCreditPackageModal() {
             document.getElementById('addCreditPackageModal').classList.add('show');

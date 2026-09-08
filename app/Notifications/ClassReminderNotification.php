@@ -13,6 +13,7 @@ class ClassReminderNotification extends Notification implements ShouldQueue
     use Queueable, SerializesModels;
 
     public $booking;
+    public $config;
 
     /**
      * Create a new notification instance.
@@ -20,6 +21,7 @@ class ClassReminderNotification extends Notification implements ShouldQueue
     public function __construct($data)
     {
         $this->booking = $data['booking'];
+        $this->config = $data['config'] ?? null;
     }
 
     /**
@@ -45,11 +47,13 @@ class ClassReminderNotification extends Notification implements ShouldQueue
         }
 
         $startsAt = \Carbon\Carbon::parse($this->booking->starts_at)->timezone($tz)->format('M d, Y h:i A');
+        $label = $this->config ? $this->config->label : 'in 30 Minutes';
+        $timeStr = str_replace(' Before', '', $label);
 
         return (new \Illuminate\Notifications\Messages\MailMessage)
-                    ->subject('Reminder: Upcoming Class in 30 Minutes')
+                    ->subject('Reminder: Upcoming Class ' . $timeStr)
                     ->greeting('Hello ' . $notifiable->name . '!')
-                    ->line('This is a quick reminder that your ' . $this->booking->instrument . ' class is starting in exactly 30 minutes.')
+                    ->line('This is a quick reminder that your ' . $this->booking->instrument . ' class is scheduled to start ' . strtolower($timeStr) . '.')
                     ->line('Scheduled Time: ' . $startsAt . ' (' . $tz . ')')
                     ->action('Join Google Meet', $this->booking->google_meet_link ?? '#')
                     ->line('Please be on time and prepared for the class.');
@@ -62,6 +66,22 @@ class ClassReminderNotification extends Notification implements ShouldQueue
      */
     public function toDatabase(object $notifiable): array
     {
-        return ['title' => 'Class Reminder', 'message' => 'Your class ' . $this->booking->instrument . ' starts in 30 minutes!', 'booking_id' => $this->booking->id, 'icon' => '⏰'];
+        $label = $this->config ? $this->config->label : 'in 30 Minutes';
+        $timeStr = str_replace(' Before', '', $label);
+        
+        $url = '#';
+        if ($notifiable->hasRole('admin') || $notifiable->hasRole('student')) {
+            $url = '/admin/class-booking';
+        } elseif ($notifiable->hasRole('teacher')) {
+            $url = '/teacher/class-booking';
+        }
+
+        return [
+            'title' => 'Class Reminder', 
+            'message' => 'Your ' . $this->booking->instrument . ' class starts ' . strtolower($timeStr) . '.', 
+            'booking_id' => $this->booking->id, 
+            'url' => $url,
+            'icon' => '⏰'
+        ];
     }
 }
