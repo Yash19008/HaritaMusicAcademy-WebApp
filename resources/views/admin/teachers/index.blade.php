@@ -72,8 +72,10 @@
         <td>{{ $teacher->email }}</td>
         <td>{{ $teacher->phone ?? '—' }}</td>
         <td>
-          @if($teacher->course)
-            <span class="badge badge-primary">{{ $teacher->course->name }}</span>
+          @if($teacher->categories)
+            @foreach(array_map('trim', explode(',', $teacher->categories)) as $cat)
+              <span class="badge badge-primary" style="margin:1px 2px;">{{ $cat }}</span>
+            @endforeach
           @else
             <span class="text-muted">—</span>
           @endif

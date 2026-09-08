@@ -379,7 +379,7 @@ class AdminController extends Controller
 
     public function teachers(): View
     {
-        $teachers = Teacher::with('course')->latest()->get();
+        $teachers = Teacher::latest()->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
         return view('admin.teachers.index', compact('teachers', 'courses'));
     }

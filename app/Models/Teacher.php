@@ -12,16 +12,11 @@ class Teacher extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'user_id', 'name', 'email', 'phone', 'course_id', 'categories', 'week_off',
+        'user_id', 'name', 'email', 'phone', 'categories', 'week_off',
         'status', 'bio', 'youtube_url', 'certifications', 'per_class_rate',
         'experience', 'specialization', 'joining_date', 'rating', 'level',
         'emergency_contact_name', 'emergency_contact_phone',
     ];
-
-    public function course(): BelongsTo
-    {
-        return $this->belongsTo(Course::class);
-    }
 
     public function user(): BelongsTo
     {

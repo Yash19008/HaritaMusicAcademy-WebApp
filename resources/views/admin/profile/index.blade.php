@@ -180,8 +180,8 @@
     </div>
     <div class="card-body">
       <div class="info-list-item">
-        <span class="text-muted">Course</span>
-        <span class="font-semibold">{{ $user->teacher->course->name ?? 'None' }}</span>
+        <span class="text-muted">Music Categories</span>
+        <span class="font-semibold">{{ $user->teacher->categories ?? 'None' }}</span>
       </div>
       <div class="info-list-item">
         <span class="text-muted">Email</span>

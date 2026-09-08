@@ -23,7 +23,7 @@ class TeachersSheet implements FromCollection, WithHeadings, WithTitle, WithMapp
 
     public function collection(): Enumerable
     {
-        $query = Teacher::with('course');
+        $query = Teacher::query();
         if ($this->startDate && $this->endDate) {
             $query->whereBetween('created_at', [$this->startDate, $this->endDate . ' 23:59:59']);
         }
@@ -32,7 +32,7 @@ class TeachersSheet implements FromCollection, WithHeadings, WithTitle, WithMapp
 
     public function headings(): array
     {
-        return ['ID', 'Name', 'Email', 'Phone', 'Course / Instrument', 'Level', 'Specialization', 'Status'];
+        return ['ID', 'Name', 'Email', 'Phone', 'Music Categories', 'Level', 'Specialization', 'Status'];
     }
 
     public function map($teacher): array
@@ -42,7 +42,7 @@ class TeachersSheet implements FromCollection, WithHeadings, WithTitle, WithMapp
             $teacher->name,
             $teacher->email,
             $teacher->phone,
-            $teacher->course ? $teacher->course->name : 'Unassigned',
+            $teacher->categories ?? 'Unassigned',
             $teacher->level,
             $teacher->specialization,
             $teacher->status,

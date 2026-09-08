@@ -91,8 +91,8 @@
         </div>
         <div class="card-body">
             <div class="info-list-item">
-                <span class="text-muted">Primary Course</span>
-                <span class="font-semibold">{{ $teacher->course->name ?? 'N/A' }}</span>
+                <span class="text-muted">Music Categories</span>
+                <span class="font-semibold">{{ $teacher->categories ?? 'N/A' }}</span>
             </div>
             <div class="info-list-item">
                 <span class="text-muted">Phone</span>
