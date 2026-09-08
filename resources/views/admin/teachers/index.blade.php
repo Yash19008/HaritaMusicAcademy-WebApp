@@ -153,13 +153,15 @@
             <input type="text" name="specialization" id="tfSpecialization" class="form-control" placeholder="e.g. Hindustani Classical, Piano">
           </div>
           <div class="form-group">
-            <label class="form-label">Music Category (Course)</label>
-            <select name="course_id" id="tfCourse" class="form-control">
-              <option value="">— Select Course —</option>
+            <label class="form-label">Music Category</label>
+            <div class="form-control week-off-grid" style="height:auto; min-height:60px;">
               @foreach($courses as $course)
-                <option value="{{ $course->id }}">{{ $course->name }}</option>
+              <label>
+                <input type="checkbox" class="tch-category-cb" name="categories[]" value="{{ $course->name }}" style="width:13px;height:13px;accent-color:var(--primary);">
+                {{ $course->name }}
+              </label>
               @endforeach
-            </select>
+            </div>
           </div>
         </div>
 
