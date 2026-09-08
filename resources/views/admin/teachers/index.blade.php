@@ -267,7 +267,7 @@
             'name'                    => $t->name,
             'email'                   => $t->email,
             'phone'                   => $t->phone ?? '',
-            'course_id'               => $t->course_id ?? '',
+            'categories'              => $t->categories ?? '',
             'experience'              => $t->experience ?? '',
             'specialization'          => $t->specialization ?? '',
             'joining_date'            => $t->joining_date ? \Carbon\Carbon::parse($t->joining_date)->format('Y-m-d') : '',
@@ -289,6 +289,7 @@
   function openAddTeacher() {
     document.getElementById('teacherForm').reset();
     document.querySelectorAll('input[name="week_off[]"]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('input[name="categories[]"]').forEach(cb => cb.checked = false);
     document.getElementById('tfMethod').value = 'POST';
     document.getElementById('teacherForm').action = '{{ route("admin.teachers.store") }}';
     document.getElementById('teacherModalTitle').textContent = 'Add New Teacher';
@@ -302,7 +303,6 @@
     document.getElementById('tfName').value           = t.name;
     document.getElementById('tfEmail').value          = t.email;
     document.getElementById('tfPhone').value          = t.phone;
-    document.getElementById('tfCourse').value         = t.course_id;
     document.getElementById('tfExperience').value     = t.experience;
     document.getElementById('tfSpecialization').value = t.specialization;
     document.getElementById('tfJoiningDate').value    = t.joining_date;
@@ -315,6 +315,12 @@
     document.getElementById('tfCertifications').value = t.certifications;
     document.getElementById('tfYoutube').value        = t.youtube_url;
     document.getElementById('tfBio').value            = t.bio;
+
+    // Tick categories checkboxes
+    const cats = t.categories ? t.categories.split(',').map(c => c.trim()) : [];
+    document.querySelectorAll('input[name="categories[]"]').forEach(cb => {
+      cb.checked = cats.includes(cb.value);
+    });
 
     // Tick week-off checkboxes
     const weekDays = t.week_off ? t.week_off.split(',').map(d => d.trim()) : [];

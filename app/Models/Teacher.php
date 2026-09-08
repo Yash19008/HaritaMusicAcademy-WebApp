@@ -11,7 +11,12 @@ class Teacher extends Model
 {
     use SoftDeletes;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id', 'name', 'email', 'phone', 'course_id', 'categories', 'week_off',
+        'status', 'bio', 'youtube_url', 'certifications', 'per_class_rate',
+        'experience', 'specialization', 'joining_date', 'rating', 'level',
+        'emergency_contact_name', 'emergency_contact_phone',
+    ];
 
     public function course(): BelongsTo
     {

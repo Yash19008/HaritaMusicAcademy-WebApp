@@ -68,13 +68,14 @@
 
           <div class="grid grid-2 gap-3">
             <div class="form-group">
-              <label class="form-label" for="Categories">Specialization Category</label>
-              <select id="Categories" name="course_id" class="form-control">
-                <option value="">Select Category</option>
-                @foreach(\App\Models\Course::all() as $course)
-                  <option value="{{ $course->id }}">{{ $course->name }}</option>
+              <label class="form-label">Music Category</label>
+              <div style="overflow-y: auto; padding: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px;">
+                @foreach(\App\Models\Course::orderBy('name')->get() as $course)
+                  <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
+                    <input type="checkbox" class="tch-category-cb" name="categories[]" value="{{ $course->name }}" style="width:13px; height:13px;"> {{ $course->name }}
+                  </label>
                 @endforeach
-              </select>
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">Week Off Days</label>

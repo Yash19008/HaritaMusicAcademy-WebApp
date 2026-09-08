@@ -390,7 +390,7 @@ class AdminController extends Controller
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', 'unique:teachers,email', 'unique:users,email'],
             'phone'          => ['nullable', 'string'],
-            'course_id'      => ['nullable', 'exists:courses,id'],
+            'categories'     => ['nullable', 'array'],
             'week_off'       => ['nullable', 'array'],
             'status'         => ['required', 'in:active,inactive,on_leave'],
             'per_class_rate' => ['nullable', 'numeric', 'min:0'],
@@ -405,6 +405,10 @@ class AdminController extends Controller
             'emergency_contact_name'  => ['nullable', 'string'],
             'emergency_contact_phone' => ['nullable', 'string'],
         ]);
+
+        if (isset($data['categories'])) {
+            $data['categories'] = implode(',', $data['categories']);
+        }
 
         if (isset($data['week_off'])) {
             $data['week_off'] = implode(',', $data['week_off']);
@@ -440,7 +444,7 @@ class AdminController extends Controller
             'name'           => ['required', 'string', 'max:255'],
             'email'          => ['required', 'email', 'unique:teachers,email,' . $teacher->id],
             'phone'          => ['nullable', 'string'],
-            'course_id'      => ['nullable', 'exists:courses,id'],
+            'categories'     => ['nullable', 'array'],
             'week_off'       => ['nullable', 'array'],
             'status'         => ['required', 'in:active,inactive,on_leave'],
             'per_class_rate' => ['nullable', 'numeric', 'min:0'],
@@ -455,6 +459,8 @@ class AdminController extends Controller
             'emergency_contact_name'  => ['nullable', 'string'],
             'emergency_contact_phone' => ['nullable', 'string'],
         ]);
+
+        $data['categories'] = isset($data['categories']) ? implode(',', $data['categories']) : null;
 
         if (isset($data['week_off'])) {
             $data['week_off'] = implode(',', $data['week_off']);
