@@ -3,6 +3,13 @@
 @section('title', 'Notifications')
 
 @section('content')
+    <style>
+        .notification-list-item:hover {
+            background-color: rgba(13, 148, 136, 0.12) !important;
+            box-shadow: inset 4px 0 0 var(--primary);
+        }
+    </style>
+
     <div class="content-header">
         <div class="content-title">
             <h2>All Notifications</h2>
@@ -17,6 +24,7 @@
                     @php
                         $data = $notification->data;
                         $createdAt = \Carbon\Carbon::parse($notification->created_at);
+                        $notificationUrl = $data['url'] ?? null;
 
                         // Convert timezone if student
                         if (auth()->user()->hasRole('student') && auth()->user()->student) {
@@ -24,8 +32,12 @@
                             $createdAt->setTimezone($tz);
                         }
                     @endphp
+                    @if ($notificationUrl)
+                        <a href="{{ $notificationUrl }}" class="notification-list-item" style="display: flex; gap: 12px; padding: 12px 1.5rem; border-bottom: 1px solid var(--border-color); align-items: flex-start; background-color: {{ $notification->read_at ? 'transparent' : 'rgba(13, 148, 136, 0.04)' }}; transition: background 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit;">
+                    @else
                     <div
                         style="display: flex; gap: 12px; padding: 12px 1.5rem; border-bottom: 1px solid var(--border-color); align-items: flex-start; background-color: {{ $notification->read_at ? 'transparent' : 'rgba(13, 148, 136, 0.04)' }}; transition: background 0.2s;">
+                    @endif
                         <div style="font-size: 1.25rem; margin-top: 2px;">
                             {{ $data['icon'] ?? '🔔' }}
                         </div>
@@ -40,7 +52,11 @@
                             <div>{{ $createdAt->format('M d, Y h:i A') }}</div>
                             <div style="color: var(--primary); margin-top: 2px;">{{ $createdAt->diffForHumans() }}</div>
                         </div>
-                    </div>
+                    @if ($notificationUrl)
+                        </a>
+                    @else
+                        </div>
+                    @endif
                 @empty
                     <div style="padding: 3rem; text-align: center; color: var(--text-muted);">
                         <div style="font-size: 2.5rem; margin-bottom: 0.75rem;">📭</div>

@@ -158,21 +158,23 @@
                     + Add Reminder
                 </button>
             </div>
-            <div class="card-body" style="padding: 0;">
-                <table class="table" style="margin: 0; width: 100%;">
-                    <thead style="background: var(--bg-color);">
-                        <tr>
-                            <th>Label</th>
-                            <th>Minutes Before</th>
-                            <th>Targets</th>
-                            <th>Status</th>
-                            <th class="text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reminderConfigTableBody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table display responsive nowrap" id="reminderConfigsTable" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th data-priority="1">Label</th>
+                                <th data-priority="2">Minutes Before</th>
+                                <th data-priority="3">Targets</th>
+                                <th data-priority="2">Status</th>
+                                <th data-priority="1" class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reminderConfigTableBody">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
         <!-- CREDIT PACKAGES (Admin Only) -->
@@ -346,38 +348,54 @@
             loadReminderConfigs();
         });
 
+        let reminderTable;
+
         function loadReminderConfigs() {
             fetch('/admin/reminder-configs')
                 .then(r => r.json())
                 .then(data => {
+                    if (reminderTable) {
+                        reminderTable.destroy();
+                    }
                     const tbody = document.getElementById('reminderConfigTableBody');
                     tbody.innerHTML = '';
-                    if(!data || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">No reminders configured</td></tr>';
-                        return;
-                    }
-                    data.forEach(config => {
-                        const targets = [];
-                        if (config.notify_student) targets.push('Students');
-                        if (config.notify_teacher) targets.push('Teachers');
-                        
-                        const statusBadge = config.enabled 
-                            ? `<span class="badge badge-primary">Active</span>`
-                            : `<span class="badge badge-secondary text-muted">Disabled</span>`;
+                    if(data && data.length > 0) {
+                        data.forEach(config => {
+                            const targets = [];
+                            if (config.notify_student) targets.push('Students');
+                            if (config.notify_teacher) targets.push('Teachers');
+                            
+                            const statusBadge = config.enabled 
+                                ? `<span class="badge badge-primary">Active</span>`
+                                : `<span class="badge badge-secondary text-muted">Disabled</span>`;
 
-                        tbody.innerHTML += `
-                            <tr>
-                                <td class="font-semibold">${config.label}</td>
-                                <td>${config.minutes_before}</td>
-                                <td>${targets.join(', ')}</td>
-                                <td>${statusBadge}</td>
-                                <td class="text-right">
-                                    <button class="btn btn-sm btn-secondary" style="padding:0.25rem 0.5rem;" onclick='openEditReminderModal(${JSON.stringify(config).replace(/'/g, "&#39;")})'>Edit</button>
-                                    <button class="btn btn-sm btn-danger" style="padding:0.25rem 0.5rem;" onclick="deleteReminder(${config.id})">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td class="font-semibold">${config.label}</td>
+                                    <td>${config.minutes_before}</td>
+                                    <td>${targets.join(', ')}</td>
+                                    <td>${statusBadge}</td>
+                                    <td class="text-right">
+                                        <button class="btn btn-sm btn-secondary" style="padding:0.25rem 0.5rem;" onclick='openEditReminderModal(${JSON.stringify(config).replace(/'/g, "&#39;")})'>Edit</button>
+                                        <button class="btn btn-sm btn-danger" style="padding:0.25rem 0.5rem;" onclick="deleteReminder(${config.id})">Delete</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
+                    
+                    if (typeof setupDataTable === 'function') {
+                        reminderTable = setupDataTable('reminderConfigsTable');
+                    } else {
+                        reminderTable = $('#reminderConfigsTable').DataTable({
+                            responsive: true,
+                            pageLength: 10,
+                            language: {
+                                search: "",
+                                searchPlaceholder: "Search reminders..."
+                            }
+                        });
+                    }
                 })
                 .catch(err => console.error(err));
         }
