@@ -20,14 +20,35 @@
 
 
                         <h1 class="section-title">
-                            Privacy Policy & Academy Policies
+                            @auth
+                                @if(auth()->user()->hasRole('admin'))
+                                    Non Teaching Staff
+                                @elseif(auth()->user()->hasRole('teacher'))
+                                    Teacher Policy
+                                @elseif(auth()->user()->hasRole('student'))
+                                    Student Policy
+                                @else
+                                    Privacy Policy & Academy Policies
+                                @endif
+                            @else
+                                Privacy Policy & Academy Policies
+                            @endauth
                         </h1>
 
                         <p class="section-description">
-                            Harita Music Academy is committed to protecting your privacy and
-                            maintaining a transparent learning environment for all students,
-                            parents, and teachers. By using our website or enrolling in our
-                            classes, you agree to the following policies.
+                            @auth
+                                @if(auth()->user()->hasRole('admin'))
+                                    This privacy policy section applies exclusively to non-teaching staff and system administrators of Harita Music Academy.
+                                @elseif(auth()->user()->hasRole('teacher'))
+                                    This privacy policy section applies exclusively to teachers and mentors of Harita Music Academy.
+                                @elseif(auth()->user()->hasRole('student'))
+                                    This privacy policy section applies exclusively to enrolled students of Harita Music Academy.
+                                @else
+                                    Harita Music Academy is committed to protecting your privacy and maintaining a transparent learning environment for all students, parents, and teachers. By using our website or enrolling in our classes, you agree to the following policies.
+                                @endif
+                            @else
+                                Harita Music Academy is committed to protecting your privacy and maintaining a transparent learning environment for all students, parents, and teachers. By using our website or enrolling in our classes, you agree to the following policies.
+                            @endauth
                         </p>
 
                         <hr style="margin:40px 0;">
