@@ -45,10 +45,8 @@ class DemoBookingController extends Controller
         if (!empty($data['lead_id'])) {
             $payment = Payment::findOrFail($data['lead_id']);
             
-            // Extract email and phone from contact field
-            $contacts = $payment->contact ? explode('|', $payment->contact) : ['', ''];
-            $email = $contacts[0] ?? '';
-            $phone = $contacts[1] ?? '';
+            $email = $payment->email ?? '';
+            $phone = $payment->phone ?? '';
             
             $data['email'] = $email;
             $data['phone'] = $phone;
