@@ -57,25 +57,58 @@ class ClassReminderNotification extends Notification implements ShouldQueue
         }
 
         $startsAtProp = isset($this->booking->scheduled_at) ? 'scheduled_at' : 'starts_at';
-        $startsAt = \Carbon\Carbon::parse($this->booking->$startsAtProp)->timezone($tz)->format('M d, Y h:i A');
-        $timeStr = $this->reminderTimeLabel();
-        
-        $greetingName = $this->isDemoStudent ? $this->demoStudentName : ($notifiable->name ?? 'Student');
+        $startsAtRaw  = \Carbon\Carbon::parse($this->booking->$startsAtProp)->timezone($tz);
+        $endsAtProp   = isset($this->booking->ends_at) ? 'ends_at' : null;
+        $duration     = $endsAtProp
+            ? $startsAtRaw->diffInMinutes(\Carbon\Carbon::parse($this->booking->ends_at)->timezone($tz))
+            : ($this->booking->duration_minutes ?? 40);
 
-        $mail = (new \Illuminate\Notifications\Messages\MailMessage)
-                    ->subject('Reminder: Upcoming Class ' . $timeStr)
-                    ->greeting('Hello ' . $greetingName . '!')
-                    ->line('This is a quick reminder that your ' . $this->booking->instrument . ' class is scheduled to start ' . strtolower($timeStr) . '.')
-                    ->line('Scheduled Time: ' . $startsAt . ' (' . $tz . ')')
-                    ->line('Please be on time and prepared for the class.');
+        $isTeacher   = method_exists($notifiable, 'hasRole') && $notifiable->hasRole('teacher');
+        $isDemo      = $this->booking instanceof \App\Models\DemoBooking;
+        $instrument  = $this->booking->instrument ?? 'Music';
+        $timeLabel   = $this->reminderTimeLabel();
 
-        if ($this->booking->google_meet_link) {
-            $isTeacher = method_exists($notifiable, 'hasRole') && $notifiable->hasRole('teacher');
-            $joinUrl = $isTeacher ? $this->booking->teacher_join_url : $this->booking->student_join_url;
-            $mail->action('Join Class', $joinUrl);
+        $recipientName = $this->isDemoStudent
+            ? $this->demoStudentName
+            : ($notifiable->name ?? 'Student');
+
+        // Teacher name for student email, student name for teacher email
+        $teacherName = null;
+        $studentName = null;
+        if ($isTeacher) {
+            $studentName = $isDemo
+                ? ($this->booking->student_name ?? null)
+                : ($this->booking->student->name ?? ($this->booking->studentGroup->name ?? null));
+        } else {
+            $teacherName = $this->booking->teacher->user->name ?? null;
         }
 
-        return $mail;
+        // Join URL
+        $joinUrl = null;
+        if (!empty($this->booking->google_meet_link)) {
+            $joinUrl = $isTeacher ? ($this->booking->teacher_join_url ?? $this->booking->google_meet_link)
+                                  : ($this->booking->student_join_url ?? $this->booking->google_meet_link);
+        } elseif ($isDemo && !empty($this->booking->meet_link)) {
+            $joinUrl = $this->booking->meet_link;
+        }
+
+        $html = view('emails.class_reminder', [
+            'recipientName' => $recipientName,
+            'instrument'    => $instrument,
+            'isDemo'        => $isDemo,
+            'isTeacher'     => $isTeacher,
+            'timeLabel'     => $timeLabel,
+            'startsAt'      => $startsAtRaw->format('l, F j, Y \a\t h:i A'),
+            'timezone'      => $tz,
+            'duration'      => $duration,
+            'teacherName'   => $teacherName,
+            'studentName'   => $studentName,
+            'joinUrl'       => $joinUrl,
+        ])->render();
+
+        return (new \Illuminate\Notifications\Messages\MailMessage)
+            ->subject('Reminder: Your ' . ($isDemo ? 'Demo ' : '') . $instrument . ' Class – Starting ' . $timeLabel)
+            ->html($html);
     }
 
     /**
