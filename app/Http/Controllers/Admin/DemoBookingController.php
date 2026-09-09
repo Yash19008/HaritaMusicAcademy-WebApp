@@ -69,6 +69,11 @@ class DemoBookingController extends Controller
             if ($teacher->user && $teacher->user->email) {
                 \Illuminate\Support\Facades\Mail::to($teacher->user->email)->send(new \App\Mail\DemoBookedMail($booking, true));
             }
+
+            // Send in-app notification to the assigned teacher
+            if ($teacher->user) {
+                $teacher->user->notify(new \App\Notifications\DemoScheduledForTeacherNotification($booking));
+            }
             
             return redirect()->route('admin.demos')->with('success', 'Demo class scheduled successfully! Google Meet link generated and emails sent.');
         } catch (\Exception $e) {
