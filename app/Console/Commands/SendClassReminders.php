@@ -36,19 +36,26 @@ class SendClassReminders extends Command
         $totalSent = 0;
 
         foreach ($configs as $config) {
-            $targetTimeStart = $now->copy()->addMinutes($config->minutes_before)->startOfMinute();
-            $targetTimeEnd = $targetTimeStart->copy()->addMinute();
+            // Create a 15-minute backward buffer in case the cron missed a run
+            $targetTimeStart = $now->copy()->addMinutes($config->minutes_before)->subMinutes(15);
+            $targetTimeEnd = $now->copy()->addMinutes($config->minutes_before)->addMinute();
+
+            // Never send reminders for classes that started more than 5 minutes ago
+            $earliestAllowed = $now->copy()->subMinutes(5);
+            if ($targetTimeStart->lessThan($earliestAllowed)) {
+                $targetTimeStart = $earliestAllowed;
+            }
 
             $bookings = ClassBooking::with(['teacher.user', 'student.user', 'studentGroup.members.user'])
                 ->where('status', 'scheduled')
                 ->where('starts_at', '>=', $targetTimeStart)
-                ->where('starts_at', '<', $targetTimeEnd)
+                ->where('starts_at', '<=', $targetTimeEnd)
                 ->get();
 
             $demos = DemoBooking::with(['teacher.user'])
                 ->where('status', 'scheduled')
                 ->where('scheduled_at', '>=', $targetTimeStart)
-                ->where('scheduled_at', '<', $targetTimeEnd)
+                ->where('scheduled_at', '<=', $targetTimeEnd)
                 ->get();
 
             // Process Regular Classes
