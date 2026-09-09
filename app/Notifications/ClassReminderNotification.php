@@ -58,9 +58,11 @@ class ClassReminderNotification extends Notification implements ShouldQueue
 
         $startsAtProp = isset($this->booking->scheduled_at) ? 'scheduled_at' : 'starts_at';
         $startsAtRaw  = \Carbon\Carbon::parse($this->booking->$startsAtProp)->timezone($tz);
-        $endsAtProp   = isset($this->booking->ends_at) ? 'ends_at' : null;
-        $duration     = $endsAtProp
-            ? $startsAtRaw->diffInMinutes(\Carbon\Carbon::parse($this->booking->ends_at)->timezone($tz))
+
+        // DemoBooking has no ends_at — only scheduled_at. Safely compute duration.
+        $endsAt   = !empty($this->booking->ends_at) ? \Carbon\Carbon::parse($this->booking->ends_at)->timezone($tz) : null;
+        $duration = $endsAt
+            ? $startsAtRaw->diffInMinutes($endsAt)
             : ($this->booking->duration_minutes ?? 40);
 
         $isTeacher   = method_exists($notifiable, 'hasRole') && $notifiable->hasRole('teacher');
