@@ -249,7 +249,7 @@ class GoogleCalendarService
                 $claimsPayload['sub'] = $impersonate;
             }
 
-            $claims      = $this->base64UrlEncode(json_encode($claimsPayload));
+            $claims      = $this->base64UrlEncode(json_encode($claimsPayload, JSON_UNESCAPED_SLASHES));
             $unsignedJwt = $header . '.' . $claims;
 
             // Ensure private key has correct newlines (handles cases where .env escapes \n)
