@@ -487,7 +487,7 @@ class BookingService
     /**
      * Create a Google Calendar event and persist ALL result fields to the booking.
      */
-    private function createGoogleCalendarEvent(ClassBooking $booking): void
+    public function createGoogleCalendarEvent(ClassBooking $booking): void
     {
         $result = app(GoogleCalendarService::class)->createMeetEvent($booking);
 
