@@ -1,10 +1,47 @@
+@php
+    // Look up the active page label from sidebar nav items
+    $activePage = trim($__env->yieldContent('page', 'dashboard'));
+    $user        = auth()->user();
+    $isTeacher   = $user->hasRole('teacher');
+    $isStudent   = $user->hasRole('student');
+    $isInternal  = !$isTeacher && !$isStudent;
+
+    // Build minimal label map from roles
+    $allNavLabels = [
+        // Admin / internal
+        'dashboard'    => 'Dashboard',
+        'students'     => 'Student Master',
+        'teachers'     => 'Teacher Master',
+        'credits'      => $isStudent ? 'My Credits' : 'Credit Management',
+        'class-booking'=> 'Class Booking',
+        'leaves'       => $isTeacher ? 'Leaves' : 'Leave Approval',
+        'roles'        => 'Access Control',
+        'sales'        => 'Sales Dashboard',
+        'demos'        => 'Demo Classes',
+        'demo-classes' => 'Demo Classes',
+        'reports'      => 'Reports Feed',
+        'syllabus'     => $isInternal ? 'Syllabus Master' : 'Syllabus',
+        'curriculum'   => 'Curriculum Master',
+        'payroll'      => 'Payroll',
+        'referrals'    => 'Referrals',
+        'feedbacks'    => 'Feedbacks',
+        'feedback'     => 'Feedback',
+        'profile'      => $isInternal ? 'My Profile' : 'Profile',
+        'settings'     => 'Settings',
+        'my-classes'   => 'My Classes',
+        'resources'    => 'Resources',
+    ];
+
+    $headerTitle    = $allNavLabels[$activePage] ?? ucwords(str_replace('-', ' ', $activePage));
+    $headerPreTitle = $headerTitle === 'Dashboard' ? 'Welcome back' : 'You are viewing';
+@endphp
 <!-- HEADER -->
     <header class="header">
       <div class="header-left">
         <button class="menu-toggle">☰</button>
         <div class="header-title-container">
-          <span class="header-pre-title">Welcome back</span>
-          <h1 class="header-title">Dashboard Overview</h1>
+          <span class="header-pre-title">{{ $headerPreTitle }}</span>
+          <h1 class="header-title">{{ $headerTitle }}</h1>
         </div>
       </div>
 
