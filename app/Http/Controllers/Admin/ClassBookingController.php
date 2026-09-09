@@ -21,7 +21,7 @@ class ClassBookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = ClassBooking::with(['student.user', 'teacher.user'])->orderBy('starts_at', 'asc');
+        $query = ClassBooking::with(['student.user', 'teacher.user', 'studentGroup'])->orderBy('starts_at', 'asc');
         
         $today = Carbon::today();
         

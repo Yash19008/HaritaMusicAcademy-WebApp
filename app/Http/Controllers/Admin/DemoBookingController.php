@@ -15,7 +15,7 @@ class DemoBookingController extends Controller
 {
     public function index(): View
     {
-        $demos     = DemoBooking::with(['teacher', 'convertedStudent'])->latest()->get();
+        $demos     = DemoBooking::with(['teacher.user', 'convertedStudent.user'])->latest()->get();
         $scheduled = $demos->where('status', 'scheduled')->count();
         $completed = $demos->where('status', 'completed')->count();
         $converted = $demos->where('status', 'converted')->count();
