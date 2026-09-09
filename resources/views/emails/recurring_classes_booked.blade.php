@@ -235,7 +235,10 @@
                             <td>{{ $booking->starts_at->format('l, M d, Y - h:i A') }}</td>
                             <td>
                                 @if ($booking->google_meet_link)
-                                    <a href="{{ $booking->google_meet_link }}" style="color: #667eea;">Join Meet</a>
+                                    @php
+                                        $joinUrl = $isTeacher ? $booking->teacher_join_url : $booking->student_join_url;
+                                    @endphp
+                                    <a href="{{ $joinUrl }}" style="color: #667eea;">Join Meet</a>
                                 @else
                                     <span style="color: #999;">Pending/N/A</span>
                                 @endif
