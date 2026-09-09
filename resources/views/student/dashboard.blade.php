@@ -432,8 +432,17 @@
                     <p class="text-muted mb-2" style="font-size: 0.85rem;">Keep practicing, great music accomplishments take
                         time.</p>
                     @if ($nextClass)
-                        <button class="btn btn-primary btn-sm"
-                            onclick="alert('Launching Live Audio/Video Stream room...')">Join Next Class</button>
+                        @php
+                            $now = now();
+                            $minutesUntilClass = $now->diffInMinutes($nextClass->starts_at, false);
+                            $canJoin = $minutesUntilClass <= 15 && $now->isBefore($nextClass->ends_at ?? $nextClass->starts_at->copy()->addMinutes($nextClass->duration_minutes ?? 40));
+                        @endphp
+                        @if($canJoin)
+                            <a href="{{ $nextClass->student_join_url }}" target="_blank" class="btn btn-primary btn-sm"
+                                onclick="alert('The call is recorded for quality purposes.')">Join Next Class</a>
+                        @else
+                            <button class="btn btn-primary btn-sm" style="opacity: 0.5; cursor: not-allowed;" disabled title="You can join 15 minutes before the class starts.">Join Next Class</button>
+                        @endif
                     @else
                         <button class="btn btn-primary btn-sm"
                             onclick="window.location.href='{{ route('student.my-classes') }}'">View Schedule</button>
@@ -449,7 +458,15 @@
                         <h4 class="font-semibold text-primary mt-1">
                             {{ $nextClass->title ?? ($student->instrument ?? 'Music Class') }}</h4>
                         <p class="text-muted" style="font-size: 0.8rem;">with <a href="javascript:void(0)"
-                                class="text-primary hover-underline font-semibold">{{ $nextClass->teacher->user->name ?? 'Instructor' }}</a>
+                                class="text-primary hover-underline font-semibold"
+                                data-name="{{ $nextClass->teacher->user->name ?? 'N/A' }}"
+                                data-specialization="{{ $nextClass->teacher->categories ?? 'M/A' }}"
+                                data-level="{{ $nextClass->teacher->level ?? 'N/A' }}"
+                                data-certifications="{{ $nextClass->teacher->certifications ?? 'N/A' }}"
+                                data-bio="{{ $nextClass->teacher->bio ?? 'N/A' }}"
+                                data-youtube="{{ $nextClass->teacher->youtube_url ?? 'N/A' }}"
+                                data-avatar="{{ $nextClass->teacher->user->avatar ?? '' }}"
+                                onclick="showTeacherProfileModal(this)">{{ $nextClass->teacher->user->name ?? 'Instructor' }}</a>
                         </p>
                     </div>
                     <div class="student-class-box mt-2">
@@ -520,6 +537,20 @@
                 </table>
             </div>
         </div>
+        </div>
+    </div>
+
+    {{-- ── Teacher Bio Modal ── --}}
+    <div id="teacherProfileModal" class="modal-backdrop">
+        <div class="modal" style="max-width: 480px;">
+            <div class="modal-header">
+                <h3 class="font-semibold text-serif">Mentor Biography</h3>
+                <button class="modal-close" onclick="closeTeacherProfileModal()">×</button>
+            </div>
+            <div class="modal-body p-4" id="teacherProfileModalBody">
+                <!-- Dynamically populated by JS -->
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -557,6 +588,103 @@
                 </div>
             </div>
         `;
+            }
+        });
+
+        // Teacher bio modal
+        function showTeacherProfileModal(el) {
+            const modal = document.getElementById("teacherProfileModal");
+            const body = document.getElementById("teacherProfileModalBody");
+            if (!modal || !body) return;
+
+            const name = el.getAttribute('data-name');
+            const specialization = el.getAttribute('data-specialization');
+            const level = el.getAttribute('data-level');
+            const certifications = el.getAttribute('data-certifications');
+            const bio = el.getAttribute('data-bio');
+            const youtube = el.getAttribute('data-youtube');
+            const avatarUrl = el.getAttribute('data-avatar');
+
+            // Helper function to extract embed URL
+            const getEmbedUrl = (url) => {
+                if (!url) return null;
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                if (match && match[2].length === 11) {
+                    return "https://www.youtube.com/embed/" + match[2];
+                }
+                return null;
+            };
+
+            const embedUrl = getEmbedUrl(youtube);
+            let youtubeHtml = "";
+            if (embedUrl) {
+                youtubeHtml = `
+                    <div class="mt-3" style="border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+                        <h4 class="font-bold" style="font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--primary);">Featured Performance</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                `;
+            } else {
+                youtubeHtml = `
+                    <div class="mt-3 p-3 text-center text-muted" style="border: 1px dashed var(--border-color); border-radius: var(--radius-md); font-size: 0.8rem; background: var(--bg-body);">
+                        🎥 No featured performance video uploaded yet.
+                    </div>
+                `;
+            }
+
+            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            let avatarHtml = '';
+            if (avatarUrl && avatarUrl !== '') {
+                avatarHtml = `<img src="${avatarUrl}" alt="${name}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.5rem; border: 2.5px solid var(--primary); display: block;">`;
+            } else {
+                avatarHtml = `
+                    <div class="avatar avatar-lg mx-auto" style="width: 70px; height: 70px; font-size: 1.5rem; line-height: 70px; border-radius: 50%; background: var(--primary-light); color: #fff; font-weight: bold; margin-bottom: 0.5rem; border: 2.5px solid var(--primary); display: flex; align-items: center; justify-content: center; margin-left: auto !important; margin-right: auto !important; float: none !important;">
+                        ${initials}
+                    </div>
+                `;
+            }
+
+            body.innerHTML = `
+                <div class="text-center mb-3">
+                    ${avatarHtml}
+                    <h3 class="font-bold text-serif" style="font-size: 1.35rem; margin-bottom: 0.25rem;">${name}</h3>
+                    <span class="badge badge-success" style="font-size: 0.75rem;">Academy Mentor</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Specialization</span>
+                    <span class="font-bold">${specialization}</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Expertise Level</span>
+                    <span class="font-bold">${level}</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Certifications</span>
+                    <span class="font-semibold">${certifications}</span>
+                </div>
+                <div class="mt-3" style="font-size: 0.82rem; line-height: 1.5; color: var(--text-muted); text-align: justify; border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+                    <b>Biography:</b> ${bio}
+                </div>
+                ${youtubeHtml}
+                <button class="btn btn-secondary w-100 mt-4" onclick="closeTeacherProfileModal()">Close Bio</button>
+            `;
+
+            modal.classList.add('show');
+        }
+
+        function closeTeacherProfileModal() {
+            document.getElementById('teacherProfileModal').classList.remove('show');
+        }
+        
+        // Close modal when clicking backdrop
+        window.addEventListener('click', (e) => {
+            const modal = document.getElementById('teacherProfileModal');
+            if (e.target === modal) {
+                closeTeacherProfileModal();
             }
         });
     </script>

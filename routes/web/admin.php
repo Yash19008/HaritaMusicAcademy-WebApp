@@ -36,6 +36,7 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::get('/teachers/{teacher}/slots',             [\App\Http\Controllers\Admin\ClassBookingController::class, 'getAvailableSlots'])->name('class-booking.slots');
         Route::post('/bookings',                            [\App\Http\Controllers\Admin\ClassBookingController::class, 'store'])->name('bookings.store');
         Route::put('/bookings/{booking}/status',            [\App\Http\Controllers\Admin\ClassBookingController::class, 'updateStatus'])->name('bookings.status');
+        Route::post('/class-booking/{booking}/attendance',  [\App\Http\Controllers\Admin\ClassBookingController::class, 'updateAttendance'])->name('class-booking.attendance');
         
         // Rescheduling
         Route::put('/bookings/{booking}/reschedule',        [\App\Http\Controllers\RescheduleController::class, 'adminReschedule'])->name('bookings.reschedule');
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::post('/demos',                                 [\App\Http\Controllers\Admin\DemoBookingController::class, 'store'])->name('demos.store');
         Route::put('/demos/{demo}/status',                    [\App\Http\Controllers\Admin\DemoBookingController::class, 'updateStatus'])->name('demos.status');
         Route::post('/demos/{demo}/convert',                  [\App\Http\Controllers\Admin\DemoBookingController::class, 'convert'])->name('demos.convert');
+        Route::post('/demos/{demo}/attendance',               [\App\Http\Controllers\Admin\DemoBookingController::class, 'updateAttendance'])->name('demos.attendance');
 
         // Reports
         Route::get('/reports/export',                         [AdminController::class, 'exportReports'])->name('reports.export');
@@ -113,6 +115,20 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::post('/credit-packages', [\App\Http\Controllers\Admin\CreditPackageController::class, 'store'])->name('credit-packages.store');
         Route::put('/credit-packages/{creditPackage}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'update'])->name('credit-packages.update');
         Route::delete('/credit-packages/{creditPackage}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'destroy'])->name('credit-packages.destroy');
+
+        // Syllabus
+        Route::get('/syllabus', [\App\Http\Controllers\Admin\SyllabusController::class, 'index'])->name('syllabus.index');
+        Route::post('/syllabus', [\App\Http\Controllers\Admin\SyllabusController::class, 'store'])->name('syllabus.store');
+        Route::put('/syllabus/{syllabus}', [\App\Http\Controllers\Admin\SyllabusController::class, 'update'])->name('syllabus.update');
+        Route::delete('/syllabus/{syllabus}', [\App\Http\Controllers\Admin\SyllabusController::class, 'destroy'])->name('syllabus.destroy');
+        Route::get('/syllabus/{syllabus}/download', [\App\Http\Controllers\Admin\SyllabusController::class, 'download'])->name('syllabus.download');
+
+        // Curriculum
+        Route::get('/curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum.index');
+        Route::post('/curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'store'])->name('curriculum.store');
+        Route::put('/curriculum/{curriculum}', [\App\Http\Controllers\Admin\CurriculumController::class, 'update'])->name('curriculum.update');
+        Route::delete('/curriculum/{curriculum}', [\App\Http\Controllers\Admin\CurriculumController::class, 'destroy'])->name('curriculum.destroy');
+        Route::get('/curriculum/{curriculum}/download', [\App\Http\Controllers\Admin\CurriculumController::class, 'download'])->name('curriculum.download');
 
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');

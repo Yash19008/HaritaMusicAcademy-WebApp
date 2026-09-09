@@ -98,6 +98,7 @@
                 <th data-priority="4">Assigned Teacher</th>
                 <th data-priority="5">Scheduled Date &amp; Time</th>
                 <th data-priority="6">Duration</th>
+                <th data-priority="2">Attendance</th>
                 <th data-priority="2">Meet Link</th>
                 <th data-priority="1">Status (Update Inline)</th>
               </tr>
@@ -111,6 +112,26 @@
                   <td>{{ $demo->teacher->user->name ?? 'N/A' }}</td>
                   <td>{{ $demo->scheduled_at->format('M d, Y h:i A') }}</td>
                   <td>{{ $demo->duration_minutes }} mins</td>
+                  <td>
+                    <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Teacher:</span>
+                            <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px;" onchange="updateAttendance({{ $demo->id }}, 'teacher_attended', this.value)">
+                                <option value="">—</option>
+                                <option value="1" {{ $demo->teacher_attended === true ? 'selected' : '' }}>Present</option>
+                                <option value="0" {{ $demo->teacher_attended === false ? 'selected' : '' }}>Absent</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Student:</span>
+                            <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px;" onchange="updateAttendance({{ $demo->id }}, 'student_attended', this.value)">
+                                <option value="">—</option>
+                                <option value="1" {{ $demo->student_attended === true ? 'selected' : '' }}>Present</option>
+                                <option value="0" {{ $demo->student_attended === false ? 'selected' : '' }}>Absent</option>
+                            </select>
+                        </div>
+                    </div>
+                  </td>
                   <td>
                     @if($demo->google_meet_link)
                       <a href="{{ $demo->google_meet_link }}" target="_blank" class="btn btn-sm" style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
@@ -282,6 +303,38 @@ function updateDemoStatus(selectElement, url) {
     .catch(error => {
         console.error('Error:', error);
         alert('Failed to update status. Please try again.');
+    });
+}
+
+// ── AJAX Attendance Update ─────────────────────────────
+function updateAttendance(demoId, field, value) {
+    if (value === "") value = null;
+    else value = parseInt(value, 10);
+
+    const payload = {};
+    payload[field] = value;
+
+    fetch(`/admin/demos/${demoId}/attendance`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value,
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof showToast !== 'undefined') showToast('Attendance updated successfully', 'success');
+            else alert('Attendance updated successfully');
+        } else {
+            alert('Failed to update attendance');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while updating attendance');
     });
 }
 </script>

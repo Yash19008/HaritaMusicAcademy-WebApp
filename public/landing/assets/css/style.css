@@ -3244,7 +3244,7 @@ details:focus-visible {
 .booking-widget-section {
   position: relative;
   padding: 100px 0;
-  background: url("/assets/images/lotus-background.png") no-repeat left bottom;
+  background: url("/landing/assets/images/lotus-background.png") no-repeat left bottom;
   background-size: cover;
   /* or contain depending on image */
   overflow: hidden;
@@ -4676,7 +4676,7 @@ details:focus-visible {
 .category-card.active-red,
 .category-card:hover,
 .pricing-card.active-red,
-.pricing-card:hover,
+.pricing-card:not(.new-pricing-card):hover,
 .commitment-feature-item.active-red,
 .commitment-feature-item:hover,
 .about-feature-card.active-red,
@@ -4691,7 +4691,7 @@ details:focus-visible {
 }
 
 .category-card:hover *,
-.pricing-card:hover *,
+.pricing-card:not(.new-pricing-card):hover *,
 .commitment-feature-item:hover *,
 .about-feature-card:hover *,
 .step-card:hover *,
@@ -5414,4 +5414,318 @@ details:focus-visible {
   font-weight: 800;
 
   transition: all .3s ease;
+}
+
+/* ============================================================
+   COUNTRY-SPECIFIC PAGES: New Pricing Cards + Country Switcher
+   ============================================================ */
+
+/* --- Plan Type Tabs --- */
+.plan-type-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.75rem 0 2rem;
+}
+
+.plan-type-tab {
+  padding: 0.6rem 1.75rem;
+  border: 2px solid var(--color-primary-green, #2d5a27);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--color-primary-green, #2d5a27);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.22s, color 0.22s;
+  font-family: inherit;
+}
+
+.plan-type-tab:hover,
+.plan-type-tab.active {
+  background: var(--color-primary-green, #2d5a27);
+  color: #fff;
+}
+
+/* --- Pricing Grid Layouts --- */
+.pricing-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.pricing-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.premium-plans-row {
+  margin-top: 1.25rem;
+}
+
+@media (max-width: 1100px) {
+  .pricing-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+
+  .pricing-grid-4,
+  .pricing-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- New Pricing Card --- */
+.new-pricing-card {
+  background: #fff;
+  border: 1.5px solid #e8e0d0;
+  border-radius: 16px;
+  padding: 1.5rem 1.35rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: box-shadow 0.22s, transform 0.22s, border-color 0.22s;
+}
+
+/* Normal card hover — lift + shadow + accent border */
+.new-pricing-card:hover {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px);
+  border-color: var(--color-accent, #C8A56A);
+}
+
+/* Popular card base — gold border + subtle ring */
+.new-pricing-card.is-popular {
+  border-color: var(--color-accent, #C8A56A);
+  box-shadow: 0 0 0 3px rgba(200, 165, 106, 0.18);
+}
+
+/* Popular card hover — same lift, keep accent ring */
+.new-pricing-card.is-popular:hover {
+  box-shadow: 0 12px 36px rgba(200, 165, 106, 0.3);
+  transform: translateY(-5px);
+  border-color: var(--color-accent, #C8A56A);
+}
+
+/* Premium card hover — identical to normal card (no special dark treatment) */
+.new-pricing-card.is-premium {
+  border-color: #2d5a27;
+  background: linear-gradient(135deg, #f8fbf6 0%, #fff 100%);
+}
+
+.new-pricing-card.is-premium:hover {
+  box-shadow: 0 12px 36px rgba(45, 90, 39, 0.18);
+  transform: translateY(-5px);
+  border-color: #2d5a27;
+  background: linear-gradient(135deg, #f8fbf6 0%, #fff 100%);
+}
+
+/* Duration pill — stays visible on ALL hover states */
+.new-pricing-card:hover .plan-duration-pill,
+.new-pricing-card.is-popular:hover .plan-duration-pill,
+.new-pricing-card.is-premium:hover .plan-duration-pill {
+  background: #e8f5e9;
+  color: #2d5a27;
+}
+
+/* Programme label — keep gold on hover */
+.new-pricing-card:hover .plan-programme-label {
+  color: var(--color-accent, #C8A56A);
+}
+
+/* Detail text — keep dark on hover */
+.new-pricing-card:hover .plan-detail-row,
+.new-pricing-card:hover .plan-tier-title {
+  color: inherit;
+}
+
+/* Price — keep green on hover */
+.new-pricing-card:hover .price-amount {
+  color: var(--color-primary-green, #2d5a27);
+}
+
+/* --- Popular / Premium Badges --- */
+.badge-popular {
+  position: absolute;
+  top: -0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-accent, #C8A56A);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.9rem;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.badge-premium {
+  position: absolute;
+  top: -0.65rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-primary-green, #2d5a27);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0.9rem;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+/* --- Card Meta / Programme label --- */
+.new-pricing-card-top {
+  flex: 1;
+  margin-bottom: 1rem;
+}
+
+.new-pricing-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.plan-programme-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-accent, #C8A56A);
+}
+
+.plan-duration-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f3f4f6;
+  color: #555;
+  padding: 0.2rem 0.65rem;
+  border-radius: 50px;
+}
+
+.plan-tier-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin: 0.35rem 0 0.75rem;
+  font-family: var(--font-serif, serif);
+}
+
+.plan-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.plan-detail-row svg {
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.group-type-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-primary-green, #2d5a27);
+}
+
+/* --- Price Display --- */
+.new-pricing-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.price-amount {
+  font-size: 1.75rem;
+  font-weight: 900;
+  color: var(--color-primary-green, #2d5a27);
+  font-family: var(--font-sans, sans-serif);
+  line-height: 1;
+}
+
+.price-per-label {
+  font-size: 0.75rem;
+  color: #888;
+  font-weight: 500;
+}
+
+/* --- Country Switcher Dropdown --- */
+.country-switcher {
+  position: relative;
+}
+
+.country-switcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  color: inherit;
+  padding: 0.35rem 0.7rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.country-switcher-btn:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.country-switcher-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 0.4rem;
+  min-width: 155px;
+  z-index: 1000;
+}
+
+.country-switcher-dropdown.open {
+  display: block;
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #333;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.15s;
+}
+
+.country-option:hover {
+  background: #f3f4f6;
+}
+
+.country-option.active {
+  background: #f0f7ee;
+  color: var(--color-primary-green, #2d5a27);
+  font-weight: 700;
 }

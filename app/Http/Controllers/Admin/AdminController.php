@@ -138,6 +138,9 @@ class AdminController extends Controller
 
         $studentData = collect($data)->except(['assigned_group', 'timezone', 'courses'])->toArray();
         $studentData['user_id'] = $user->id;
+        if (!empty($data['courses'])) {
+            $studentData['course_id'] = $data['courses'][0];
+        }
         $student = Student::create($studentData);
         
         if ($data['enrolled_format'] === 'Group' && !empty($data['assigned_group'])) {
@@ -194,7 +197,13 @@ class AdminController extends Controller
             ]);
         }
 
-        $student->update(collect($data)->except(['assigned_group', 'timezone', 'courses'])->toArray());
+        $studentData = collect($data)->except(['assigned_group', 'timezone', 'courses'])->toArray();
+        if (!empty($data['courses'])) {
+            $studentData['course_id'] = $data['courses'][0];
+        } else {
+            $studentData['course_id'] = null;
+        }
+        $student->update($studentData);
         
         if ($data['enrolled_format'] === 'Group' && !empty($data['assigned_group'])) {
             $student->groups()->sync([$data['assigned_group']]);

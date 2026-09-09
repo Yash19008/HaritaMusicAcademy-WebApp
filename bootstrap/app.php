@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'role.access' => \App\Http\Middleware\RoleAccess::class,
+            'set.locale'  => \App\Http\Middleware\SetLocale::class,
         ]);
 
         $middleware->redirectUsersTo(function (\Illuminate\Http\Request $request) {

@@ -103,7 +103,9 @@
                             <div class="booking-step-num">02</div>
                             <div>
                                 <h4 class="booking-step-title">Make Payment</h4>
-                                <p class="booking-step-desc">Securely pay ₹499 online.</p>
+                                <p class="booking-step-desc">Securely pay
+                                    {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }}
+                                    online.</p>
                             </div>
                         </div>
                         <div class="booking-step-item">
@@ -187,18 +189,24 @@
                                 </svg>
                             </div>
                             <h3 class="security-card-title">Safe & Secure Payments</h3>
-                            <p class="security-card-desc">₹499 Demo Class Fee is Fully Adjustable.</p>
+                            <p class="security-card-desc">
+                                {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} Demo
+                                Class Fee is Fully Adjustable.</p>
                             <div class="security-features-list">
 
                                 <div class="security-feature-bullet">
                                     <span class="bullet-icon-wrapper green-check">✓</span>
-                                    <span class="bullet-text">We charge a fee of ₹499 to filter out non-serious
+                                    <span class="bullet-text">We charge a fee of
+                                        {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }}
+                                        to filter out non-serious
                                         applications.</span>
                                 </div>
                                 <div class="security-feature-bullet">
                                     <span class="bullet-icon-wrapper green-check">✓</span>
                                     <span class="bullet-text">If you enroll in any course after the demo class, the
-                                        entire ₹499 will be adjusted in your course fee. If you choose not to
+                                        entire
+                                        {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }}
+                                        will be adjusted in your course fee. If you choose not to
                                         enroll, the demo fee is non-refundable.</span>
                                 </div>
                                 <div class="security-feature-bullet">
@@ -228,8 +236,11 @@
             <div class="modal-header"
                 style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
                 <div>
-                    <h3 class="font-semibold text-serif" style="margin:0; font-size: 1.4rem; color: #111;">Book Your Demo Class</h3>
-                    <p style="margin:0.25rem 0 0; font-size:0.8rem; color:#888;">₹499 · Fully adjustable towards course fee</p>
+                    <h3 class="font-semibold text-serif" style="margin:0; font-size: 1.4rem; color: #111;">Book Your Demo
+                        Class</h3>
+                    <p style="margin:0.25rem 0 0; font-size:0.8rem; color:#888;">
+                        {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} · Fully
+                        adjustable towards course fee</p>
                 </div>
                 <button class="modal-close" onclick="closeDemoModal()"
                     style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
@@ -242,13 +253,18 @@
                     <!-- Row 1: Name + Phone -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Full Name *</label>
-                            <input type="text" id="demo_student_name" name="student_name" required placeholder="e.g. Priya Sharma"
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Full
+                                Name *</label>
+                            <input type="text" id="demo_student_name" name="student_name" required
+                                placeholder="e.g. Priya Sharma"
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box; transition:border-color .2s;"
                                 onfocus="this.style.borderColor='#51040e'" onblur="this.style.borderColor='#ddd'">
                         </div>
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Phone Number *</label>
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Phone
+                                Number *</label>
                             <input type="tel" id="demo_phone" name="phone" required placeholder="+91 98765 43210"
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box; transition:border-color .2s;"
                                 onfocus="this.style.borderColor='#51040e'" onblur="this.style.borderColor='#ddd'">
@@ -257,39 +273,49 @@
 
                     <!-- Row 2: Email -->
                     <div class="form-group" style="margin-bottom: 0.75rem;">
-                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Email Address *</label>
+                        <label
+                            style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Email
+                            Address *</label>
                         <input type="email" id="demo_email" name="email" required placeholder="you@example.com"
                             style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box; transition:border-color .2s;"
                             onfocus="this.style.borderColor='#51040e'" onblur="this.style.borderColor='#ddd'">
                     </div>
 
-                    <!-- Row 3: Instrument -->
-                    <div class="form-group" style="margin-bottom: 0.75rem;">
-                        <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Instrument / Course *</label>
-                        <select id="demo_instrument" name="instrument" required
-                            style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
-                            <option value="">Select an instrument...</option>
-                            <option value="Hindustani Classical Vocal">Hindustani Classical Vocal</option>
-                            <option value="Bollywood Singing">Bollywood Singing</option>
-                            <option value="Keyboard">Keyboard</option>
-                            <option value="Harmonium">Harmonium</option>
-                            <option value="Tabla">Tabla</option>
-                            <option value="Piano">Piano</option>
-                            <option value="Guitar">Guitar</option>
-                            <option value="Other">Other</option>
-                        </select>
+                    <!-- Row 3: Plan Type + Programme -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                        <div class="form-group">
+                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Plan Type *</label>
+                            <select id="demo_plan_type" name="plan_type" required onchange="updateProgrammeOptions()"
+                                style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
+                                <option value="">Select Plan Type...</option>
+                                <option value="individual">Individual Plans</option>
+                                <option value="group">Group Plans</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Programme *</label>
+                            <select id="demo_programme" name="programme" required
+                                style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
+                                <option value="">Select Programme...</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Row 4: Preferred Date + Time -->
-                    <div id="demo_datetime_row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                    <div id="demo_datetime_row"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Preferred Date *</label>
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Preferred
+                                Date *</label>
                             <input type="date" id="demo_preferred_date" name="preferred_date" required
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; font-size:0.9rem; box-sizing:border-box;"
                                 min="{{ now()->format('Y-m-d') }}">
                         </div>
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Preferred Time *</label>
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Preferred
+                                Time *</label>
                             <select id="demo_preferred_time" name="preferred_time" required
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
                                 <option value="">Select time slot...</option>
@@ -325,12 +351,21 @@
                     </div>
 
                     <!-- Error message -->
-                    <div id="demoFormError" style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:0.75rem 1rem; border-radius:8px; font-size:0.85rem; margin-bottom:0.75rem;"></div>
+                    <div id="demoFormError"
+                        style="display:none; background:#fef2f2; border:1px solid #fecaca; color:#dc2626; padding:0.75rem 1rem; border-radius:8px; font-size:0.85rem; margin-bottom:0.75rem;">
+                    </div>
 
                     <!-- Security trust signals -->
-                    <div style="display:flex; align-items:center; gap:0.5rem; background:#f9fafb; border-radius:8px; padding:0.6rem 0.9rem; margin-top:0.5rem;">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span style="font-size:0.78rem; color:#555;">100% Secure · Powered by Razorpay · ₹499 adjustable towards your course</span>
+                    <div
+                        style="display:flex; align-items:center; gap:0.5rem; background:#f9fafb; border-radius:8px; padding:0.6rem 0.9rem; margin-top:0.5rem;">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#16a34a"
+                            stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                        <span style="font-size:0.78rem; color:#555;">100% Secure · Powered by Razorpay ·
+                            {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }}
+                            adjustable towards your course</span>
                     </div>
                 </div>
 
@@ -341,8 +376,15 @@
                     </button>
                     <button type="submit" id="demoSubmitBtn" class="btn btn-primary"
                         style="flex:2; padding:0.85rem; border-radius:50px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:0.5rem;">
-                        <span id="demoSubmitText">Pay ₹499 &amp; Book Demo</span>
-                        <svg id="demoSubmitSpinner" style="display:none; animation:spin 1s linear infinite;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                        <span id="demoSubmitText">Pay
+                            {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} &amp;
+                            Book Demo</span>
+                        <svg id="demoSubmitSpinner" style="display:none; animation:spin 1s linear infinite;"
+                            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <path
+                                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                        </svg>
                     </button>
                 </div>
             </form>
@@ -352,164 +394,199 @@
     <!-- Success Modal (shown after payment verified) -->
     <div id="demoSuccessModal" class="modal-backdrop" style="display:none;">
         <div class="modal" style="max-width:420px; text-align:center; padding:2.5rem;">
-            <div style="width:70px; height:70px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
-                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            <div
+                style="width:70px; height:70px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
+                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#16a34a"
+                    stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
             </div>
             <h3 style="font-size:1.4rem; color:#111; margin:0 0 0.5rem;">Demo Booked! 🎵</h3>
             <p style="color:#555; font-size:0.9rem; line-height:1.6; margin:0 0 1.5rem;">
                 Your payment is confirmed. Our team will reach out within a few hours to confirm your exact demo slot.
             </p>
-            <button onclick="let m = document.getElementById('demoSuccessModal'); m.classList.remove('show'); setTimeout(() => m.style.display='none', 300);" class="btn btn-primary"
-                style="padding:0.75rem 2rem; border-radius:50px; font-weight:600;">
+            <button
+                onclick="let m = document.getElementById('demoSuccessModal'); m.classList.remove('show'); setTimeout(() => m.style.display='none', 300);"
+                class="btn btn-primary" style="padding:0.75rem 2rem; border-radius:50px; font-weight:600;">
                 Done
             </button>
         </div>
     </div>
 
     @if (session('demo_success'))
-    <script>
-        document.addEventListener('DOMContentLoaded', () => { 
-            const sModal = document.getElementById('demoSuccessModal');
-            sModal.style.display = 'flex';
-            void sModal.offsetWidth;
-            sModal.classList.add('show');
-        });
-    </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const sModal = document.getElementById('demoSuccessModal');
+                sModal.style.display = 'flex';
+                void sModal.offsetWidth;
+                sModal.classList.add('show');
+            });
+        </script>
     @endif
 
-    <!-- Razorpay Checkout JS -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-    (function () {
-        const VERIFY_URL   = "{{ route('payment.verify') }}";
-        const CREATE_URL   = "{{ route('payment.create') }}";
-        const CSRF_TOKEN   = document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
+        (function() {
+            const VERIFY_URL = "{{ route('payment.verify') }}";
+            const CREATE_URL = "{{ route('payment.create') }}";
+            const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
+            const COUNTRY = "{{ $country ?? 'in' }}";
+            const CURRENCY = "{{ $locale['currency_code'] ?? 'INR' }}";
+            const DEMO_PRICE = {{ $locale['demo_price'] ?? 499 }};
+            const CUR_SYM = "{{ $locale['currency_sym'] ?? '₹' }}";
 
-        window.handleDemoSubmit = async function(e) {
-            e.preventDefault();
-            const form    = document.getElementById('demoBookingForm');
-            const errBox  = document.getElementById('demoFormError');
-            const btn     = document.getElementById('demoSubmitBtn');
-            const spinner = document.getElementById('demoSubmitSpinner');
-            const btnText = document.getElementById('demoSubmitText');
+            window.handleDemoSubmit = async function(e) {
+                e.preventDefault();
+                const form = document.getElementById('demoBookingForm');
+                const errBox = document.getElementById('demoFormError');
+                const btn = document.getElementById('demoSubmitBtn');
+                const spinner = document.getElementById('demoSubmitSpinner');
+                const btnText = document.getElementById('demoSubmitText');
 
-            // — Client-side validation —
-            const name  = document.getElementById('demo_student_name').value.trim();
-            const phone = document.getElementById('demo_phone').value.trim();
-            const email = document.getElementById('demo_email').value.trim();
-            const instrument = document.getElementById('demo_instrument').value;
-            const date  = document.getElementById('demo_preferred_date').value;
-            const time  = document.getElementById('demo_preferred_time').value;
+                // — Client-side validation —
+                const name = document.getElementById('demo_student_name').value.trim();
+                const phone = document.getElementById('demo_phone').value.trim();
+                const email = document.getElementById('demo_email').value.trim();
+                const planTypeRaw = document.getElementById('demo_plan_type').value;
+                const programmeRaw = document.getElementById('demo_programme').value;
+                const date = document.getElementById('demo_preferred_date').value;
+                const time = document.getElementById('demo_preferred_time').value;
 
-            errBox.style.display = 'none';
+                errBox.style.display = 'none';
 
-            if (!name || !phone || !email || !instrument || !date || !time) {
-                errBox.textContent = 'Please fill in all required fields.';
-                errBox.style.display = 'block';
-                return;
-            }
-            if (!/^\S+@\S+\.\S+$/.test(email)) {
-                errBox.textContent = 'Please enter a valid email address.';
-                errBox.style.display = 'block';
-                return;
-            }
-
-            // — Show loading state —
-            btn.disabled = true;
-            spinner.style.display = 'inline-block';
-            btnText.textContent = 'Preparing Payment…';
-
-            try {
-                // Step 1: Create order server-side
-                const orderResp = await fetch(CREATE_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
-                    body: JSON.stringify({ student_name: name, email, phone, instrument, preferred_date: date, preferred_time: time })
-                });
-                const orderData = await orderResp.json();
-
-                if (!orderData.success) {
-                    throw new Error(orderData.message || 'Could not initialize payment.');
+                if (!name || !phone || !email || !planTypeRaw || !programmeRaw || !date || !time) {
+                    errBox.textContent = 'Please fill in all required fields.';
+                    errBox.style.display = 'block';
+                    return;
+                }
+                
+                // Format Plan Type for backend
+                const planTypeFormatted = planTypeRaw.charAt(0).toUpperCase() + planTypeRaw.slice(1);
+                const instrument = `${planTypeFormatted} - ${programmeRaw}`;
+                if (!/^\S+@\S+\.\S+$/.test(email)) {
+                    errBox.textContent = 'Please enter a valid email address.';
+                    errBox.style.display = 'block';
+                    return;
                 }
 
-                // Step 2: Open Razorpay Checkout
-                btnText.textContent = 'Pay ₹499 & Book Demo';
-                spinner.style.display = 'none';
-                btn.disabled = false;
+                // — Show loading state —
+                btn.disabled = true;
+                spinner.style.display = 'inline-block';
+                btnText.textContent = 'Preparing Payment…';
 
-                const options = {
-                    key:         orderData.key,
-                    amount:      orderData.amount,   // in paise, set by server
-                    currency:    'INR',
-                    name:        'Harita Music Academy',
-                    description: 'Demo Class Booking',
-                    order_id:    orderData.order_id,
-                    prefill: {
-                        name:    name,
-                        email:   email,
-                        contact: phone,
-                    },
-                    theme:       { color: '#51040e' },
-                    modal: {
-                        ondismiss: function() {
-                            // User closed modal without paying — no action needed
-                        }
-                    },
-                    handler: async function(response) {
-                        // Step 3: Verify payment signature server-side
-                        btn.disabled = true;
-                        btnText.textContent = 'Verifying…';
-                        spinner.style.display = 'inline-block';
+                try {
+                    // Step 1: Create order server-side
+                    const orderResp = await fetch(CREATE_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            student_name: name,
+                            email,
+                            phone,
+                            instrument,
+                            preferred_date: date,
+                            preferred_time: time,
+                            country: COUNTRY // sent to server; server resolves price/currency from config
+                        })
+                    });
+                    const orderData = await orderResp.json();
 
-                        try {
-                            const verifyResp = await fetch(VERIFY_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Accept': 'application/json' },
-                                body: JSON.stringify({
-                                    razorpay_order_id:   response.razorpay_order_id,
-                                    razorpay_payment_id: response.razorpay_payment_id,
-                                    razorpay_signature:  response.razorpay_signature,
-                                    payment_db_id:       orderData.payment_db_id,
-                                })
-                            });
-                            const verifyData = await verifyResp.json();
-
-                            if (verifyData.success) {
-                                closeDemoModal();
-                                const sModal = document.getElementById('demoSuccessModal');
-                                sModal.style.display = 'flex';
-                                void sModal.offsetWidth;
-                                sModal.classList.add('show');
-                            } else {
-                                throw new Error(verifyData.message || 'Verification failed.');
-                            }
-                        } catch (verifyErr) {
-                            errBox.textContent = verifyErr.message || 'Payment verified but confirmation failed. Please contact support.';
-                            errBox.style.display = 'block';
-                        } finally {
-                            btn.disabled = false;
-                            btnText.textContent = 'Pay ₹499 & Book Demo';
-                            spinner.style.display = 'none';
-                        }
+                    if (!orderData.success) {
+                        throw new Error(orderData.message || 'Could not initialize payment.');
                     }
-                };
 
-                const rzp = new Razorpay(options);
-                rzp.on('payment.failed', function(resp) {
-                    errBox.textContent = 'Payment failed: ' + (resp.error?.description || 'Please try again.');
+                    // Step 2: Open Razorpay Checkout
+                    const displayText = `Pay ${CUR_SYM}${DEMO_PRICE.toLocaleString()} & Book Demo`;
+                    btnText.textContent = displayText;
+                    spinner.style.display = 'none';
+                    btn.disabled = false;
+
+                    const options = {
+                        key: orderData.key,
+                        amount: orderData.amount, // smallest unit, set by server
+                        currency: orderData.currency ?? CURRENCY, // from server response
+                        name: 'Harita Music Academy',
+                        description: 'Demo Class Booking',
+                        order_id: orderData.order_id,
+                        prefill: {
+                            name: name,
+                            email: email,
+                            contact: phone,
+                        },
+                        theme: {
+                            color: '#51040e'
+                        },
+                        modal: {
+                            ondismiss: function() {
+                                // User closed modal without paying — no action needed
+                            }
+                        },
+                        handler: async function(response) {
+                            // Step 3: Verify payment signature server-side
+                            btn.disabled = true;
+                            btnText.textContent = 'Verifying…';
+                            spinner.style.display = 'inline-block';
+
+                            try {
+                                const verifyResp = await fetch(VERIFY_URL, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': CSRF_TOKEN,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({
+                                        razorpay_order_id: response.razorpay_order_id,
+                                        razorpay_payment_id: response
+                                            .razorpay_payment_id,
+                                        razorpay_signature: response.razorpay_signature,
+                                        payment_db_id: orderData.payment_db_id,
+                                    })
+                                });
+                                const verifyData = await verifyResp.json();
+
+                                if (verifyData.success) {
+                                    closeDemoModal();
+                                    const sModal = document.getElementById('demoSuccessModal');
+                                    sModal.style.display = 'flex';
+                                    void sModal.offsetWidth;
+                                    sModal.classList.add('show');
+                                } else {
+                                    throw new Error(verifyData.message || 'Verification failed.');
+                                }
+                            } catch (verifyErr) {
+                                errBox.textContent = verifyErr.message ||
+                                    'Payment verified but confirmation failed. Please contact support.';
+                                errBox.style.display = 'block';
+                            } finally {
+                                btn.disabled = false;
+                                btnText.textContent = displayText;
+                                spinner.style.display = 'none';
+                            }
+                        }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.on('payment.failed', function(resp) {
+                        errBox.textContent = 'Payment failed: ' + (resp.error?.description ||
+                            'Please try again.');
+                        errBox.style.display = 'block';
+                    });
+                    rzp.open();
+
+                } catch (err) {
+                    errBox.textContent = err.message || 'Something went wrong. Please try again.';
                     errBox.style.display = 'block';
-                });
-                rzp.open();
-
-            } catch (err) {
-                errBox.textContent = err.message || 'Something went wrong. Please try again.';
-                errBox.style.display = 'block';
-                btn.disabled = false;
-                btnText.textContent = 'Pay ₹499 & Book Demo';
-                spinner.style.display = 'none';
-            }
-        };
-    })();
+                    btn.disabled = false;
+                    btnText.textContent = `Pay ${CUR_SYM}${DEMO_PRICE.toLocaleString()} & Book Demo`;
+                    spinner.style.display = 'none';
+                }
+            };
+        })();
     </script>
 
     <!-- 4. Courses Offered Section (Explore by Category design preference) -->
@@ -1133,196 +1210,60 @@
                             </svg>
                         </button>
                     </div>
-                </div>
+                </div>{{-- end split-left-sticky --}}
 
                 <div class="cards-scroll-wrap-three" id="test-cards-container">
-                    <!-- Testimonial 1 -->
-                    <div class="testimonial-card reveal-right" style="transition-delay: 0.00s;">
-                        <div>
-                            <div class="testimonial-card-top">
-                                <div class="test-avatar-ring">
-                                    <img src="{{ asset('landing/assets/') }}/images/teachers/img1.png?v=1.0.1"
-                                        alt="Brijesh Chaturvedi Portrait">
-                                </div>
-                                <div class="test-badge-info">
-                                    <div class="test-stars-row" aria-label="5 star rating">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
+
+                    @foreach ($locale['reviews'] as $i => $review)
+                        <div class="testimonial-card reveal-right"
+                            style="transition-delay: {{ number_format($i * 0.15, 2) }}s;">
+                            <div>
+                                <div class="testimonial-card-top">
+                                    <div class="test-avatar-ring">
+                                        <img src="{{ asset('landing/assets/reviews/' . $review['img']) }}"
+                                            alt="{{ $review['name'] }} Portrait" loading="lazy">
                                     </div>
-                                    <span class="test-verified-badge">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z">
-                                            </path>
-                                        </svg>
-                                        Verified student
-                                    </span>
-                                    <span class="test-location-lbl">Chennai</span>
-                                </div>
-                            </div>
-
-
-
-                            <p class="testimonial-card-quote">“I found a wonderful teacher within a couple of days.
-                                The live 1:1 classes are so much better than watching videos.”</p>
-                        </div>
-                        <div class="testimonial-card-footer">
-                            <span class="testimonial-card-name">Brijesh Chaturvedi</span>
-                            <span class="testimonial-card-date">1 Jul 2026</span>
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 2 -->
-                    <div class="testimonial-card reveal-right" style="transition-delay: 0.15s;">
-                        <div>
-                            <div class="testimonial-card-top">
-                                <div class="test-avatar-ring">
-                                    <img src="{{ asset('landing/assets/') }}/images/teachers/img2.png?v=1.0.1"
-                                        alt="Sen Gupta Portrait">
-                                </div>
-                                <div class="test-badge-info">
-                                    <div class="test-stars-row" aria-label="5 star rating">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
+                                    <div class="test-badge-info">
+                                        <div class="test-stars-row" aria-label="5 star rating">
+                                            @for ($s = 0; $s < 5; $s++)
+                                                <svg viewBox="0 0 24 24">
+                                                    <path
+                                                        d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
+                                                    </path>
+                                                </svg>
+                                            @endfor
+                                        </div>
+                                        <span class="test-verified-badge">
+                                            <svg viewBox="0 0 24 24">
+                                                <path
+                                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z">
+                                                </path>
+                                            </svg>
+                                            Verified {{ $review['type'] }}
+                                        </span>
+                                        <span class="test-location-lbl">{{ $review['loc'] }}</span>
                                     </div>
-                                    <span class="test-verified-badge">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z">
-                                            </path>
-                                        </svg>
-                                        Verified student
-                                    </span>
-                                    <span class="test-location-lbl">New Delhi</span>
                                 </div>
+
+                                <p class="testimonial-card-quote">{{ $review['quote'] }}</p>
                             </div>
-
-
-
-                            <p class="testimonial-card-quote">“My son has been learning every week for six months
-                                now. His teacher is patient and genuinely brilliant.”</p>
-                        </div>
-                        <div class="testimonial-card-footer">
-                            <span class="testimonial-card-name">Sen Gupta</span>
-                            <span class="testimonial-card-date">2 Jul 2026</span>
-                        </div>
-                    </div>
-
-                    <!-- Testimonial 3 -->
-                    <div class="testimonial-card reveal-right" style="transition-delay: 0.30s;">
-                        <div>
-                            <div class="testimonial-card-top">
-                                <div class="test-avatar-ring">
-                                    <img src="{{ asset('landing/assets/') }}/images/teachers/img3.png?v=1.0.1"
-                                        alt="Coco Portrait">
-                                </div>
-                                <div class="test-badge-info">
-                                    <div class="test-stars-row" aria-label="5 star rating">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                    <span class="test-verified-badge">
-                                        <svg viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z">
-                                            </path>
-                                        </svg>
-                                        Verified student
-                                    </span>
-                                    <span class="test-location-lbl">Pune</span>
-                                </div>
+                            <div class="testimonial-card-footer">
+                                <span class="testimonial-card-name">{{ $review['name'] }}</span>
+                                <span class="testimonial-card-date">{{ $review['date'] }}</span>
                             </div>
-
-
-
-                            <p class="testimonial-card-quote">“Booked live lessons flexible timings, a verified
-                                teacher, and secure payment. Exactly what I was looking for.”</p>
                         </div>
-                        <div class="testimonial-card-footer">
-                            <span class="testimonial-card-name">Coco</span>
-                            <span class="testimonial-card-date">3 Jul 2026</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    @endforeach
+
+                </div>{{-- end cards-scroll-wrap-three --}}
+
+            </div>{{-- end split-layout --}}
+        </div>{{-- end container --}}
     </section>
 
     <!-- 5. Course Fees & Pricing Section -->
     <section class="section section-alt reveal" id="pricing"
         style="overflow: hidden; background: url('/{{ asset('landing/assets/') }}/images/lotus-background.png') no-repeat left top;">
         <div class="container pricing-grid-wrap">
-
-
 
             <div class="section-header reveal-scale">
                 <span class="section-label">Tuition Plans</span>
@@ -1334,134 +1275,119 @@
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
                     </svg>
                 </div>
-                <h2 class="section-title" style="color: var(--color-primary-green);">Simple & Transparent Pricing
-                </h2>
+                <h2 class="section-title" style="color: var(--color-primary-green);">Simple &amp; Transparent Pricing</h2>
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 1.25rem 0;">
-                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
-                    </div>
+                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;"></div>
                     <div style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
                     </div>
-                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
-                    </div>
+                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;"></div>
                 </div>
-                <p class="section-description">Choose a flexible learning structure that fits your musical goals. No
-                    hidden fees.</p>
+                <p class="section-description">Choose a flexible learning structure that fits your musical goals. No hidden
+                    fees.</p>
             </div>
 
-            <div class="pricing-grid">
-                <!-- Individual 1-Month Plans -->
-                <div class="pricing-card reveal-scale" style="transition-delay: 0s;">
-                    <div class="pricing-card-badge-top">
-                        <!-- User Silhouette Icon -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
-                            <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round">
-                            </circle>
-                        </svg>
-                    </div>
-                    <div class="pricing-header">
-                        <span class="plan-type">Individual Learning</span>
-                        <h3 class="plan-title">One Month Plan</h3>
-                        <div class="pricing-card-separator">
-                            <div class="pricing-card-separator-dot"></div>
-                        </div>
-                    </div>
-                    <div class="pricing-rates">
-                        <div class="rate-row">
-                            <span class="rate-classes">8 Live Classes</span>
-                            <span class="rate-price">₹3,600</span>
-                        </div>
-                        <div class="rate-row">
-                            <span class="rate-classes">12 Live Classes</span>
-                            <span class="rate-price">₹5,400</span>
-                        </div>
-                        <div class="rate-row">
-                            <span class="rate-classes">20 Live Classes</span>
-                            <span class="rate-price">₹9,000</span>
-                        </div>
-                    </div>
-                    <a href="#trial" class="btn btn-solid pricing-cta">Enroll Now</a>
-                </div>
-
-                <!-- Individual 3-Month Plans (Recommended) -->
-                <div class="pricing-card recommended reveal-scale" style="transition-delay: 0.15s;">
-                    <span class="best-value-label">MOST PREFERRED</span>
-                    <div class="pricing-card-badge-top" style="background-color: var(--color-primary-green);">
-                        <!-- Star Icon -->
-                        <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                            <polygon
-                                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
-                            </polygon>
-                        </svg>
-                    </div>
-                    <div class="pricing-header">
-                        <span class="plan-type">Individual Learning</span>
-                        <h3 class="plan-title">Three Month Plan</h3>
-                        <div class="pricing-card-separator">
-                            <div class="pricing-card-separator-dot"></div>
-                        </div>
-                    </div>
-                    <div class="pricing-rates">
-                        <div class="rate-row">
-                            <span class="rate-classes">24 Live Classes</span>
-                            <span class="rate-price">
-                                <span class="old-price">₹16,999</span>
-                                <span class="price-arrow">→</span>
-                                <span class="new-price">₹9,700</span>
-                            </span>
-                        </div>
-                        <div class="rate-row">
-                            <span class="rate-classes">36 Live Classes</span>
-                            <span class="rate-price">
-                                <span class="old-price">₹24,999</span>
-                                <span class="price-arrow">→</span>
-                                <span class="new-price">₹14,500</span>
-                            </span>
-                        </div>
-                        <div class="rate-row">
-                            <span class="rate-classes">60 Live Classes</span>
-                            <span class="rate-price">
-                                <span class="old-price">₹39,999</span>
-                                <span class="price-arrow">→</span>
-                                <span class="new-price">₹24,700</span>
-                            </span>
-                        </div>
-                    </div>
-                    <a href="#trial" class="btn btn-solid pricing-cta">Enroll Now</a>
-                </div>
-
-                <!-- Group Classes -->
-                <div class="pricing-card reveal-scale" style="transition-delay: 0.3s;">
-                    <div class="pricing-card-badge-top">
-                        <!-- Group Icon -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round"
-                                stroke-linejoin="round"></path>
-                            <circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round">
-                            </circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87" stroke-linecap="round" stroke-linejoin="round">
-                            </path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round" stroke-linejoin="round">
-                            </path>
-                        </svg>
-                    </div>
-                    <div class="pricing-header">
-                        <span class="plan-type">Group Learning</span>
-                        <h3 class="plan-title">Group Classes</h3>
-                        <div class="pricing-card-separator">
-                            <div class="pricing-card-separator-dot"></div>
-                        </div>
-                    </div>
-                    <div class="pricing-rates" style="margin-bottom: 7.75rem;">
-                        <div class="rate-row">
-                            <span class="rate-classes">8 Live Classes (4 members per group)</span>
-                            <span class="rate-price">₹2,000</span>
-                        </div>
-                    </div>
-                    <a href="#trial" class="btn btn-solid pricing-cta">Enroll Now</a>
-                </div>
+            {{-- ── Plan Type Tabs ── --}}
+            <div class="plan-type-tabs">
+                <button class="plan-type-tab active" data-tab="individual"
+                    onclick="switchPlanTab('individual', this)">Individual Plans</button>
+                <button class="plan-type-tab" data-tab="group" onclick="switchPlanTab('group', this)">Group
+                    Plans</button>
             </div>
+
+            {{-- ── Individual Plans ── --}}
+            @php
+                $sym = $locale['currency_sym'] ?? '₹';
+            @endphp
+
+            <div id="tab-individual" class="plan-tab-content">
+                <div class="pricing-grid pricing-grid-3">
+                    @foreach ($locale['individual_plans'] ?? [] as $plan)
+                        <div
+                            class="pricing-card new-pricing-card reveal-scale {{ $plan['popular'] ?? false ? 'is-popular' : '' }} {{ $plan['premium'] ?? false ? 'is-premium' : '' }}">
+                            @if ($plan['popular'] ?? false)
+                                <span class="badge-popular">MOST POPULAR</span>
+                            @endif
+                            @if ($plan['premium'] ?? false)
+                                <span class="badge-premium">⭐ PREMIUM</span>
+                            @endif
+                            <div class="new-pricing-card-top">
+                                <div class="new-pricing-card-meta">
+                                    <span class="plan-programme-label">{{ $plan['programme'] }}</span>
+                                    <span class="plan-duration-pill">{{ $plan['duration'] }}</span>
+                                </div>
+                                <h3 class="plan-tier-title">{{ $plan['tier'] }}</h3>
+                                <div class="plan-detail-row">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14" height="14">
+                                        <path
+                                            d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                                    </svg>
+                                    <span>{{ $plan['classes'] }} Live Classes</span>
+                                </div>
+                                <div class="plan-detail-row">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14" height="14">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                    <span>{{ $plan['per_week'] }} classes/week · 40 min/class</span>
+                                </div>
+                            </div>
+                            <div class="new-pricing-card-price">
+                                <span class="price-amount">{{ $sym }}{{ number_format($plan['price']) }}</span>
+                            </div>
+                            <a href="#trial" class="btn btn-solid pricing-cta" onclick="selectPlanAndScroll('individual', '{{ $plan['programme'] }} ({{ $plan['tier'] }})')">Enroll Now</a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>{{-- end #tab-individual --}}
+
+            {{-- ── Group Plans ── --}}
+            <div id="tab-group" class="plan-tab-content" style="display:none;">
+                <div class="pricing-grid pricing-grid-2">
+                    @foreach ($locale['group_plans'] ?? [] as $plan)
+                        <div class="pricing-card new-pricing-card reveal-scale">
+                            <div class="new-pricing-card-top">
+                                <div class="new-pricing-card-meta">
+                                    <span class="plan-programme-label">{{ $plan['programme'] }}</span>
+                                    <span class="plan-duration-pill">{{ $plan['duration'] }}</span>
+                                </div>
+                                <div class="group-type-label">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="15" height="15">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                        <circle cx="9" cy="7" r="4" />
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                    </svg>
+                                    Group Learning
+                                </div>
+                                <div class="plan-detail-row" style="margin-top:0.75rem;">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14" height="14">
+                                        <path
+                                            d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
+                                    </svg>
+                                    <span>{{ $plan['classes'] }} Live Classes</span>
+                                </div>
+                                <div class="plan-detail-row">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                        width="14" height="14">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polyline points="12 6 12 12 16 14" />
+                                    </svg>
+                                    <span>{{ $plan['per_week'] }} classes/week · 40 min/class</span>
+                                </div>
+                            </div>
+                            <div class="new-pricing-card-price">
+                                <span class="price-amount">{{ $sym }}{{ number_format($plan['price']) }}</span>
+                                <span class="price-per-label">per student</span>
+                            </div>
+                            <a href="#trial" class="btn btn-solid pricing-cta" onclick="selectPlanAndScroll('group', '{{ $plan['programme'] }}')">Enroll Now</a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>{{-- end #tab-group --}}
 
             <!-- Pricing Inclusions Grid -->
             <div class="inclusions-block">
@@ -1518,6 +1444,22 @@
                 </div>
             </div>
         </div>
+    </section>
+
+    <script>
+        function switchPlanTab(tab, btn) {
+            document.querySelectorAll('.plan-tab-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.plan-type-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tab).style.display = 'block';
+            btn.classList.add('active');
+        }
+    </script>
+    v>
+    Flexible Scheduling
+    </div>
+    </div>
+    </div>
+    </div>
     </section>
 
     <!-- 11. Meet Our Founder Section -->
@@ -1627,7 +1569,8 @@
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 1.25rem 0;">
                     <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
                     </div>
-                    <div style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
+                    <div
+                        style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
                     </div>
                     <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
                     </div>
@@ -1937,13 +1880,75 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
     <script>
+        let autoSelectedPlan = null;
+        let autoSelectedProgramme = null;
+
+        function selectPlanAndScroll(type, programme) {
+            autoSelectedPlan = type;
+            autoSelectedProgramme = programme;
+            
+            // Scroll to #trial section
+            const trialSection = document.getElementById('trial');
+            if(trialSection) {
+                trialSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        const programmesData = {
+            'group': [
+                'Musical Foundation',
+                'Musical Development'
+            ],
+            'individual': [
+                'Musical Foundation (Essential)',
+                'Musical Foundation (Accelerated)',
+                'Musical Development (Essential)',
+                'Musical Development (Accelerated)',
+                'Musical Transformation (Advance)',
+                'Musical Transformation (Signature)'
+            ]
+        };
+
+        function updateProgrammeOptions(selectedProg = '') {
+            const planType = document.getElementById('demo_plan_type').value;
+            const progSelect = document.getElementById('demo_programme');
+            
+            progSelect.innerHTML = '<option value="">Select Programme...</option>';
+            
+            if (planType && programmesData[planType]) {
+                programmesData[planType].forEach(prog => {
+                    const opt = document.createElement('option');
+                    opt.value = prog;
+                    opt.textContent = prog;
+                    if(prog === selectedProg) {
+                        opt.selected = true;
+                    }
+                    progSelect.appendChild(opt);
+                });
+            }
+        }
+
         function openDemoModal() {
             const modal = document.getElementById('publicDemoModal');
+
+            // Apply auto-selected plan type and programme if available
+            if (autoSelectedPlan && autoSelectedProgramme) {
+                const planSelect = document.getElementById('demo_plan_type');
+                if (planSelect) {
+                    planSelect.value = autoSelectedPlan;
+                    updateProgrammeOptions(autoSelectedProgramme);
+                }
+            }
 
             // Pre-fill date and time based on calendar selection
             if (typeof selectedDate !== 'undefined' && typeof selectedSlotText !== 'undefined') {
@@ -1962,11 +1967,11 @@
                     if (ampm === 'AM' && hours === 12) hours = 0;
 
                     const timeStr = hours.toString().padStart(2, '0') + ':' + mins;
-                    
+
                     const dateInput = document.getElementById('demo_preferred_date');
                     const timeSelect = document.getElementById('demo_preferred_time');
                     const datetimeRow = document.getElementById('demo_datetime_row');
-                    
+
                     if (dateInput && timeSelect) {
                         dateInput.value = dateStr;
                         timeSelect.value = timeStr;

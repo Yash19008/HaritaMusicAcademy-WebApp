@@ -26,6 +26,7 @@ Route::middleware(['auth', 'role.access:teacher'])
         // Resources
         Route::get('/resources',      [TeacherController::class, 'resources'])->name('resources');
         Route::get('/resources/download/{filename}', [TeacherController::class, 'downloadResource'])->name('resources.download');
+        Route::get('/curriculum/{curriculum}/download', [\App\Http\Controllers\Admin\CurriculumController::class, 'download'])->name('curriculum.download');
 
         // Opportunities
         Route::get('/opportunities/current', [\App\Http\Controllers\Teacher\OpportunityController::class, 'current'])->name('opportunities.current');

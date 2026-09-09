@@ -45,10 +45,20 @@ class TeacherController extends Controller
         return view('teacher.dashboard', compact('teacher', 'todayClasses', 'todayDemos'));
     }
 
-    public function myClasses(): View
+    public function myClasses(\Illuminate\Http\Request $request): View
     {
         $teacher = auth()->user()->teacher;
-        $classes = ClassBooking::where('teacher_id', $teacher->id)->with('student')->latest('starts_at')->paginate(15);
+        
+        $startDate = $request->input('start_date', today()->format('Y-m-d'));
+        $endDate = $request->input('end_date', today()->addDays(7)->format('Y-m-d'));
+        
+        $classes = ClassBooking::where('teacher_id', $teacher->id)
+            ->with('student')
+            ->whereDate('starts_at', '>=', $startDate)
+            ->whereDate('starts_at', '<=', $endDate)
+            ->orderBy('starts_at', 'asc')
+            ->get();
+            
         $demos = \App\Models\DemoBooking::where('teacher_id', $teacher->id)->latest('scheduled_at')->paginate(15);
         
         $reschedulesThisMonth = \App\Models\ClassBooking::where('teacher_id', $teacher->id)
@@ -62,10 +72,19 @@ class TeacherController extends Controller
         return view('teacher.my-classes', compact('classes', 'demos', 'reschedulesThisMonth', 'lockHours'));
     }
 
-    public function demoClasses(): View
+    public function demoClasses(Request $request): View
     {
         $teacher = auth()->user()->teacher;
-        $demos = \App\Models\DemoBooking::where('teacher_id', $teacher->id)->latest('scheduled_at')->paginate(15);
+        
+        $startDate = $request->input('start_date', today()->format('Y-m-d'));
+        $endDate = $request->input('end_date', today()->addDays(7)->format('Y-m-d'));
+        
+        $demos = \App\Models\DemoBooking::where('teacher_id', $teacher->id)
+            ->whereDate('scheduled_at', '>=', $startDate)
+            ->whereDate('scheduled_at', '<=', $endDate)
+            ->orderBy('scheduled_at', 'asc')
+            ->get();
+            
         return view('teacher.demo-classes', compact('demos'));
     }
 
@@ -266,13 +285,14 @@ class TeacherController extends Controller
             $resources[] = [
                 'name' => basename($file),
                 'path' => $file,
-                'size' => round($disk->size($file) / 1024, 2), // KB
-                'last_modified' => date("Y-m-d H:i:s", $disk->lastModified($file)),
-                'extension' => pathinfo($file, PATHINFO_EXTENSION),
+                'size' => round($disk->size($file) / 1024, 2) . ' KB',
+                'url'  => route('teacher.resources.download', ['filename' => basename($file)]),
             ];
         }
 
-        return view('teacher.resources.index', compact('resources'));
+        $curricula = \App\Models\Curriculum::where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('teacher.resources.index', compact('resources', 'curricula'));
     }
 
     public function downloadResource($filename)

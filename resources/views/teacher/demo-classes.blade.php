@@ -334,11 +334,13 @@
                                 <th>Instrument</th>
                                 <th>Student</th>
                                 <th>Duration</th>
+                                <th>Attendance</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php $now = now(); @endphp
                             @foreach ($demos as $i => $demo)
                                 @php
                                     $status = $demo->status;
@@ -384,6 +386,17 @@
                                         <span style="color: var(--text-muted); font-size: 0.78rem;"> min</span>
                                     </td>
 
+                                    {{-- Attendance --}}
+                                    <td>
+                                        @if ($demo->teacher_attended === true)
+                                            <span class="status-badge completed">Present</span>
+                                        @elseif ($demo->teacher_attended === false)
+                                            <span class="status-badge cancelled">Absent</span>
+                                        @else
+                                            <span class="status-badge scheduled" style="background:#f1f5f9;color:#64748b;border-color:#cbd5e1;">—</span>
+                                        @endif
+                                    </td>
+
                                     {{-- Status --}}
                                     <td>
                                         <span class="status-badge {{ $badgeClass }}">
@@ -395,17 +408,28 @@
                                     <td>
                                         @if ($status === 'scheduled')
                                             <div class="d-flex gap-2">
-                                                <a href="{{ $demo->google_meet_link ?? 'https://meet.google.com' }}"
-                                                    onclick="alert('The call is recorded for quality purposes.'); showDemoPopup(event, this.href)" class="btn-join">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                                        <rect x="1" y="5" width="15" height="14" rx="2"
-                                                            ry="2"></rect>
-                                                    </svg>
-                                                    Start Demo
-                                                </a>
+                                                @php
+                                                    $minutesUntilClass = $now->diffInMinutes($demo->scheduled_at, false);
+                                                    $canJoin = $minutesUntilClass <= 15 && $now->isBefore($demo->scheduled_at->copy()->addMinutes($demo->duration_minutes ?? 40));
+                                                @endphp
+                                                @if($canJoin)
+                                                    <a href="{{ $demo->teacher_join_url }}"
+                                                        onclick="alert('The call is recorded for quality purposes.'); showDemoPopup(event, this.href)" class="btn-join">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                            <rect x="1" y="5" width="15" height="14" rx="2"
+                                                                ry="2"></rect>
+                                                        </svg>
+                                                        Start Demo
+                                                    </a>
+                                                @else
+                                                    <button class="btn-join" style="opacity: 0.5; cursor: not-allowed; background: #94a3b8;"
+                                                        title="You can join 15 minutes before the class starts." disabled>
+                                                        Start Demo
+                                                    </button>
+                                                @endif
                                             </div>
                                         @else
                                             <span style="color: var(--text-light); font-size: 0.78rem;">—</span>

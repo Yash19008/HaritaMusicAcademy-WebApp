@@ -9,9 +9,35 @@ class DemoBooking extends Model
 {
     protected $guarded = [];
 
+    protected static function booted(): void
+    {
+        static::creating(function (DemoBooking $booking) {
+            if (!$booking->teacher_join_token) {
+                $booking->teacher_join_token = \Illuminate\Support\Str::uuid()->toString();
+            }
+            if (!$booking->student_join_token) {
+                $booking->student_join_token = \Illuminate\Support\Str::uuid()->toString();
+            }
+        });
+    }
+
     protected function casts(): array
     {
-        return ['scheduled_at' => 'datetime'];
+        return [
+            'scheduled_at' => 'datetime',
+            'teacher_attended' => 'boolean',
+            'student_attended' => 'boolean',
+        ];
+    }
+
+    public function getTeacherJoinUrlAttribute()
+    {
+        return url('/join/teacher/' . $this->teacher_join_token);
+    }
+
+    public function getStudentJoinUrlAttribute()
+    {
+        return url('/join/student/' . $this->student_join_token);
     }
 
     public function teacher(): BelongsTo

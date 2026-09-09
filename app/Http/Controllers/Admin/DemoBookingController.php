@@ -15,7 +15,7 @@ class DemoBookingController extends Controller
 {
     public function index(): View
     {
-        $demos     = DemoBooking::with('teacher')->latest()->get();
+        $demos     = DemoBooking::with(['teacher', 'convertedStudent'])->latest()->get();
         $scheduled = $demos->where('status', 'scheduled')->count();
         $completed = $demos->where('status', 'completed')->count();
         $converted = $demos->where('status', 'converted')->count();
@@ -182,5 +182,21 @@ class DemoBookingController extends Controller
         }
 
         return back()->with('success', "Demo successfully converted to Student! Login credentials sent to {$user->email}");
+    }
+
+    public function updateAttendance(Request $request, DemoBooking $demo)
+    {
+        $validated = $request->validate([
+            'teacher_attended' => 'nullable|boolean',
+            'student_attended' => 'nullable|boolean',
+        ]);
+
+        $demo->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance updated successfully.',
+            'demo' => $demo
+        ]);
     }
 }

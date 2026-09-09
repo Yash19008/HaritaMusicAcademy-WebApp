@@ -277,21 +277,38 @@
             </div>
             <div class="d-flex gap-2 flex-nowrap align-center" style="margin-left: auto;">
                 <form method="GET" class="filter-container d-flex gap-2 flex-nowrap align-center mb-0">
-                    <div class="filter-input-group" style="display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 6px; padding: 0 0.3rem; background: var(--bg-main); height: 32px;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <input type="date" name="start_date" class="form-control" style="border:none; box-shadow:none; padding: 0 0.3rem; font-size: 0.78rem; background:transparent; height: 100%; min-width: 110px;" value="{{ request('start_date', today()->format('Y-m-d')) }}" title="Start Date">
+                    <div class="filter-input-group"
+                        style="display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 6px; padding: 0 0.3rem; background: var(--bg-main); height: 32px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)"
+                            stroke-width="2.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <input type="date" name="start_date" class="form-control"
+                            style="border:none; box-shadow:none; padding: 0 0.3rem; font-size: 0.78rem; background:transparent; height: 100%; min-width: 110px;"
+                            value="{{ request('start_date', today()->format('Y-m-d')) }}" title="Start Date">
                     </div>
                     <span class="text-muted" style="font-size: 0.75rem; font-weight: 500;">&rarr;</span>
-                    <div class="filter-input-group" style="display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 6px; padding: 0 0.3rem; background: var(--bg-main); height: 32px;">
-                        <input type="date" name="end_date" class="form-control" style="border:none; box-shadow:none; padding: 0 0.3rem; font-size: 0.78rem; background:transparent; height: 100%; min-width: 110px;" value="{{ request('end_date', today()->format('Y-m-d')) }}" title="End Date">
+                    <div class="filter-input-group"
+                        style="display: flex; align-items: center; border: 1px solid var(--border-light); border-radius: 6px; padding: 0 0.3rem; background: var(--bg-main); height: 32px;">
+                        <input type="date" name="end_date" class="form-control"
+                            style="border:none; box-shadow:none; padding: 0 0.3rem; font-size: 0.78rem; background:transparent; height: 100%; min-width: 110px;"
+                            value="{{ request('end_date', today()->format('Y-m-d')) }}" title="End Date">
                     </div>
-                    <button type="submit" class="btn btn-primary filter-btn" style="height: 32px; padding: 0 0.6rem; border-radius: 6px; font-size: 0.78rem; display: flex; align-items: center; gap: 0.3rem;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    <button type="submit" class="btn btn-primary filter-btn"
+                        style="height: 32px; padding: 0 0.6rem; border-radius: 6px; font-size: 0.78rem; display: flex; align-items: center; gap: 0.3rem;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5">
+                            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                        </svg>
                         Filter
                     </button>
                 </form>
                 {{-- Status filter synced to DataTables --}}
-                <select id="statusFilter" class="form-control" style="min-width: 130px; font-size: 0.78rem; height: 32px; padding: 0 0.4rem; display: inline-block; width: auto;"
+                <select id="statusFilter" class="form-control"
+                    style="min-width: 130px; font-size: 0.78rem; height: 32px; padding: 0 0.4rem; display: inline-block; width: auto;"
                     onchange="filterTable()">
                     <option value="">All Statuses</option>
                     <option value="scheduled">Scheduled</option>
@@ -317,6 +334,7 @@
                                 <th>Mentor</th>
                                 <th>Duration</th>
                                 <th>Status</th>
+                                <th>Attendance</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -360,11 +378,14 @@
 
                                     {{-- Mentor --}}
                                     <td>
-                                        <span class="teacher-link"
-                                            onclick="showTeacherProfileModal(
-                                        '{{ addslashes($booking->teacher->user->name ?? 'N/A') }}',
-                                        '{{ addslashes(implode(', ', $booking->teacher->instruments ?? [])) }}'
-                                    )">
+                                        <span class="teacher-link" data-name="{{ $booking->teacher->user->name ?? 'N/A' }}"
+                                            data-specialization="{{ $booking->teacher->categories ?? 'M/A' }}"
+                                            data-level="{{ $booking->teacher->level ?? 'N/A' }}"
+                                            data-certifications="{{ $booking->teacher->certifications ?? 'N/A' }}"
+                                            data-bio="{{ $booking->teacher->bio ?? 'N/A' }}"
+                                            data-youtube="{{ $booking->teacher->youtube_url ?? 'N/A' }}"
+                                            data-avatar="{{ $booking->teacher->user->avatar ?? '' }}"
+                                            onclick="showTeacherProfileModal(this)">
                                             {{ $booking->teacher->user->name ?? 'N/A' }}
                                         </span>
                                     </td>
@@ -382,44 +403,92 @@
                                         </span>
                                     </td>
 
+                                    {{-- Attendance --}}
+                                    <td>
+                                        @if ($status === 'completed')
+                                            @if ($booking->student_attended === 1)
+                                                <span class="badge badge-success" style="font-size:0.75rem;">Present</span>
+                                            @elseif($booking->student_attended === 0)
+                                                <span class="badge badge-danger" style="font-size:0.75rem;">Absent</span>
+                                            @else
+                                                <span class="text-muted" style="font-size:0.75rem;">Pending</span>
+                                            @endif
+                                        @else
+                                            <span class="text-muted" style="font-size:0.75rem;">—</span>
+                                        @endif
+                                    </td>
+
                                     {{-- Actions --}}
                                     <td>
                                         @if ($status === 'scheduled')
                                             <div class="d-flex gap-2">
-                                                <a href="{{ $booking->google_meet_link ?? 'https://meet.google.com' }}"
-                                                    target="_blank" class="btn-join"
-                                                    onclick="alert('The call is recorded for quality purposes.')">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                                        <rect x="1" y="5" width="15" height="14" rx="2"
-                                                            ry="2"></rect>
-                                                    </svg>
-                                                    Join
-                                                </a>
                                                 @php
-                                                    $isLocked = now()->addHours($lockHours)->greaterThan($booking->starts_at);
+                                                    $now = now();
+                                                    $minutesUntilClass = $now->diffInMinutes(
+                                                        $booking->starts_at,
+                                                        false,
+                                                    );
+                                                    $canJoin =
+                                                        $minutesUntilClass <= 15 &&
+                                                        $now->isBefore(
+                                                            $booking->ends_at ??
+                                                                $booking->starts_at
+                                                                    ->copy()
+                                                                    ->addMinutes($booking->duration_minutes ?? 40),
+                                                        );
+                                                @endphp
+                                                @if ($canJoin)
+                                                    <a href="{{ $booking->student_join_url }}" target="_blank"
+                                                        class="btn-join"
+                                                        onclick="alert('The call is recorded for quality purposes.')">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24"
+                                                            fill="none" stroke="currentColor" stroke-width="2.2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                            <rect x="1" y="5" width="15" height="14"
+                                                                rx="2" ry="2"></rect>
+                                                        </svg>
+                                                        Join
+                                                    </a>
+                                                @else
+                                                    <button class="btn-join" style="opacity: 0.5; cursor: not-allowed;"
+                                                        title="You can join 15 minutes before the class starts." disabled>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24"
+                                                            fill="none" stroke="currentColor" stroke-width="2.2"
+                                                            stroke-linecap="round" stroke-linejoin="round">
+                                                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                            <rect x="1" y="5" width="15" height="14"
+                                                                rx="2" ry="2"></rect>
+                                                        </svg>
+                                                        Join
+                                                    </button>
+                                                @endif
+                                                @php
+                                                    $isLocked = now()
+                                                        ->addHours($lockHours)
+                                                        ->greaterThan($booking->starts_at);
                                                     $limitReached = $reschedulesThisMonth >= 2;
                                                     $canReschedule = !$isLocked && !$limitReached;
                                                 @endphp
-                                                @if($canReschedule)
+                                                @if ($canReschedule)
                                                     <button class="btn-reschedule"
                                                         onclick="openRescheduleModal({{ $booking->id }}, {{ $booking->teacher_id }})">
-                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                            stroke-linejoin="round">
+                                                        <svg width="11" height="11" viewBox="0 0 24 24"
+                                                            fill="none" stroke="currentColor" stroke-width="2.5"
+                                                            stroke-linecap="round" stroke-linejoin="round">
                                                             <path d="M23 4v6h-6" />
                                                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                                                         </svg>
                                                         Reschedule
                                                     </button>
                                                 @else
-                                                    <button class="btn-reschedule" style="opacity: 0.5; cursor: not-allowed; background: #e2e8f0; color: #64748b;"
-                                                        title="{{ $limitReached ? 'Limit of 2 reschedules per month reached' : 'Cannot reschedule within ' . $lockHours . ' hours of class' }}" disabled>
-                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none"
-                                                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
-                                                            stroke-linejoin="round">
+                                                    <button class="btn-reschedule"
+                                                        style="opacity: 0.5; cursor: not-allowed; background: #e2e8f0; color: #64748b;"
+                                                        title="{{ $limitReached ? 'Limit of 2 reschedules per month reached' : 'Cannot reschedule within ' . $lockHours . ' hours of class' }}"
+                                                        disabled>
+                                                        <svg width="11" height="11" viewBox="0 0 24 24"
+                                                            fill="none" stroke="currentColor" stroke-width="2.5"
+                                                            stroke-linecap="round" stroke-linejoin="round">
                                                             <path d="M23 4v6h-6" />
                                                             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
                                                         </svg>
@@ -465,7 +534,8 @@
                 <h3 class="font-semibold">Request Reschedule</h3>
                 <button class="modal-close" onclick="closeRescheduleModal()">×</button>
             </div>
-            <form id="rescheduleForm" method="POST" action="" onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').innerHTML = 'Processing...';">
+            <form id="rescheduleForm" method="POST" action=""
+                onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').innerHTML = 'Processing...';">
                 @csrf
                 <div class="modal-body">
                     <div
@@ -485,16 +555,18 @@
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="rescheduleTeacher">Teacher</label>
-                        <select id="rescheduleTeacher" name="teacher_id" class="form-control" required onchange="fetchRescheduleSlots()">
+                        <select id="rescheduleTeacher" name="teacher_id" class="form-control" required
+                            onchange="fetchRescheduleSlots()">
                             <option value="">Select Teacher</option>
-                            @foreach($teachers as $t)
+                            @foreach ($teachers as $t)
                                 <option value="{{ $t->id }}">{{ $t->user->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="rescheduleDate">Proposed Date</label>
-                        <input type="date" id="rescheduleDate" name="date" class="form-control" required onchange="fetchRescheduleSlots()">
+                        <input type="date" id="rescheduleDate" name="date" class="form-control" required
+                            onchange="fetchRescheduleSlots()">
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label" for="rescheduleTime">Preferred Time Slot</label>
@@ -524,20 +596,7 @@
                 <button class="modal-close" onclick="closeTeacherProfileModal()">×</button>
             </div>
             <div class="modal-body p-4" id="teacherProfileModalBody">
-                <div class="text-center mb-3">
-                    <div id="teacherAvatar"
-                        style="width:70px;height:70px;font-size:1.5rem;line-height:70px;border-radius:50%;background:var(--primary-light);color:#fff;font-weight:bold;margin:0 auto 0.5rem;border:2.5px solid var(--primary);display:flex;align-items:center;justify-content:center;">
-                        T</div>
-                    <h3 class="font-bold text-serif" style="font-size:1.3rem;margin-bottom:0.25rem;" id="teacherName">
-                        Name</h3>
-                    <span class="badge badge-success" style="font-size:0.75rem;">Academy Mentor</span>
-                </div>
-                <div
-                    style="display:flex;justify-content:space-between;padding:0.65rem 0;border-bottom:1px solid var(--border-light);font-size:0.85rem;">
-                    <span class="text-muted">Specialization</span>
-                    <span class="font-bold" id="teacherSpecialization">—</span>
-                </div>
-                <button class="btn btn-secondary w-100 mt-4" onclick="closeTeacherProfileModal()">Close</button>
+                <!-- Dynamically populated by JS -->
             </div>
         </div>
     </div>
@@ -564,8 +623,8 @@
                     dom: 'lrtip', // Hide default search (we use filter above)
                     columnDefs: [{
                             orderable: false,
-                            targets: [2, 6]
-                        }, // Instrument & Actions not sortable
+                            targets: [2, 6, 7]
+                        }, // Instrument, Attendance & Actions not sortable
                         {
                             width: '40px',
                             targets: 0
@@ -622,27 +681,30 @@
             timeSelect.disabled = true;
 
             fetch(`/student/reschedule/slots?teacher_id=${teacherId}&date=${date}`, {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(slots => {
-                if (!Array.isArray(slots) || slots.length === 0) {
-                    timeSelect.innerHTML = '<option value="">No available slots on this date</option>';
-                    return;
-                }
-                timeSelect.innerHTML = '<option value="">— Select a time slot —</option>';
-                slots.forEach(slot => {
-                    const label = slot.display_time;
-                    const opt = document.createElement('option');
-                    opt.value = label;
-                    opt.textContent = label;
-                    timeSelect.appendChild(opt);
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(slots => {
+                    if (!Array.isArray(slots) || slots.length === 0) {
+                        timeSelect.innerHTML = '<option value="">No available slots on this date</option>';
+                        return;
+                    }
+                    timeSelect.innerHTML = '<option value="">— Select a time slot —</option>';
+                    slots.forEach(slot => {
+                        const label = slot.display_time;
+                        const opt = document.createElement('option');
+                        opt.value = label;
+                        opt.textContent = label;
+                        timeSelect.appendChild(opt);
+                    });
+                    timeSelect.disabled = false;
+                })
+                .catch(() => {
+                    timeSelect.innerHTML = '<option value="">Error loading slots — try again</option>';
                 });
-                timeSelect.disabled = false;
-            })
-            .catch(() => {
-                timeSelect.innerHTML = '<option value="">Error loading slots — try again</option>';
-            });
         }
 
         function closeRescheduleModal() {
@@ -650,11 +712,89 @@
         }
 
         // Teacher bio modal
-        function showTeacherProfileModal(name, specs) {
-            document.getElementById('teacherName').innerText = name;
-            document.getElementById('teacherAvatar').innerText = name.charAt(0).toUpperCase();
-            document.getElementById('teacherSpecialization').innerText = specs || '—';
-            document.getElementById('teacherProfileModal').classList.add('show');
+        function showTeacherProfileModal(el) {
+            const modal = document.getElementById("teacherProfileModal");
+            const body = document.getElementById("teacherProfileModalBody");
+            if (!modal || !body) return;
+
+            const name = el.getAttribute('data-name');
+            const specialization = el.getAttribute('data-specialization');
+            const level = el.getAttribute('data-level');
+            const certifications = el.getAttribute('data-certifications');
+            const bio = el.getAttribute('data-bio');
+            const youtube = el.getAttribute('data-youtube');
+            const avatarUrl = el.getAttribute('data-avatar');
+
+            // Helper function to extract embed URL
+            const getEmbedUrl = (url) => {
+                if (!url) return null;
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+                const match = url.match(regExp);
+                if (match && match[2].length === 11) {
+                    return "https://www.youtube.com/embed/" + match[2];
+                }
+                return null;
+            };
+
+            const embedUrl = getEmbedUrl(youtube);
+            let youtubeHtml = "";
+            if (embedUrl) {
+                youtubeHtml = `
+                    <div class="mt-3" style="border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+                        <h4 class="font-bold" style="font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--primary);">Featured Performance</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                            <iframe src="${embedUrl}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                `;
+            } else {
+                youtubeHtml = `
+                    <div class="mt-3 p-3 text-center text-muted" style="border: 1px dashed var(--border-color); border-radius: var(--radius-md); font-size: 0.8rem; background: var(--bg-body);">
+                        🎥 No featured performance video uploaded yet.
+                    </div>
+                `;
+            }
+
+            const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+            let avatarHtml = '';
+            if (avatarUrl && avatarUrl !== '') {
+                avatarHtml =
+                    `<img src="${avatarUrl}" alt="${name}" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 0 auto 0.5rem; border: 2.5px solid var(--primary); display: block;">`;
+            } else {
+                avatarHtml = `
+                    <div class="avatar avatar-lg mx-auto" style="width: 70px; height: 70px; font-size: 1.5rem; line-height: 70px; border-radius: 50%; background: var(--primary-light); color: #fff; font-weight: bold; margin-bottom: 0.5rem; border: 2.5px solid var(--primary); display: flex; align-items: center; justify-content: center; margin-left: auto !important; margin-right: auto !important; float: none !important;">
+                        ${initials}
+                    </div>
+                `;
+            }
+
+            body.innerHTML = `
+                <div class="text-center mb-3">
+                    ${avatarHtml}
+                    <h3 class="font-bold text-serif" style="font-size: 1.35rem; margin-bottom: 0.25rem;">${name}</h3>
+                    <span class="badge badge-success" style="font-size: 0.75rem;">Academy Mentor</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Specialization</span>
+                    <span class="font-semibold">${specialization}</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Expertise Level</span>
+                    <span class="font-semibold">${level}</span>
+                </div>
+                <div class="info-list-item" style="display:flex; justify-content:space-between; padding:0.65rem 0; border-bottom:1px solid var(--border-light); font-size:0.85rem;">
+                    <span class="text-muted">Certifications</span>
+                    <span class="font-semibold">${certifications}</span>
+                </div>
+                <div class="mt-3" style="font-size: 0.82rem; line-height: 1.5; color: var(--text-muted); text-align: justify; border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+                    <b>Biography:</b> ${bio}
+                </div>
+                ${youtubeHtml}
+                <button class="btn btn-secondary w-100 mt-4" onclick="closeTeacherProfileModal()">Close Bio</button>
+            `;
+
+            modal.classList.add('show');
         }
 
         function closeTeacherProfileModal() {

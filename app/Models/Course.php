@@ -14,4 +14,9 @@ class Course extends Model
     {
         return $this->hasMany(Student::class);
     }
+
+    public function syllabi()
+    {
+        return $this->hasMany(Syllabus::class)->orderBy('sort_order');
+    }
 }

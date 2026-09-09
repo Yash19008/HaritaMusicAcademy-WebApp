@@ -295,4 +295,16 @@ class StudentController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function syllabus()
+    {
+        $student = auth()->user()->student;
+        if (!$student) abort(404);
+
+        $courses = $student->courses()->with(['syllabi' => function($query) {
+            $query->where('is_active', true)->orderBy('sort_order');
+        }])->get();
+
+        return view('student.syllabus', compact('student', 'courses'));
+    }
 }

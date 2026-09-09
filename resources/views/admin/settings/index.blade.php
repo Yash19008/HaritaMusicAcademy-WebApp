@@ -359,6 +359,13 @@
                     }
                     const tbody = document.getElementById('reminderConfigTableBody');
                     tbody.innerHTML = '';
+                    const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    }[character]));
                     if(data && data.length > 0) {
                         data.forEach(config => {
                             const targets = [];
@@ -371,9 +378,9 @@
 
                             tbody.innerHTML += `
                                 <tr>
-                                    <td class="font-semibold">${config.label}</td>
+                                    <td class="font-semibold">${escapeHtml(config.label)}</td>
                                     <td>${config.minutes_before}</td>
-                                    <td>${targets.join(', ')}</td>
+                                    <td>${escapeHtml(targets.join(', '))}</td>
                                     <td>${statusBadge}</td>
                                     <td class="text-right">
                                         <button class="btn btn-sm btn-secondary" style="padding:0.25rem 0.5rem;" onclick='openEditReminderModal(${JSON.stringify(config).replace(/'/g, "&#39;")})'>Edit</button>

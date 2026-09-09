@@ -247,6 +247,7 @@
           <div class="card p-3">
             <h4 class="font-semibold text-primary mb-3">Today's Class Schedule</h4>
             <div class="schedule-grid-cols">
+              @php $now = now(); @endphp
               @forelse($todayClasses as $class)
               <div class="student-class-box">
                   <div class="d-flex justify-between align-center mb-2">
@@ -258,7 +259,15 @@
                     <p class="text-muted" style="font-size: 0.85rem;">{{ $class->instrument }}</p>
                   </div>
                   <div class="d-flex gap-2 mt-2">
-                    <a href="{{ $class->google_meet_link ?? 'https://meet.google.com' }}" target="_blank" class="btn btn-primary btn-sm" style="flex:1; text-align:center; text-decoration:none;">Start Class</a>
+                    @php
+                        $minutesUntilClass = $now->diffInMinutes($class->starts_at, false);
+                        $canJoin = $minutesUntilClass <= 15 && $now->isBefore($class->ends_at ?? $class->starts_at->copy()->addMinutes($class->duration_minutes ?? 40));
+                    @endphp
+                    @if($canJoin)
+                        <a href="{{ $class->teacher_join_url }}" target="_blank" class="btn btn-primary btn-sm" style="flex:1; text-align:center; text-decoration:none;">Start Class</a>
+                    @else
+                        <button class="btn btn-primary btn-sm" style="flex:1; text-align:center; opacity:0.5; cursor:not-allowed;" title="You can join 15 minutes before the class starts." disabled>Start Class</button>
+                    @endif
                   </div>
               </div>
               @empty
@@ -284,7 +293,15 @@
                     <p class="text-muted" style="font-size: 0.85rem;">{{ $demo->instrument }} (Demo)</p>
                   </div>
                   <div class="d-flex gap-2 mt-2">
-                    <a href="{{ $demo->google_meet_link ?? 'https://meet.google.com' }}" onclick="showDemoPopup(event, this.href)" class="btn btn-primary btn-sm" style="flex:1; text-align:center; text-decoration:none;">Start Demo</a>
+                    @php
+                        $minutesUntilClass = $now->diffInMinutes($demo->scheduled_at, false);
+                        $canJoin = $minutesUntilClass <= 15 && $now->isBefore($demo->scheduled_at->copy()->addMinutes($demo->duration_minutes ?? 40));
+                    @endphp
+                    @if($canJoin)
+                        <a href="{{ $demo->teacher_join_url }}" onclick="showDemoPopup(event, this.href)" class="btn btn-primary btn-sm" style="flex:1; text-align:center; text-decoration:none;">Start Demo</a>
+                    @else
+                        <button class="btn btn-primary btn-sm" style="flex:1; text-align:center; opacity:0.5; cursor:not-allowed;" title="You can join 15 minutes before the class starts." disabled>Start Demo</button>
+                    @endif
                   </div>
               </div>
               @endforeach

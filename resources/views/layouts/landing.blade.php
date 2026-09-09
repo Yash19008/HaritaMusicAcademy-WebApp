@@ -18,7 +18,18 @@
         content="music academy, online music classes, Hindustani classical vocal, Bollywood singing, piano class, keyboard class, harmonium class, tabla class, live music lessons">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Harita Music Academy">
-    <link rel="canonical" href="https://haritamusicacademy.com">
+    @php
+        $currentCountry = $country ?? 'in';
+        $baseUrl = 'https://haritamusicacademy.com';
+    @endphp
+    <link rel="canonical" href="{{ $baseUrl }}/{{ $currentCountry }}">
+    <link rel="alternate" hreflang="en-in" href="{{ $baseUrl }}/in">
+    <link rel="alternate" hreflang="en-us" href="{{ $baseUrl }}/us">
+    <link rel="alternate" hreflang="en-gb" href="{{ $baseUrl }}/uk">
+    <link rel="alternate" hreflang="en-ca" href="{{ $baseUrl }}/cad">
+    <link rel="alternate" hreflang="en-ae" href="{{ $baseUrl }}/uae">
+    <link rel="alternate" hreflang="x-default" href="{{ $baseUrl }}/in">
+
 
     <!-- Open Graph (Facebook / LinkedIn) SEO -->
     <meta property="og:type" content="website">
@@ -105,6 +116,8 @@
                 <a href="#why-us" class="nav-link">Why Us</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
                 <a href="#faq" class="nav-link">FAQ</a>
+
+
                 <a href="#trial" class="btn btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.85rem;">Book
                     Demo</a>
             </nav>
@@ -686,6 +699,21 @@
         });
 
         counters.forEach(counter => observer.observe(counter));
+    </script>
+
+    <script>
+    /* Country Switcher Dropdown */
+    function toggleCountrySwitcher() {
+        const dropdown = document.getElementById('countrySwitcherDropdown');
+        if (dropdown) dropdown.classList.toggle('open');
+    }
+    document.addEventListener('click', function(e) {
+        const switcher = document.getElementById('countrySwitcher');
+        if (switcher && !switcher.contains(e.target)) {
+            const dropdown = document.getElementById('countrySwitcherDropdown');
+            if (dropdown) dropdown.classList.remove('open');
+        }
+    });
     </script>
 </body>
 

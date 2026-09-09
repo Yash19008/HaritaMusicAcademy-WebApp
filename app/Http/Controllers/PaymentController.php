@@ -11,14 +11,31 @@ use Razorpay\Api\Api;
 use Razorpay\Api\Errors\SignatureVerificationError;
 use Throwable;
 use App\Mail\PaymentConfirmationMail;
+use App\Models\User;
+use App\Notifications\DemoBookedNotification;
+use Illuminate\Support\Facades\Notification;
 
 class PaymentController extends Controller
 {
-    private const DEMO_AMOUNT_INR = 499;  // ₹499 — single source of truth, never from client
+    /** Valid country slugs — must match config/locales.php keys */
+    private const SUPPORTED_COUNTRIES = ['in', 'us', 'uk', 'cad', 'uae'];
+
+    /**
+     * Resolve demo price and currency from locale config.
+     * Country is supplied by the client but the price/currency are always
+     * read server-side from config — the client cannot manipulate them.
+     */
+    private function resolveLocale(string $country): array
+    {
+        if (!in_array($country, self::SUPPORTED_COUNTRIES, true)) {
+            $country = 'in'; // fallback
+        }
+        return config("locales.{$country}");
+    }
 
     /**
      * Step 1 — Create a Razorpay order server-side.
-     * Called via AJAX when the user clicks "Pay ₹499 & Book Demo".
+     * Called via AJAX when the user clicks "Pay & Book Demo".
      */
     public function createOrder(Request $request): JsonResponse
     {
@@ -29,6 +46,7 @@ class PaymentController extends Controller
             'instrument'     => 'required|string|max:255',
             'preferred_date' => 'required|date|after_or_equal:today',
             'preferred_time' => 'required|string',
+            'country'        => 'nullable|string|in:in,us,uk,cad,uae',
         ]);
 
         try {
@@ -39,42 +57,48 @@ class PaymentController extends Controller
                 return response()->json(['success' => false, 'message' => 'Payment gateway is not configured. Please contact support.'], 500);
             }
 
+            // Resolve locale server-side — price/currency are never from the client
+            $locale       = $this->resolveLocale($validated['country'] ?? 'in');
+            $demoAmount   = $locale['demo_price'];   // e.g. 499, 15, 12
+            $currency     = $locale['currency_code']; // e.g. INR, USD, GBP
+            // Razorpay requires amount in smallest unit (paise/cents/pence)
+            $amountSmall  = $demoAmount * 100;
+
             $api = new Api($key, $secret);
 
-            // Amount is always set server-side — never trust client
-            $amountPaise = self::DEMO_AMOUNT_INR * 100; // ₹499 → 49900 paise
-
             $razorpayOrder = $api->order->create([
-                'receipt'          => 'harita-demo-' . time(),
-                'amount'           => $amountPaise,
-                'currency'         => 'INR',
-                'payment_capture'  => 1,  // auto-capture on payment
-                'notes'            => [
+                'receipt'         => 'harita-demo-' . time(),
+                'amount'          => $amountSmall,
+                'currency'        => $currency,
+                'payment_capture' => 1, // auto-capture
+                'notes'           => [
                     'name'       => $validated['student_name'],
                     'instrument' => $validated['instrument'],
+                    'country'    => $validated['country'] ?? 'in',
                 ],
             ]);
 
-            // Store a pending payment record immediately (before payment)
+            // Store a pending payment record (before user pays)
             $payment = Payment::create([
-                'student_name'   => $validated['student_name'],
-                'email'          => $validated['email'],
-                'phone'          => $validated['phone'],
-                'instrument'     => $validated['instrument'],
-                'preferred_date' => $validated['preferred_date'],
-                'preferred_time' => $validated['preferred_time'],
-                'amount'         => self::DEMO_AMOUNT_INR,
-                'payment_mode'   => 'Online',
-                'transaction_date' => today(),
-                'status'         => 'pending',
+                'student_name'      => $validated['student_name'],
+                'email'             => $validated['email'],
+                'phone'             => $validated['phone'],
+                'instrument'        => $validated['instrument'],
+                'preferred_date'    => $validated['preferred_date'],
+                'preferred_time'    => $validated['preferred_time'],
+                'amount'            => $demoAmount,
+                'payment_mode'      => 'Online',
+                'transaction_date'  => today(),
+                'status'            => 'pending',
                 'razorpay_order_id' => $razorpayOrder['id'],
             ]);
 
             return response()->json([
-                'success'    => true,
-                'order_id'   => $razorpayOrder['id'],
-                'amount'     => $amountPaise,
-                'key'        => $key,
+                'success'       => true,
+                'order_id'      => $razorpayOrder['id'],
+                'amount'        => $amountSmall,
+                'currency'      => $currency,
+                'key'           => $key,
                 'payment_db_id' => $payment->id,
             ]);
 
@@ -120,12 +144,14 @@ class PaymentController extends Controller
                 ->where('status', 'pending')  // only confirm if still pending
                 ->firstOrFail();
 
-            // Double-check the amount from Razorpay API to prevent amount tampering
-            $rzpPayment = $api->payment->fetch($validated['razorpay_payment_id']);
-            $paidAmountPaise = (int) $rzpPayment['amount'];
+            // Double-check the amount from Razorpay API to prevent amount tampering.
+            // Compare against the amount stored in OUR database (set server-side on createOrder).
+            $rzpPayment      = $api->payment->fetch($validated['razorpay_payment_id']);
+            $paidAmountSmall = (int) $rzpPayment['amount']; // smallest unit (paise/cents/pence)
+            $expectedSmall   = (int) round($payment->amount * 100);
 
-            if ($paidAmountPaise !== self::DEMO_AMOUNT_INR * 100) {
-                Log::warning("Razorpay amount mismatch! Expected: " . (self::DEMO_AMOUNT_INR * 100) . ", Got: {$paidAmountPaise}");
+            if ($paidAmountSmall !== $expectedSmall) {
+                Log::warning("Razorpay amount mismatch! Expected: {$expectedSmall}, Got: {$paidAmountSmall} for Payment #{$payment->id}");
                 return response()->json(['success' => false, 'message' => 'Payment amount mismatch. Please contact support.'], 400);
             }
 
@@ -136,11 +162,13 @@ class PaymentController extends Controller
 
             Log::info("Demo payment confirmed: Payment #{$payment->id}, Razorpay: {$validated['razorpay_payment_id']}");
 
-            // Send confirmation email
+            // Send confirmation email and admin notification
             try {
                 Mail::to($payment->email)->send(new PaymentConfirmationMail($payment));
+                $admins = User::where('role', 'admin')->get();
+                Notification::send($admins, new DemoBookedNotification($payment));
             } catch (Throwable $e) {
-                Log::error("Failed to send payment confirmation email for Payment #{$payment->id}: " . $e->getMessage());
+                Log::error("Failed to send payment confirmation email/notification for Payment #{$payment->id}: " . $e->getMessage());
             }
 
             return response()->json([
@@ -202,11 +230,13 @@ class PaymentController extends Controller
                     ]);
                     Log::info("Webhook confirmed payment for order: {$orderId}");
 
-                    // Send confirmation email
+                    // Send confirmation email and admin notification
                     try {
                         Mail::to($payment->email)->send(new PaymentConfirmationMail($payment));
+                        $admins = User::where('role', 'admin')->get();
+                        Notification::send($admins, new DemoBookedNotification($payment));
                     } catch (Throwable $e) {
-                        Log::error("Failed to send payment confirmation email via webhook for Payment #{$payment->id}: " . $e->getMessage());
+                        Log::error("Failed to send payment confirmation email/notification via webhook for Payment #{$payment->id}: " . $e->getMessage());
                     }
                 }
 

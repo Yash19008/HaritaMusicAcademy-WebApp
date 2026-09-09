@@ -23,10 +23,12 @@ class Student extends Model
         return $this->belongsToMany(Course::class, 'course_student');
     }
 
-    public function getCourseAttribute()
+    public function course(): BelongsTo
     {
-        return $this->relationLoaded('courses') ? $this->courses->first() : $this->courses()->first();
+        return $this->belongsTo(Course::class);
     }
+
+
 
     public function user(): BelongsTo
     {

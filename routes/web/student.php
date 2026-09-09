@@ -21,6 +21,8 @@ Route::middleware(['auth', 'role.access:student'])
         Route::get('/profile',         [StudentController::class, 'profile'])->name('profile');
         Route::get('/settings',        [StudentController::class, 'settings'])->name('settings');
         Route::post('/settings',       [StudentController::class, 'saveSettings'])->name('settings.save');
+        Route::get('/syllabus',        [StudentController::class, 'syllabus'])->name('syllabus');
+        Route::get('/syllabus/{syllabus}/download', [\App\Http\Controllers\Admin\SyllabusController::class, 'download'])->name('syllabus.download');
         Route::post('/intro-video',    [StudentController::class, 'uploadIntroVideo'])->name('intro-video.upload');
         Route::post('/renewal-interest', [StudentController::class, 'submitRenewalInterest'])->name('renewal-interest.submit');
     });

@@ -233,4 +233,20 @@ class ClassBookingController extends Controller
 
         return back()->with('success', 'Class rescheduled successfully.');
     }
+
+    public function updateAttendance(Request $request, ClassBooking $booking)
+    {
+        $validated = $request->validate([
+            'teacher_attended' => 'nullable|boolean',
+            'student_attended' => 'nullable|boolean',
+        ]);
+
+        $booking->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance updated successfully.',
+            'booking' => $booking
+        ]);
+    }
 }

@@ -318,7 +318,7 @@
                 <span class="text-muted" style="font-size: 0.8rem; font-weight: 500;">&rarr;</span>
                 
                 <div class="filter-input-group">
-                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date', today()->format('Y-m-d')) }}" title="End Date">
+                    <input type="date" name="end_date" class="form-control" value="{{ request('end_date', today()->addDays(7)->format('Y-m-d')) }}" title="End Date">
                 </div>
                 
                 <button type="submit" class="btn btn-primary filter-btn">
@@ -357,10 +357,12 @@
                                 <th>Student</th>
                                 <th>Duration</th>
                                 <th>Status</th>
+                                <th>Attendance</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
+                            @php $now = now(); @endphp
                             @foreach ($classes as $i => $booking)
                                 @php
                                     $status = $booking->status;
@@ -422,22 +424,51 @@
                                         </span>
                                     </td>
 
+                                    {{-- Attendance --}}
+                                    <td>
+                                        @if ($booking->teacher_attended === true)
+                                            <span class="status-badge completed">Present</span>
+                                        @elseif ($booking->teacher_attended === false)
+                                            <span class="status-badge cancelled">Absent</span>
+                                        @else
+                                            <span class="status-badge scheduled" style="background:#f1f5f9;color:#64748b;border-color:#cbd5e1;">—</span>
+                                        @endif
+                                    </td>
+
                                     {{-- Actions --}}
                                     <td>
                                         @if ($status === 'scheduled')
                                             <div class="d-flex gap-2">
-                                                <a href="{{ $booking->google_meet_link ?? 'https://meet.google.com' }}"
-                                                    target="_blank" class="btn-join"
-                                                    onclick="alert('The call is recorded for quality purposes.')">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-                                                        stroke-linejoin="round">
-                                                        <polygon points="23 7 16 12 23 17 23 7"></polygon>
-                                                        <rect x="1" y="5" width="15" height="14" rx="2"
-                                                            ry="2"></rect>
-                                                    </svg>
-                                                    Start Class
-                                                </a>
+                                                @php
+                                                    $minutesUntilClass = $now->diffInMinutes($booking->starts_at, false);
+                                                    $canJoin = $minutesUntilClass <= 15 && $now->isBefore($booking->ends_at);
+                                                @endphp
+                                                @if($canJoin)
+                                                    <a href="{{ $booking->teacher_join_url }}"
+                                                        target="_blank" class="btn-join"
+                                                        onclick="alert('The call is recorded for quality purposes.')">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                            <rect x="1" y="5" width="15" height="14" rx="2"
+                                                                ry="2"></rect>
+                                                        </svg>
+                                                        Start Class
+                                                    </a>
+                                                @else
+                                                    <button class="btn-join" style="opacity: 0.5; cursor: not-allowed; background: #94a3b8;"
+                                                        title="You can join 15 minutes before the class starts." disabled>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                                                            stroke-linejoin="round">
+                                                            <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                                                            <rect x="1" y="5" width="15" height="14" rx="2"
+                                                                ry="2"></rect>
+                                                        </svg>
+                                                        Start Class
+                                                    </button>
+                                                @endif
                                                 @php
                                                     $isLocked = now()->addHours($lockHours)->greaterThan($booking->starts_at);
                                                     $limitReached = $reschedulesThisMonth >= 2;

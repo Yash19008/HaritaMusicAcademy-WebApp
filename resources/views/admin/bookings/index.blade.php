@@ -531,6 +531,7 @@
                         <th>Date & Time</th>
                         <th>Student</th>
                         <th>Teacher</th>
+                        <th>Attendance</th>
                         <th>Google Meet</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -555,6 +556,26 @@
                                 @endif
                             </td>
                             <td>{{ $booking->teacher->user->name ?? 'N/A' }}</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Teacher:</span>
+                                        <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;" onchange="updateAttendance({{ $booking->id }}, 'teacher_attended', this.value)">
+                                            <option value="">—</option>
+                                            <option value="1" {{ $booking->teacher_attended === true ? 'selected' : '' }}>Present</option>
+                                            <option value="0" {{ $booking->teacher_attended === false ? 'selected' : '' }}>Absent</option>
+                                        </select>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Student:</span>
+                                        <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;" onchange="updateAttendance({{ $booking->id }}, 'student_attended', this.value)">
+                                            <option value="">—</option>
+                                            <option value="1" {{ $booking->student_attended === true ? 'selected' : '' }}>Present</option>
+                                            <option value="0" {{ $booking->student_attended === false ? 'selected' : '' }}>Absent</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </td>
                             <td>
                                 <a href="{{ $booking->google_meet_link ?? 'https://meet.google.com' }}" target="_blank"
                                     class="meet-btn">
@@ -1354,6 +1375,38 @@
                 _rcmForm.submit();
                 _rcmForm = null;
             }
+        }
+
+        // ── AJAX Attendance Update ─────────────────────────────
+        function updateAttendance(bookingId, field, value) {
+            if (value === "") value = null;
+            else value = parseInt(value, 10);
+
+            const payload = {};
+            payload[field] = value;
+
+            fetch(`/admin/class-booking/${bookingId}/attendance`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (typeof showToast !== 'undefined') showToast('Attendance updated successfully', 'success');
+                    else alert('Attendance updated successfully');
+                } else {
+                    alert('Failed to update attendance');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating attendance');
+            });
         }
     </script>
 @endpush
