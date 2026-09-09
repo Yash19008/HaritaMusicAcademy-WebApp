@@ -252,7 +252,10 @@ class GoogleCalendarService
             $claims      = $this->base64UrlEncode(json_encode($claimsPayload));
             $unsignedJwt = $header . '.' . $claims;
 
-            openssl_sign($unsignedJwt, $signature, $credentials['private_key'], 'sha256WithRSAEncryption');
+            // Ensure private key has correct newlines (handles cases where .env escapes \n)
+            $privateKey = str_replace('\\n', "\n", $credentials['private_key']);
+
+            openssl_sign($unsignedJwt, $signature, $privateKey, 'sha256WithRSAEncryption');
 
             $response = Http::timeout(10)->asForm()->post(self::TOKEN_URL, [
                 'grant_type' => 'urn:ietf:params:oauth:grant-type:jwt-bearer',
