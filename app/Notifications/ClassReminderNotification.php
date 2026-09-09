@@ -94,23 +94,21 @@ class ClassReminderNotification extends Notification implements ShouldQueue
             $joinUrl = $this->booking->meet_link;
         }
 
-        $html = view('emails.class_reminder', [
-            'recipientName' => $recipientName,
-            'instrument'    => $instrument,
-            'isDemo'        => $isDemo,
-            'isTeacher'     => $isTeacher,
-            'timeLabel'     => $timeLabel,
-            'startsAt'      => $startsAtRaw->format('l, F j, Y \a\t h:i A'),
-            'timezone'      => $tz,
-            'duration'      => $duration,
-            'teacherName'   => $teacherName,
-            'studentName'   => $studentName,
-            'joinUrl'       => $joinUrl,
-        ])->render();
-
         return (new \Illuminate\Notifications\Messages\MailMessage)
             ->subject('Reminder: Your ' . ($isDemo ? 'Demo ' : '') . $instrument . ' Class – Starting ' . $timeLabel)
-            ->html($html);
+            ->view('emails.class_reminder', [
+                'recipientName' => $recipientName,
+                'instrument'    => $instrument,
+                'isDemo'        => $isDemo,
+                'isTeacher'     => $isTeacher,
+                'timeLabel'     => $timeLabel,
+                'startsAt'      => $startsAtRaw->format('l, F j, Y \a\t h:i A'),
+                'timezone'      => $tz,
+                'duration'      => $duration,
+                'teacherName'   => $teacherName,
+                'studentName'   => $studentName,
+                'joinUrl'       => $joinUrl,
+            ]);
     }
 
     /**
