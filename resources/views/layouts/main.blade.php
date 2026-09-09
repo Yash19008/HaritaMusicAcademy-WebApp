@@ -69,7 +69,7 @@
             style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; color: white;">
             <div
                 style="background: #fff; color: #333; padding: 2rem; border-radius: 12px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                <h2 style="color: #2a9d8f; margin-bottom: 0.5rem;">🎉 New Class Opportunity!</h2>
+                <h2 style="color: #51040e; margin-bottom: 0.5rem;">🎉 New Class Opportunity!</h2>
                 <p style="font-size: 1.1rem; margin-bottom: 1rem;">Are you available to cover this class?</p>
 
                 <div
@@ -77,7 +77,7 @@
                     <strong>Subject:</strong> <span id="opp-subject"></span><br>
                     <strong>Date:</strong> <span id="opp-date"></span><br>
                     <strong>Time:</strong> <span id="opp-time"></span><br>
-                    <strong>Bonus Reward:</strong> <span style="color: #2a9d8f; font-weight: bold;">&#8377;<span
+                    <strong>Bonus Reward:</strong> <span style="color: #51040e; font-weight: bold;">&#8377;<span
                             id="opp-bonus"></span></span>
                 </div>
 
@@ -85,7 +85,7 @@
                     <button id="opp-reject"
                         style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #adb5bd; color: white; font-weight: bold; cursor: pointer;">Reject</button>
                     <button id="opp-accept"
-                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #2a9d8f; color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem;">Accept
+                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #51040e 0%, #7d0a1b 100%); color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem;">Accept
                         Class</button>
                 </div>
             </div>

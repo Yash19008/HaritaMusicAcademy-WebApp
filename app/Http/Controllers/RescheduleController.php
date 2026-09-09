@@ -134,10 +134,10 @@ class RescheduleController extends Controller
 
         // Send Email to Student & Teacher (RescheduleApprovedMail)
         if ($booking->student && $booking->student->user) {
-            Mail::to($booking->student->user->email)->send(new RescheduleApprovedMail($booking));
+            Mail::to($booking->student->user->email)->send(new RescheduleApprovedMail($booking, false));
         }
         if ($booking->teacher && $booking->teacher->user) {
-            Mail::to($booking->teacher->user->email)->send(new RescheduleApprovedMail($booking));
+            Mail::to($booking->teacher->user->email)->send(new RescheduleApprovedMail($booking, true));
         }
 
         return back()->with('success', 'Class rescheduled successfully!');
@@ -169,10 +169,10 @@ class RescheduleController extends Controller
 
         // Send Email to Student & Teacher (RescheduleApprovedMail)
         if ($booking->student && $booking->student->user) {
-            Mail::to($booking->student->user->email)->send(new RescheduleApprovedMail($booking));
+            Mail::to($booking->student->user->email)->send(new RescheduleApprovedMail($booking, false));
         }
         if ($booking->teacher && $booking->teacher->user) {
-            Mail::to($booking->teacher->user->email)->send(new RescheduleApprovedMail($booking));
+            Mail::to($booking->teacher->user->email)->send(new RescheduleApprovedMail($booking, true));
         }
 
         return back()->with('success', 'Reschedule approved! Class rescheduled and notifications sent.');

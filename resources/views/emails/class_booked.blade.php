@@ -226,7 +226,7 @@
             
             @if($booking->google_meet_link)
             <div style="text-align: center;">
-                <a href="{{ $booking->google_meet_link }}" class="button">Join Google Meet</a>
+                <a href="{{ $joinUrl }}" class="button">Join Google Meet</a>
             </div>
             @else
             <p class="info-text" style="text-align: center; background: #eef2ff; padding: 15px; border-radius: 8px;">

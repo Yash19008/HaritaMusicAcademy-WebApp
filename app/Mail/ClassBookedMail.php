@@ -39,17 +39,20 @@ class ClassBookedMail extends Mailable implements ShouldQueue
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
+        $joinUrl = route('attendance.join', [
+            'type' => $this->isTeacher ? 'teacher' : 'student',
+            'token' => $this->isTeacher ? $this->booking->teacher_join_token : $this->booking->student_join_token,
+        ]);
+
         return new Content(
             view: 'emails.class_booked',
             with: [
                 'booking' => $this->booking,
                 'isTeacher' => $this->isTeacher,
                 'targetStudent' => $this->targetStudent,
+                'joinUrl' => $joinUrl,
             ],
         );
     }

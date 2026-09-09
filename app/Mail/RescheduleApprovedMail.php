@@ -16,10 +16,12 @@ class RescheduleApprovedMail extends Mailable implements ShouldQueue
     use Queueable, SerializesModels;
 
     public $booking;
+    public $isTeacher;
 
-    public function __construct(ClassBooking $booking)
+    public function __construct(ClassBooking $booking, bool $isTeacher = false)
     {
         $this->booking = $booking;
+        $this->isTeacher = $isTeacher;
     }
 
     public function envelope(): Envelope
@@ -31,8 +33,18 @@ class RescheduleApprovedMail extends Mailable implements ShouldQueue
 
     public function content(): Content
     {
+        $joinUrl = route('attendance.join', [
+            'type' => $this->isTeacher ? 'teacher' : 'student',
+            'token' => $this->isTeacher ? $this->booking->teacher_join_token : $this->booking->student_join_token,
+        ]);
+
         return new Content(
             view: 'emails.reschedule-approved',
+            with: [
+                'booking' => $this->booking,
+                'isTeacher' => $this->isTeacher,
+                'joinUrl' => $joinUrl,
+            ],
         );
     }
 

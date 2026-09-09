@@ -42,7 +42,10 @@ class AttendanceController extends Controller
 
         // --- Authorization: verify the user is the right person ---
         if ($type === 'teacher') {
-            if (!$user || !$user->teacher || $user->teacher->id !== $booking->teacher_id) {
+            if (!$user) {
+                return redirect()->guest(route('login'));
+            }
+            if (!$user->teacher || $user->teacher->id !== $booking->teacher_id) {
                 abort(403, 'You are not the teacher for this class.');
             }
         } else {
@@ -58,7 +61,9 @@ class AttendanceController extends Controller
                 }
             } else {
                 // Regular class — check direct student or group member
-                if (!$user) abort(403, 'Please login first.');
+                if (!$user) {
+                    return redirect()->guest(route('login'));
+                }
                 
                 $isStudent = $user->student && $user->student->id === $booking->student_id;
                 $isGroupMember = false;

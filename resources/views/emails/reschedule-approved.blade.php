@@ -221,7 +221,7 @@
                 <div class="detail-item">
                     <span class="detail-label">Meet Link:</span>
                     <span class="detail-value">
-                        <a href="{{ $booking->google_meet_link ?? 'https://meet.google.com' }}" style="color: #059669; text-decoration: none;">Join Google Meet</a>
+                        <a href="{{ $joinUrl }}" style="color: #059669; text-decoration: none;">Join Google Meet</a>
                     </span>
                 </div>
             </div>
