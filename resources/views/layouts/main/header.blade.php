@@ -194,8 +194,20 @@
           </button>
           <div id="profileDropdown" class="dropdown-menu">
             <div class="dropdown-header">User Menu</div>
-            <a href="{{ route('admin.profile') }}" class="dropdown-item">My Profile</a>
-            <a href="{{ route('admin.settings') }}" class="dropdown-item">Settings</a>
+            @php
+                if ($isTeacher) {
+                    $profileRoute  = route('teacher.profile');
+                    $settingsRoute = route('teacher.settings');
+                } elseif ($isStudent) {
+                    $profileRoute  = route('student.profile');
+                    $settingsRoute = route('student.settings');
+                } else {
+                    $profileRoute  = route('admin.profile');
+                    $settingsRoute = route('admin.settings');
+                }
+            @endphp
+            <a href="{{ $profileRoute }}" class="dropdown-item">My Profile</a>
+            <a href="{{ $settingsRoute }}" class="dropdown-item">Settings</a>
             <div style="border-top: 1px solid var(--border-color); margin: 0.25rem 0;"></div>
             <form method="POST" action="{{ route('logout') }}" style="display: inline;">
               @csrf

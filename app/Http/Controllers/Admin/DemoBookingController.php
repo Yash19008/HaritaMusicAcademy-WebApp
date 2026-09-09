@@ -70,9 +70,9 @@ class DemoBookingController extends Controller
                 \Illuminate\Support\Facades\Mail::to($teacher->user->email)->send(new \App\Mail\DemoBookedMail($booking, true));
             }
             
-            return redirect()->route('admin.sales.index')->with('success', 'Demo class scheduled successfully! Google Meet link generated and emails sent.');
+            return redirect()->route('admin.demos')->with('success', 'Demo class scheduled successfully! Google Meet link generated and emails sent.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.sales.index')->withErrors(['error' => $e->getMessage()]);
+            return redirect()->route('admin.demos')->withErrors(['error' => $e->getMessage()]);
         }
     }
 
