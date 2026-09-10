@@ -64,107 +64,335 @@
     @stack('modals')
 
     @if (auth()->check() && auth()->user()->hasRole('teacher'))
-        <!-- OPPORTUNITY POPUP (Hidden by default) -->
-        <div id="opportunity-popup"
-            style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 99999; justify-content: center; align-items: center; color: white;">
-            <div
-                style="background: #fff; color: #333; padding: 2rem; border-radius: 12px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
-                <h2 style="color: #51040e; margin-bottom: 0.5rem;">🎉 New Class Opportunity!</h2>
-                <p style="font-size: 1.1rem; margin-bottom: 1rem;">Are you available to cover this class?</p>
+        <!-- OPPORTUNITY POPUP — Premium Redesign -->
+        <style>
+            #opportunity-popup {
+                display: none;
+                position: fixed;
+                inset: 0;
+                align-items: center;
+                justify-content: center;
+                background: rgba(0, 0, 0, 0.58);
+                padding: 20px;
+                z-index: 99999;
+            }
+            #opportunity-popup.active { display: flex; }
 
-                <div
-                    style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; text-align: left;">
-                    <strong>Subject:</strong> <span id="opp-subject"></span><br>
-                    <strong>Date:</strong> <span id="opp-date"></span><br>
-                    <strong>Time:</strong> <span id="opp-time"></span><br>
-                    <strong>Bonus Reward:</strong> <span style="color: #51040e; font-weight: bold;">&#8377;<span
-                            id="opp-bonus"></span></span>
+            .opp-modal {
+                position: relative;
+                width: 100%;
+                max-width: 760px;
+                background: #ffffff;
+                border-radius: 18px;
+                padding: 42px 50px 38px;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+                font-family: "Poppins", "Segoe UI", sans-serif;
+            }
+            .opp-close-btn {
+                position: absolute;
+                top: 24px; right: 28px;
+                width: 38px; height: 38px;
+                border: none; background: transparent;
+                font-size: 34px; font-weight: 300;
+                color: #68707a; cursor: pointer; line-height: 1;
+                transition: 0.2s ease;
+            }
+            .opp-close-btn:hover { color: #7c0b19; }
+
+            .opp-modal-header {
+                display: flex; align-items: center;
+                gap: 18px; margin-bottom: 30px; padding-right: 40px;
+            }
+            .opp-header-icon {
+                width: 58px; height: 58px;
+                display: flex; align-items: center; justify-content: center;
+                font-size: 30px; background: #fbe7e9;
+                border-radius: 14px; flex-shrink: 0;
+            }
+            .opp-modal-header h2 {
+                font-size: 29px; line-height: 1.25;
+                font-weight: 700; color: #7c0b19; margin-bottom: 5px;
+            }
+            .opp-modal-header p { font-size: 15px; color: #68707a; font-weight: 400; }
+
+            .opp-class-details {
+                background: #f7f8fa; border: 1px solid #eef0f2;
+                border-radius: 14px; padding: 26px;
+            }
+            .opp-subject-row {
+                display: flex; align-items: center;
+                gap: 16px; margin-bottom: 26px;
+            }
+            .opp-music-icon {
+                width: 58px; height: 58px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 50%; background: #f9dfe2;
+                color: #8a1724; font-size: 32px; font-weight: 700; flex-shrink: 0;
+            }
+            .opp-subject-name {
+                display: inline-block; font-size: 23px;
+                font-weight: 700; color: #151b24; margin-right: 10px;
+            }
+            .opp-class-badge {
+                display: inline-block; padding: 5px 12px; border-radius: 20px;
+                background: #f9dfe2; color: #a21c2c;
+                font-size: 12px; font-weight: 600; vertical-align: middle;
+            }
+            .opp-info-grid {
+                display: grid; grid-template-columns: 1fr 1fr;
+                gap: 30px; margin-bottom: 25px;
+            }
+            .opp-info-item { display: flex; align-items: flex-start; gap: 14px; }
+            .opp-info-item + .opp-info-item {
+                border-left: 1px solid #dfe2e6; padding-left: 30px;
+            }
+            .opp-info-icon { font-size: 22px; padding-top: 4px; }
+            .opp-info-label {
+                display: block; font-size: 13px; color: #858c96;
+                font-weight: 500; margin-bottom: 4px;
+            }
+            .opp-info-item strong {
+                display: block; font-size: 15px; color: #28313d;
+                font-weight: 600; white-space: nowrap;
+            }
+            .opp-info-item small { display: block; margin-top: 3px; color: #8a919b; font-size: 12px; }
+
+            .opp-bonus-box {
+                display: flex; align-items: center; gap: 16px;
+                padding: 18px 20px; border-radius: 12px;
+                background: #fff0f1; border: 1px solid #f9dadd;
+            }
+            .opp-bonus-icon {
+                width: 46px; height: 46px;
+                display: flex; align-items: center; justify-content: center;
+                border-radius: 10px; background: #ffffff; font-size: 22px; flex-shrink: 0;
+            }
+            .opp-bonus-box h3 { color: #8b1725; font-size: 18px; font-weight: 700; margin-bottom: 2px; }
+            .opp-bonus-box p { color: #606873; font-size: 12px; font-weight: 400; }
+
+            .opp-expiry-row {
+                display: flex; align-items: center;
+                justify-content: space-between; margin-top: 24px;
+            }
+            .opp-expiry-message { display: flex; align-items: center; gap: 10px; color: #8b1725; font-size: 13px; }
+            .opp-expiry-badge {
+                padding: 8px 15px; border-radius: 20px;
+                background: #fbe7e9; color: #9b1c2b; font-size: 12px; font-weight: 600;
+            }
+            .opp-divider { height: 1px; background: #e8eaed; margin: 25px 0; }
+
+            .opp-modal-actions { display: grid; grid-template-columns: 1fr 1.35fr; gap: 16px; }
+            .opp-btn {
+                height: 56px; border-radius: 9px;
+                font-family: "Poppins", "Segoe UI", sans-serif;
+                font-size: 15px; font-weight: 600;
+                cursor: pointer; transition: all 0.2s ease;
+            }
+            .opp-btn-reject {
+                background: #ffffff; border: 1px solid #cbd0d6; color: #5e6670;
+            }
+            .opp-btn-reject:hover { background: #f5f5f5; border-color: #adb3ba; }
+            .opp-btn-accept {
+                border: none; background: #820c1a; color: #ffffff;
+                box-shadow: 0 6px 15px rgba(130,12,26,0.18);
+            }
+            .opp-btn-accept:hover {
+                background: #690914; transform: translateY(-1px);
+                box-shadow: 0 8px 18px rgba(130,12,26,0.25);
+            }
+
+            @media (max-width: 650px) {
+                .opp-modal { padding: 30px 22px 25px; border-radius: 14px; }
+                .opp-modal-header { gap: 12px; margin-bottom: 22px; }
+                .opp-header-icon { width: 46px; height: 46px; font-size: 23px; }
+                .opp-modal-header h2 { font-size: 21px; }
+                .opp-modal-header p { font-size: 12px; }
+                .opp-class-details { padding: 18px; }
+                .opp-info-grid { grid-template-columns: 1fr; gap: 18px; }
+                .opp-info-item + .opp-info-item { border-left: none; border-top: 1px solid #dfe2e6; padding-left: 0; padding-top: 18px; }
+                .opp-info-item strong { white-space: normal; }
+                .opp-expiry-row { align-items: flex-start; flex-direction: column; gap: 12px; }
+                .opp-modal-actions { grid-template-columns: 1fr; }
+                .opp-btn { height: 52px; }
+            }
+        </style>
+
+        <div id="opportunity-popup">
+            <div class="opp-modal">
+
+                <!-- Close -->
+                <button class="opp-close-btn" id="opp-close" aria-label="Close">&times;</button>
+
+                <!-- Header -->
+                <div class="opp-modal-header">
+                    <div class="opp-header-icon">🎉</div>
+                    <div>
+                        <h2>New Class Opportunity</h2>
+                        <p>You've been invited to cover this class.</p>
+                    </div>
                 </div>
 
-                <div style="display: flex; gap: 1rem; justify-content: center;">
-                    <button id="opp-reject"
-                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: #adb5bd; color: white; font-weight: bold; cursor: pointer;">Reject</button>
-                    <button id="opp-accept"
-                        style="padding: 0.75rem 1.5rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #51040e 0%, #7d0a1b 100%); color: white; font-weight: bold; cursor: pointer; font-size: 1.1rem;">Accept
-                        Class</button>
+                <!-- Class Details -->
+                <div class="opp-class-details">
+
+                    <!-- Subject -->
+                    <div class="opp-subject-row">
+                        <div class="opp-music-icon">♪</div>
+                        <div>
+                            <span class="opp-subject-name" id="opp-subject"></span>
+                            <span class="opp-class-badge">Class</span>
+                        </div>
+                    </div>
+
+                    <!-- Date / Time -->
+                    <div class="opp-info-grid">
+                        <div class="opp-info-item">
+                            <div class="opp-info-icon">📅</div>
+                            <div>
+                                <span class="opp-info-label">Date</span>
+                                <strong id="opp-date"></strong>
+                            </div>
+                        </div>
+                        <div class="opp-info-item">
+                            <div class="opp-info-icon">🕐</div>
+                            <div>
+                                <span class="opp-info-label">Time</span>
+                                <strong id="opp-time"></strong>
+                                <small>40 minutes</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bonus -->
+                    <div class="opp-bonus-box">
+                        <div class="opp-bonus-icon">🎁</div>
+                        <div>
+                            <h3>&#8377;<span id="opp-bonus"></span> Bonus Reward</h3>
+                            <p>Earn an additional bonus for covering this class.</p>
+                        </div>
+                    </div>
+
                 </div>
+
+                <!-- Expiry -->
+                <div class="opp-expiry-row">
+                    <div class="opp-expiry-message">
+                        <span>⏱</span>
+                        <strong>Please respond within 15 minutes</strong>
+                    </div>
+                    <div class="opp-expiry-badge" id="opp-expiry-badge">Expires in 15:00</div>
+                </div>
+
+                <!-- Divider -->
+                <div class="opp-divider"></div>
+
+                <!-- Actions -->
+                <div class="opp-modal-actions">
+                    <button class="opp-btn opp-btn-reject" id="opp-reject">Reject</button>
+                    <button class="opp-btn opp-btn-accept" id="opp-accept">✓ Accept Class &nbsp;→</button>
+                </div>
+
             </div>
         </div>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                let opportunityPolling;
+            document.addEventListener('DOMContentLoaded', function () {
                 let currentOppId = null;
+                let expiryTimer = null;
+                let expirySeconds = 15 * 60;
+
+                function startExpiryCountdown() {
+                    clearInterval(expiryTimer);
+                    expirySeconds = 15 * 60;
+                    updateExpiryBadge();
+                    expiryTimer = setInterval(function () {
+                        expirySeconds--;
+                        if (expirySeconds <= 0) {
+                            clearInterval(expiryTimer);
+                            closePopup();
+                        } else {
+                            updateExpiryBadge();
+                        }
+                    }, 1000);
+                }
+
+                function updateExpiryBadge() {
+                    const m = String(Math.floor(expirySeconds / 60)).padStart(2, '0');
+                    const s = String(expirySeconds % 60).padStart(2, '0');
+                    const badge = document.getElementById('opp-expiry-badge');
+                    if (badge) badge.textContent = 'Expires in ' + m + ':' + s;
+                }
 
                 function checkOpportunity() {
-                    if (document.getElementById('opportunity-popup').style.display === 'flex') return;
+                    if (document.getElementById('opportunity-popup').classList.contains('active')) return;
 
                     fetch('{{ route('teacher.opportunities.current') }}')
                         .then(res => res.json())
-                        .then(data => {
-                            if (data && data.id) {
-                                showOpportunity(data);
-                            }
-                        })
+                        .then(data => { if (data && data.id) showOpportunity(data); })
                         .catch(err => console.error(err));
                 }
 
                 function showOpportunity(data) {
                     currentOppId = data.id;
                     document.getElementById('opp-subject').innerText = data.subject;
-                    document.getElementById('opp-date').innerText = data.date;
-                    document.getElementById('opp-time').innerText = data.time;
-                    document.getElementById('opp-bonus').innerText = data.bonus;
-
-                    document.getElementById('opportunity-popup').style.display = 'flex';
+                    document.getElementById('opp-date').innerText    = data.date;
+                    document.getElementById('opp-time').innerText    = data.time;
+                    document.getElementById('opp-bonus').innerText   = data.bonus;
+                    document.getElementById('opportunity-popup').classList.add('active');
+                    startExpiryCountdown();
                 }
 
                 function closePopup() {
-                    document.getElementById('opportunity-popup').style.display = 'none';
+                    document.getElementById('opportunity-popup').classList.remove('active');
                     currentOppId = null;
+                    clearInterval(expiryTimer);
                 }
 
-                document.getElementById('opp-accept').addEventListener('click', function() {
+                // Close button
+                document.getElementById('opp-close').addEventListener('click', closePopup);
+
+                // Accept
+                document.getElementById('opp-accept').addEventListener('click', function () {
                     if (!currentOppId) return;
                     const btn = this;
-                    btn.innerText = 'Accepting...';
+                    btn.innerText = 'Accepting…';
                     btn.disabled = true;
 
                     fetch(`/teacher/opportunities/${currentOppId}/accept`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                    .getAttribute('content'),
-                                'Accept': 'application/json'
-                            }
-                        })
-                        .then(res => res.json())
-                        .then(data => {
-                            closePopup();
-                            btn.innerText = 'Accept Class';
-                            btn.disabled = false;
-                            if (data.success) {
-                                alert(
-                                    'Success! The class has been assigned to you. Google Calendar updated.');
-                                window.location.reload();
-                            } else {
-                                alert(data.message || 'Someone else already accepted this opportunity.');
-                            }
-                        })
-                        .catch(err => {
-                            btn.innerText = 'Accept Class';
-                            btn.disabled = false;
-                            closePopup();
-                        });
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        closePopup();
+                        btn.innerText = '✓ Accept Class →';
+                        btn.disabled = false;
+                        if (data.success) {
+                            if (typeof showToast !== 'undefined') showToast('Class accepted! Google Calendar updated.', 'success');
+                            else alert('Success! The class has been assigned to you.');
+                            window.location.reload();
+                        } else {
+                            if (typeof showToast !== 'undefined') showToast(data.message || 'Someone else already accepted this opportunity.', 'error');
+                            else alert(data.message || 'Someone else already accepted this opportunity.');
+                        }
+                    })
+                    .catch(() => {
+                        btn.innerText = '✓ Accept Class →';
+                        btn.disabled = false;
+                        closePopup();
+                    });
                 });
 
-                document.getElementById('opp-reject').addEventListener('click', function() {
+                // Reject
+                document.getElementById('opp-reject').addEventListener('click', function () {
                     if (!currentOppId) return;
                     fetch(`/teacher/opportunities/${currentOppId}/reject`, {
                         method: 'POST',
                         headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                .getAttribute('content'),
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                             'Accept': 'application/json'
                         }
                     });
@@ -172,10 +400,11 @@
                 });
 
                 // Poll every 5 seconds
-                opportunityPolling = setInterval(checkOpportunity, 5000);
+                setInterval(checkOpportunity, 5000);
             });
         </script>
     @endif
+
 
     @if (auth()->check() &&
             auth()->user()->hasRole('student') &&
