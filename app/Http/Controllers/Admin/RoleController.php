@@ -3,6 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\StudentCreatedMail;
+use App\Mail\TeacherCreatedMail;
+use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -36,7 +40,7 @@ class RoleController extends Controller
         $users = User::with('roles')->get()->map(function ($user) {
             return [
                 'raw_id' => $user->id,
-                'id' => 'USR' . str_pad($user->id, 3, '0', STR_PAD_LEFT),
+                'id' => 'USR'.str_pad($user->id, 3, '0', STR_PAD_LEFT),
                 'name' => $user->name,
                 'email' => $user->email,
                 'password' => '••••••••', // Don't send real password
@@ -75,39 +79,40 @@ class RoleController extends Controller
 
         // If Teacher role, create teacher record
         if ($data['role'] === 'Teacher' || $data['role'] === 'teacher') {
-            \App\Models\Teacher::create([
+            Teacher::create([
                 'user_id' => $user->id,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'status' => 'active',
             ]);
-            
+
             try {
-                \Mail::to($user->email)->send(new \App\Mail\TeacherCreatedMail($user, $rawPassword));
+                \Mail::to($user->email)->send(new TeacherCreatedMail($user, $rawPassword));
             } catch (\Exception $e) {
-                \Log::error('Failed to send teacher credentials email: ' . $e->getMessage());
+                \Log::error('Failed to send teacher credentials email: '.$e->getMessage());
             }
         }
 
         // If Student role, create student record
         if ($data['role'] === 'Student' || $data['role'] === 'student') {
-            \App\Models\Student::create([
+            Student::create([
                 'user_id' => $user->id,
                 'name' => $data['name'],
                 'email' => $data['email'],
                 'status' => 'active',
             ]);
-            
+
             try {
-                \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $rawPassword));
+                \Mail::to($user->email)->send(new StudentCreatedMail($user, $rawPassword));
             } catch (\Exception $e) {
-                \Log::error('Failed to send student credentials email: ' . $e->getMessage());
+                \Log::error('Failed to send student credentials email: '.$e->getMessage());
             }
         }
 
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'User created successfully!']);
         }
+
         return back()->with('success', 'User created successfully!');
     }
 
@@ -118,7 +123,7 @@ class RoleController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => 'nullable|string|min:6',
             'role' => 'required|string|exists:roles,name',
             'status' => 'required|in:active,inactive',
@@ -132,7 +137,7 @@ class RoleController extends Controller
         ]);
 
         // Update password if provided
-        if (!empty($data['password'])) {
+        if (! empty($data['password'])) {
             $user->update(['password' => Hash::make($data['password'])]);
         }
 
@@ -142,6 +147,7 @@ class RoleController extends Controller
         if ($request->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'User updated successfully!']);
         }
+
         return back()->with('success', 'User updated successfully!');
     }
 
@@ -156,8 +162,8 @@ class RoleController extends Controller
         }
 
         // Delete associated Teacher or Student
-        \App\Models\Teacher::where('user_id', $user->id)->delete();
-        \App\Models\Student::where('user_id', $user->id)->delete();
+        Teacher::where('user_id', $user->id)->delete();
+        Student::where('user_id', $user->id)->delete();
 
         // Delete user
         $user->delete();
@@ -165,6 +171,7 @@ class RoleController extends Controller
         if (request()->wantsJson()) {
             return response()->json(['success' => true, 'message' => 'User deleted successfully!']);
         }
+
         return back()->with('success', 'User deleted successfully!');
     }
 
@@ -194,7 +201,7 @@ class RoleController extends Controller
         ]);
 
         $role = Role::where('name', $data['role'])->firstOrFail();
-        
+
         // Build permission names from the nested structure
         $permissionNames = [];
         foreach ($data['permissions'] as $module => $actions) {
@@ -222,7 +229,7 @@ class RoleController extends Controller
         $roleName = $request->input('role');
         $role = Role::where('name', $roleName)->with('permissions')->first();
 
-        if (!$role) {
+        if (! $role) {
             return response()->json(['error' => 'Role not found'], 404);
         }
 
@@ -230,7 +237,7 @@ class RoleController extends Controller
         $permissionsByModule = [];
         foreach ($role->permissions as $permission) {
             [$module, $action] = explode('.', $permission->name);
-            if (!isset($permissionsByModule[$module])) {
+            if (! isset($permissionsByModule[$module])) {
                 $permissionsByModule[$module] = [
                     'view' => false,
                     'create' => false,
@@ -254,7 +261,7 @@ class RoleController extends Controller
     public function clone(Request $request, Role $role): RedirectResponse
     {
         $newRole = Role::create([
-            'name' => $role->name . ' (Copy)',
+            'name' => $role->name.' (Copy)',
             'description' => $role->description,
             'status' => 'inactive',
             'guard_name' => 'web',

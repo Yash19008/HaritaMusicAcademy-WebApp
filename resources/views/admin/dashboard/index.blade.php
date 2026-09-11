@@ -223,28 +223,28 @@
             <div class="stat-icon">🎓</div>
             <div>
               <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Students</div>
-              <h3 id="adminTotalStudents" class="font-bold">5</h3>
+              <h3 id="adminTotalStudents" class="font-bold">{{ $totalStudents }}</h3>
             </div>
           </div>
           <div class="card p-3 d-flex align-center gap-3 stat-card">
             <div class="stat-icon">🎻</div>
             <div>
               <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Teachers</div>
-              <h3 id="adminTotalTeachers" class="font-bold">4</h3>
+              <h3 id="adminTotalTeachers" class="font-bold">{{ $totalTeachers }}</h3>
             </div>
           </div>
           <div class="card p-3 d-flex align-center gap-3 stat-card">
             <div class="stat-icon">📅</div>
             <div>
               <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Today's Classes</div>
-              <h3 id="adminTodayClasses" class="font-bold">1</h3>
+              <h3 id="adminTodayClasses" class="font-bold">{{ $todayClasses }}</h3>
             </div>
           </div>
           <div class="card p-3 d-flex align-center gap-3 stat-card">
             <div class="stat-icon">💰</div>
             <div>
               <div class="text-muted" style="font-size: 0.75rem; text-transform: uppercase;">Monthly Sales</div>
-              <h3 id="adminMonthlySales" class="font-bold">₹41,000</h3>
+              <h3 id="adminMonthlySales" class="font-bold">₹{{ number_format($monthlySales) }}</h3>
             </div>
           </div>
         </div>
@@ -333,27 +333,19 @@
               <h4 class="font-semibold">🔔 Recent Academy Activity</h4>
             </div>
             <div class="card-body p-0">
-              <div class="d-flex align-center gap-3 p-2 border-bottom" style="font-size: 13px;">
-                <span>🟢</span>
-                <div>
-                  <strong>New Student Registered</strong>: Anirudh Ravichander enrolled in Flute class.
-                  <div class="text-light" style="font-size: 11px; margin-top: 2px;">5 minutes ago</div>
+              @if($recentActivity->isEmpty())
+                <div class="p-3 text-center text-muted" style="font-size: 0.85rem;">No recent activity.</div>
+              @else
+                @foreach($recentActivity as $activity)
+                <div class="d-flex align-center gap-3 p-2 border-bottom" style="font-size: 13px;">
+                  <span>📅</span>
+                  <div>
+                    <strong>Class Booked</strong>: {{ $activity->student->name ?? 'Unknown Student' }} with {{ $activity->teacher->name ?? 'Unknown Teacher' }} ({{ $activity->instrument }})
+                    <div class="text-light" style="font-size: 11px; margin-top: 2px;">{{ $activity->created_at->diffForHumans() }}</div>
+                  </div>
                 </div>
-              </div>
-              <div class="d-flex align-center gap-3 p-2 border-bottom" style="font-size: 13px;">
-                <span>💳</span>
-                <div>
-                  <strong>Payment Confirmed</strong>: Aria Sharma purchased Tabla 20-Class Package.
-                  <div class="text-light" style="font-size: 11px; margin-top: 2px;">2 hours ago</div>
-                </div>
-              </div>
-              <div class="d-flex align-center gap-3 p-2" style="font-size: 13px;">
-                <span>📅</span>
-                <div>
-                  <strong>Class Rescheduled</strong>: Sitar Intermediate (Rohan Malhotra) moved to tomorrow.
-                  <div class="text-light" style="font-size: 11px; margin-top: 2px;">Yesterday</div>
-                </div>
-              </div>
+                @endforeach
+              @endif
             </div>
           </div>
 
@@ -363,36 +355,22 @@
               <h4 class="font-semibold">⭐ Top Rated Instructors</h4>
             </div>
             <div class="card-body p-0">
-              <div class="d-flex align-center justify-between p-2 border-bottom" style="font-size: 13.5px;">
-                <div class="d-flex align-center">
-                  <span class="table-avatar" style="background-color: var(--secondary-light);">MS</span>
-                  <div>
-                    <strong>Meera Sharma</strong>
-                    <div class="text-light" style="font-size: 11px;">Vocal & Violin Specialist</div>
+              @if($topTeachers->isEmpty())
+                <div class="p-3 text-center text-muted" style="font-size: 0.85rem;">No teachers yet.</div>
+              @else
+                @foreach($topTeachers as $teacher)
+                <div class="d-flex align-center justify-between p-2 border-bottom" style="font-size: 13.5px;">
+                  <div class="d-flex align-center">
+                    <span class="table-avatar" style="background-color: var(--secondary-light);">{{ substr($teacher->name, 0, 2) }}</span>
+                    <div>
+                      <strong>{{ $teacher->name }}</strong>
+                      <div class="text-light" style="font-size: 11px;">{{ $teacher->categories ?? 'General' }}</div>
+                    </div>
                   </div>
+                  <span style="color: #eab308; font-weight: 700;">{{ $teacher->rating ? number_format($teacher->rating, 1) : '5.0' }} ⭐ ({{ $teacher->class_bookings_count ?? 0 }} classes)</span>
                 </div>
-                <span style="color: #eab308; font-weight: 700;">5.0 ⭐ (24 classes)</span>
-              </div>
-              <div class="d-flex align-center justify-between p-2 border-bottom" style="font-size: 13.5px;">
-                <div class="d-flex align-center">
-                  <span class="table-avatar" style="background-color: var(--secondary-light);">RS</span>
-                  <div>
-                    <strong>Pandit Ravi Sen</strong>
-                    <div class="text-light" style="font-size: 11px;">Sitar Maestro</div>
-                  </div>
-                </div>
-                <span style="color: #eab308; font-weight: 700;">4.9 ⭐ (18 classes)</span>
-              </div>
-              <div class="d-flex align-center justify-between p-2" style="font-size: 13.5px;">
-                <div class="d-flex align-center">
-                  <span class="table-avatar" style="background-color: var(--secondary-light);">HP</span>
-                  <div>
-                    <strong>Hari Prasad Jr</strong>
-                    <div class="text-light" style="font-size: 11px;">Flute Specialist</div>
-                  </div>
-                </div>
-                <span style="color: #eab308; font-weight: 700;">4.8 ⭐ (15 classes)</span>
-              </div>
+                @endforeach
+              @endif
             </div>
           </div>
         </div>
@@ -408,118 +386,13 @@
     // Draw Charts when on Dashboard
     document.addEventListener("DOMContentLoaded", () => {
       renderDashboardCharts();
-      populateDynamicMetrics();
     });
 
-    function onRoleChange() {
-      renderDashboardCharts();
-      populateDynamicMetrics();
-    }
-
-    function populateDynamicMetrics() {
-      const role = db.getCurrentRole();
-
-      if (role === 'admin') {
-        const students = db.getStudents();
-        const teachers = db.getTeachers();
-        const classes = db.getClasses();
-        const sales = db.getSales();
-
-        const totalSales = sales.reduce((acc, curr) => acc + curr.amount, 0);
-
-        document.getElementById('adminTotalStudents').textContent = students.length;
-        document.getElementById('adminTotalTeachers').textContent = teachers.length;
-        document.getElementById('adminTodayClasses').textContent = classes.filter(c => c.status === 'Scheduled').length;
-        document.getElementById('adminMonthlySales').textContent = "₹" + totalSales.toLocaleString('en-IN');
-      }
-
-      else if (role === 'teacher') {
-        const classes = db.getClasses();
-        const scheduleContainer = document.getElementById('teacherTodaySchedule');
-        scheduleContainer.innerHTML = "";
-
-        const meeraClasses = classes.filter(c => c.teacherName === "Meera Sharma" && c.status !== "Completed");
-
-        if (meeraClasses.length === 0) {
-          scheduleContainer.innerHTML = "<div class='text-muted p-2'>No scheduled classes for today.</div>";
-        } else {
-          meeraClasses.forEach(cls => {
-            const dateObj = new Date(cls.dateTime);
-            const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-            const div = document.createElement('div');
-            div.className = "student-class-box";
-            div.innerHTML = `
-              <div class="font-semibold">${cls.studentName} - ${cls.instrument}</div>
-              <div class="text-muted" style="font-size: 0.75rem;">Time: ${timeStr}</div>
-              <div class="d-flex gap-2 mt-2">
-                <button class="btn btn-primary btn-sm p-1 px-2" style="font-size: 0.7rem;" onclick="alert('Starting class session...')">Start Class</button>
-                <button class="btn btn-secondary btn-sm p-1 px-2" style="font-size: 0.7rem;" onclick="window.location.href='class-booking.html'">Reschedule</button>
-              </div>
-            `;
-            scheduleContainer.appendChild(div);
-          });
-        }
-
-        ChartManager.drawProgressRing("teacherAvailabilityProgress", 90, "#059669");
-        renderCalendarWidget();
-      }
-
-      else if (role === 'student') {
-        ChartManager.drawProgressRing("studentProgressRing", 75, "#10b981");
-        renderCalendarWidget();
-      }
-    }
-
     function renderDashboardCharts() {
-      const role = db.getCurrentRole();
-      if (role === 'admin') {
-        ChartManager.drawLineChart("revenueLineChart", [22000, 29000, 31000, 25000, 41000], ["Mar", "Apr", "May", "Jun", "Jul"]);
-        ChartManager.drawBarChart("instrumentBarChart", [15, 8, 12, 5, 9], ["Vocal", "Sitar", "Violin", "Flute", "Tabla"]);
-        ChartManager.drawLineChart("studentsEnrolledChart", [12, 18, 25, 38, 50], ["Mar", "Apr", "May", "Jun", "Jul"]);
-        ChartManager.drawBarChart("teachersOnboardedChart", [4, 8, 12, 18, 25], ["Mar", "Apr", "May", "Jun", "Jul"]);
-      }
-    }
-
-    function renderCalendarWidget() {
-      const container = document.getElementById("dashboardCalendar");
-      if (!container) return;
-
-      container.innerHTML = "";
-
-      const startDay = 3;
-      const totalDays = 31;
-
-      const daysHeaders = ["S", "M", "T", "W", "T", "F", "S"];
-      daysHeaders.forEach(day => {
-        const div = document.createElement("div");
-        div.className = "calendar-day-header";
-        div.textContent = day;
-        container.appendChild(div);
-      });
-
-      for (let i = 0; i < startDay; i++) {
-        const div = document.createElement("div");
-        div.className = "calendar-day-cell text-muted";
-        div.innerHTML = "";
-        container.appendChild(div);
-      }
-
-      for (let day = 1; day <= totalDays; day++) {
-        const div = document.createElement("div");
-        div.className = "calendar-day-cell";
-        div.textContent = day;
-
-        if (day === 24) {
-          div.classList.add("today");
-        }
-
-        if (day === 24 || day === 26) {
-          div.classList.add("active-class");
-        }
-
-        container.appendChild(div);
-      }
+      ChartManager.drawLineChart("revenueLineChart", @json($revenueData), @json($chartLabels));
+      ChartManager.drawBarChart("instrumentBarChart", @json(array_values($instrumentCount)), @json($instrumentData));
+      ChartManager.drawLineChart("studentsEnrolledChart", @json($studentsData), @json($chartLabels));
+      ChartManager.drawBarChart("teachersOnboardedChart", @json($teachersData), @json($chartLabels));
     }
   
 </script>

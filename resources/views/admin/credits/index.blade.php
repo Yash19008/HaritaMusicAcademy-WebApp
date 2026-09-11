@@ -103,7 +103,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($transactions as $log)
+                    @foreach ($transactions as $log)
                         <tr>
                             <td style="font-size:12.5px;">{{ $log->created_at->format('M d, Y h:i A') }}</td>
                             <td class="font-semibold">{{ $log->student->name ?? 'Deleted Student' }}</td>
@@ -119,11 +119,7 @@
                             </td>
                             <td style="font-size:13px; color:var(--text-muted);">{{ $log->reason }}</td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">No transactions recorded yet.</td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -147,7 +143,8 @@
                             <option value="">— Select Student —</option>
                             @foreach ($students as $s)
                                 <option value="{{ $s->id }}">{{ $s->name }}
-                                    ({{ $s->course->name ?? 'No Course' }})</option>
+                                    ({{ $s->course->name ?? 'No Course' }})
+                                </option>
                             @endforeach
                         </select>
                     </div>
