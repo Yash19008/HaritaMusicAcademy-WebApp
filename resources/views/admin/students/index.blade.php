@@ -173,7 +173,7 @@
             @endif
           </td>
           <td>{{ $group->teacher->name ?? '— Unassigned —' }}</td>
-          <td class="text-center font-bold">{{ $group->members_count }} / 4</td>
+          <td class="text-center font-bold">{{ $group->members_count }} / {{ \App\Models\Setting::get('max_group_users', 4) }}</td>
           <td>
             <span class="badge {{ strtolower($group->status ?? 'active')==='active' ? 'badge-success' : 'badge-danger' }}">
               {{ ucfirst($group->status ?? 'Active') }}
@@ -582,7 +582,7 @@
           </select>
         </div>
         <div class="form-group mb-3">
-          <label class="form-label">Select Students (1 – 4 max)</label>
+          <label class="form-label">Select Students (1 – {{ \App\Models\Setting::get('max_group_users', 4) }} max)</label>
           <div class="student-check-list" id="groupStudentsList">
             @forelse($students as $student)
               <label>

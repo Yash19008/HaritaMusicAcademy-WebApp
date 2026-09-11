@@ -243,15 +243,23 @@ class TeacherController extends Controller
             return response()->json(['loss' => 0, 'rate' => 0, 'classes' => 0]);
         }
 
-        $startDate = \Carbon\Carbon::parse($start);
-        $endDate = \Carbon\Carbon::parse($end);
-        
-        $days = $startDate->diffInDays($endDate) + 1;
-        
-        // 8am to 2am (next day) = 18 hours. 18 hours * 60 = 1080 mins. 1080 / 40 = 27 classes per day
-        $classes = $days * 27;
-
         $teacher = auth()->user()->teacher;
+
+        $startDate = \Carbon\Carbon::parse($start)->startOfDay();
+        $endDate = \Carbon\Carbon::parse($end)->endOfDay();
+        
+        $bookedClassesCount = \App\Models\ClassBooking::where('teacher_id', $teacher->id)
+            ->where('status', 'scheduled')
+            ->whereBetween('starts_at', [$startDate, $endDate])
+            ->count();
+            
+        $bookedDemosCount = \App\Models\DemoBooking::where('teacher_id', $teacher->id)
+            ->where('status', 'scheduled')
+            ->whereBetween('scheduled_at', [$startDate, $endDate])
+            ->count();
+
+        $classes = $bookedClassesCount + $bookedDemosCount;
+
         $currentMonthName = now()->format('F Y');
         
         $payroll = TeacherPayroll::where('teacher_id', $teacher->id)

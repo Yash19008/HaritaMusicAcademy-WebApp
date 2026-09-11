@@ -1215,8 +1215,14 @@
                 <div class="cards-scroll-wrap-three" id="test-cards-container">
 
                     @foreach ($locale['reviews'] as $i => $review)
+                        @php
+                            $colors = ['#ffffff', '#51040e'];
+                            $bgColor = $colors[$i % count($colors)];
+                            $isDark = $bgColor === '#51040e';
+                            $styleOverride = $isDark ? "--color-text-main: #ffffff; --color-text-light: rgba(255,255,255,0.8); border-color: #51040e;" : "";
+                        @endphp
                         <div class="testimonial-card reveal-right"
-                            style="transition-delay: {{ number_format($i * 0.15, 2) }}s;">
+                            style="transition-delay: {{ number_format($i * 0.15, 2) }}s; background-color: {{ $bgColor }}; {{ $styleOverride }}">
                             <div>
                                 <div class="testimonial-card-top">
                                     <div class="test-avatar-ring">
@@ -1262,7 +1268,7 @@
 
     <!-- 5. Course Fees & Pricing Section -->
     <section class="section section-alt reveal" id="pricing"
-        style="overflow: hidden; background: url('/{{ asset('landing/assets/') }}/images/lotus-background.png') no-repeat left top;">
+        style="overflow: hidden; background: url('{{ asset('landing/assets/') }}/images/lotus-background.png') no-repeat left bottom;">
         <div class="container pricing-grid-wrap">
 
             <div class="section-header reveal-scale">
@@ -1454,13 +1460,6 @@
             btn.classList.add('active');
         }
     </script>
-    v>
-    Flexible Scheduling
-    </div>
-    </div>
-    </div>
-    </div>
-    </section>
 
     <!-- 11. Meet Our Founder Section -->
     <section class="heritage-section">

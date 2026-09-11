@@ -191,7 +191,9 @@
                         <li><a href="#courses" class="footer-link">Our Courses</a></li>
                         <li><a href="#pricing" class="footer-link">Pricing Plans</a></li>
                         <li><a href="#journey" class="footer-link">Learning Journey</a></li>
-                        <li><a href="privacy.html" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="{{ route('landing.privacy') }}" class="footer-link">Privacy Policy</a></li>
+                        <li><a href="{{ route('landing.terms') }}" class="footer-link">Terms and Conditions</a></li>
+                        <li><a href="{{ route('landing.refund') }}" class="footer-link">Refund Policy</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">

@@ -35,6 +35,7 @@ class RoleController extends Controller
     {
         $users = User::with('roles')->get()->map(function ($user) {
             return [
+                'raw_id' => $user->id,
                 'id' => 'USR' . str_pad($user->id, 3, '0', STR_PAD_LEFT),
                 'name' => $user->name,
                 'email' => $user->email,
@@ -50,7 +51,7 @@ class RoleController extends Controller
     /**
      * Store new user
      */
-    public function storeUser(Request $request): RedirectResponse
+    public function storeUser(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -104,13 +105,16 @@ class RoleController extends Controller
             }
         }
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'User created successfully!']);
+        }
         return back()->with('success', 'User created successfully!');
     }
 
     /**
      * Update existing user
      */
-    public function updateUser(Request $request, User $user): RedirectResponse
+    public function updateUser(Request $request, User $user)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
@@ -135,13 +139,16 @@ class RoleController extends Controller
         // Sync role
         $user->syncRoles([$data['role']]);
 
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'User updated successfully!']);
+        }
         return back()->with('success', 'User updated successfully!');
     }
 
     /**
      * Delete user
      */
-    public function destroyUser(User $user): RedirectResponse
+    public function destroyUser(User $user)
     {
         // Prevent deleting first user (Super Admin)
         if ($user->id === 1) {
@@ -155,6 +162,9 @@ class RoleController extends Controller
         // Delete user
         $user->delete();
 
+        if (request()->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'User deleted successfully!']);
+        }
         return back()->with('success', 'User deleted successfully!');
     }
 

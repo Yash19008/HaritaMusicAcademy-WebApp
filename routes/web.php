@@ -8,6 +8,8 @@ use App\Http\Controllers\LandingController;
 // ── Landing: root → India (default) ─────────────────────────────────────────
 Route::get('/', fn () => redirect('/in', 301));
 Route::get('/privacy', fn () => view('landing.privacy'))->name('landing.privacy');
+Route::get('/terms', fn () => view('landing.terms'))->name('landing.terms');
+Route::get('/refund', fn () => view('landing.refund'))->name('landing.refund');
 
 // ── Landing: country-prefixed pages ──────────────────────────────────────────
 // Supported slugs: in | us | uk | cad | uae

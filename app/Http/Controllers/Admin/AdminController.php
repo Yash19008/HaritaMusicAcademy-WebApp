@@ -338,7 +338,7 @@ class AdminController extends Controller
             'name'       => ['required', 'string'],
             'status'     => ['required', 'in:active,inactive'],
             'teacher_id' => ['nullable', 'exists:teachers,id'],
-            'student_ids' => ['nullable', 'array'],
+            'student_ids' => ['nullable', 'array', 'max:' . \App\Models\Setting::get('max_group_users', 4)],
             'student_ids.*' => ['exists:students,id'],
         ]);
 
@@ -360,7 +360,7 @@ class AdminController extends Controller
             'name'       => ['required', 'string'],
             'status'     => ['required', 'in:active,inactive'],
             'teacher_id' => ['nullable', 'exists:teachers,id'],
-            'student_ids' => ['nullable', 'array'],
+            'student_ids' => ['nullable', 'array', 'max:' . \App\Models\Setting::get('max_group_users', 4)],
             'student_ids.*' => ['exists:students,id'],
         ]);
 
@@ -1067,7 +1067,7 @@ class AdminController extends Controller
             'auto_deduct_credits', 'opportunity_teacher_pct', 'opportunity_bonus_rs', 'referral_bonus_student_credits',
             'referral_bonus_teacher_rs',
             'indian_reschedule_cutoff_hours', 'intl_reschedule_cutoff_hours',
-            'demo_price_inr', 'demo_price_intl',
+            'demo_price_inr', 'demo_price_intl', 'max_group_users',
         ];
 
         $request->validate([
@@ -1076,6 +1076,7 @@ class AdminController extends Controller
             'opportunity_teacher_pct' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'demo_price_inr' => ['nullable', 'numeric', 'min:0'],
             'demo_price_intl' => ['nullable', 'numeric', 'min:0'],
+            'max_group_users' => ['nullable', 'integer', 'min:1'],
         ]);
 
         foreach ($allowed as $key) {

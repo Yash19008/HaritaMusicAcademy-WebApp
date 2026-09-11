@@ -3245,7 +3245,7 @@ details:focus-visible {
   position: relative;
   padding: 100px 0;
   background: url("/landing/assets/images/lotus-background.png") no-repeat left bottom;
-  background-size: cover;
+  background-size: auto;
   /* or contain depending on image */
   overflow: hidden;
 }

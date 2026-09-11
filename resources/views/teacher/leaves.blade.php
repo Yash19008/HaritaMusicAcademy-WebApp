@@ -146,7 +146,7 @@
                 .then(data => {
                     if (data.classes > 0) {
                         lossAmount.innerText = `₹${data.loss}`;
-                        lossDetails.innerText = `(Rate per class ₹${data.rate} × ${data.classes} possible classes)`;
+                        lossDetails.innerText = `(Rate per class ₹${data.rate} × ${data.classes} booked classes)`;
                         lossContainer.style.display = 'block';
                     } else {
                         lossAmount.innerText = `₹0`;

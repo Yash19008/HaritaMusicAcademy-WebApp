@@ -127,6 +127,13 @@
                                 style="position: absolute; right: 1rem; font-weight: bold; color: var(--text-muted);">Credits</span>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label" for="maxGroupUsers">Max Group Users</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="number" id="maxGroupUsers" name="max_group_users" class="form-control"
+                                value="{{ $settings['max_group_users'] ?? '4' }}" min="1" required>
+                        </div>
+                    </div>
                 </div>
                 <div class="grid grid-2 gap-3 mb-3">
                     <div class="form-group">

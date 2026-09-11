@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Harita Music Academy Admin Panel</title>
     <link rel="stylesheet" href="{{ asset('admin-assets/css/') }}/style.css">
+    <link rel="icon" type="image/png" href="{{ asset('landing/favicon.png') }}">
     <style>
         body {
             background-color: #f8fafc;

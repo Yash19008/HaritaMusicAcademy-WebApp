@@ -170,7 +170,7 @@ return [
         'currency_code' => 'USD',
         'currency_sym'  => '$',
         'phone_code'    => '+1',
-        'demo_price'    => 6,
+        'demo_price'    => 15,
 
         'individual_plans' => [
             [
@@ -302,7 +302,7 @@ return [
         'currency_code' => 'GBP',
         'currency_sym'  => '£',
         'phone_code'    => '+44',
-        'demo_price'    => 4,
+        'demo_price'    => 12,
 
         'individual_plans' => [
             [
@@ -434,7 +434,7 @@ return [
         'currency_code' => 'CAD',
         'currency_sym'  => 'C$',
         'phone_code'    => '+1',
-        'demo_price'    => 7.5,
+        'demo_price'    => 25,
 
         'individual_plans' => [
             [
@@ -566,7 +566,7 @@ return [
         'currency_code' => 'AED',
         'currency_sym'  => 'AED ',
         'phone_code'    => '+971',
-        'demo_price'    => 20,
+        'demo_price'    => 60,
 
         'individual_plans' => [
             [
