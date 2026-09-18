@@ -18,7 +18,8 @@ class ClassBooking extends Model
         'reschedule_requested_ends_at', 'reschedule_requested_reason',
         'reschedule_requested_by', 'reschedule_status',
         'teacher_join_token', 'student_join_token',
-        'google_sync_attempts', 'next_retry_at', 'meet_link_source_booking_id', 'meet_link_generated_at'
+        'google_sync_attempts', 'next_retry_at', 'meet_link_source_booking_id', 'meet_link_generated_at',
+        'recurrence_group_id', 'is_recurring_master'
     ];
 
     protected static function booted(): void
@@ -46,6 +47,7 @@ class ClassBooking extends Model
             'teacher_attended'               => 'boolean',
             'next_retry_at'                  => 'datetime',
             'meet_link_generated_at'         => 'datetime',
+            'is_recurring_master'            => 'boolean',
         ];
     }
 
