@@ -21,7 +21,7 @@
         'demo-classes' => 'Demo Classes',
         'reports' => 'Reports Feed',
         'syllabus' => $isInternal ? 'Syllabus Master' : 'Syllabus',
-        'curriculum' => 'Curriculum Master',
+        'resource-folders' => 'Resources',
         'payroll' => 'Payroll',
         'referrals' => 'Referrals',
         'feedbacks' => 'Feedbacks',

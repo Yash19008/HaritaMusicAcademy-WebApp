@@ -198,6 +198,7 @@
                         <thead>
                             <tr>
                                 <th data-priority="1">Package Name</th>
+                                <th data-priority="3">Format</th>
                                 <th data-priority="2">Credits</th>
                                 <th data-priority="1" class="text-right">Actions</th>
                             </tr>
@@ -206,12 +207,13 @@
                             @foreach ($creditPackages as $package)
                                 <tr>
                                     <td class="font-semibold">{{ $package->name }}</td>
+                                    <td>{{ $package->enrollment_format }}</td>
                                     <td>{{ $package->credits }}</td>
                                     <td class="text-right">
                                         <div
                                             style="display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;">
                                             <button type="button" class="btn btn-sm btn-secondary"
-                                                onclick="openEditCreditPackageModal({{ $package->id }}, '{{ addslashes($package->name) }}', {{ $package->credits }})">Edit</button>
+                                                onclick="openEditCreditPackageModal({{ $package->id }}, '{{ addslashes($package->name) }}', {{ $package->credits }}, '{{ $package->enrollment_format }}')">Edit</button>
                                             <form action="{{ route('admin.credit-packages.destroy', $package->id) }}"
                                                 method="POST" onsubmit="return confirm('Delete this package?');"
                                                 style="margin: 0;">
@@ -249,6 +251,13 @@
                         <input type="number" id="packageCredits" name="credits" class="form-control"
                             placeholder="e.g., 10" min="1" required>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label" for="packageFormat">Enrollment Format</label>
+                        <select id="packageFormat" name="enrollment_format" class="form-control" required>
+                            <option value="Individual">Individual</option>
+                            <option value="Group">Group</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
@@ -277,6 +286,13 @@
                         <label class="form-label" for="editPackageCredits">Credits</label>
                         <input type="number" id="editPackageCredits" name="credits" class="form-control"
                             min="1" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label class="form-label" for="editPackageFormat">Enrollment Format</label>
+                        <select id="editPackageFormat" name="enrollment_format" class="form-control" required>
+                            <option value="Individual">Individual</option>
+                            <option value="Group">Group</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -500,10 +516,14 @@
             document.getElementById('addCreditPackageModal').classList.remove('show');
         }
 
-        function openEditCreditPackageModal(id, name, credits) {
+        function openEditCreditPackageModal(id, name, credits, format) {
+            const form = document.getElementById('editCreditPackageForm');
+            form.action = `/admin/credit-packages/${id}`;
             document.getElementById('editPackageName').value = name;
             document.getElementById('editPackageCredits').value = credits;
-            document.getElementById('editCreditPackageForm').action = `/admin/credit-packages/${id}`;
+            if (format) {
+                document.getElementById('editPackageFormat').value = format;
+            }
             document.getElementById('editCreditPackageModal').classList.add('show');
         }
 

@@ -79,11 +79,15 @@ class AdminController extends Controller
 
         $renewalInterests = Student::where('renewal_interest', 'interested')->latest('updated_at')->get();
 
+        $failedClassesCount = ClassBooking::where('google_sync_status', 'failed_permanent')
+            ->where('starts_at', '>=', now()) // Only future classes that need attention
+            ->count();
+
         return view('admin.dashboard.index', compact(
             'totalStudents', 'totalTeachers', 'todayClasses', 'monthlySales',
             'recentActivity', 'topTeachers', 'recentLeads', 'renewalInterests',
             'chartLabels', 'revenueData', 'studentsData', 'teachersData',
-            'instrumentData', 'instrumentCount'
+            'instrumentData', 'instrumentCount', 'failedClassesCount'
         ));
     }
 
@@ -148,6 +152,15 @@ class AdminController extends Controller
         }
         if (!empty($data['courses'])) {
             $student->courses()->attach($data['courses']);
+        }
+        
+        if ($student->credits > 0) {
+            \App\Models\CreditTransaction::create([
+                'student_id' => $student->id,
+                'action' => 'Added',
+                'quantity' => $student->credits,
+                'reason' => 'Initial credits assigned upon registration.',
+            ]);
         }
 
         try {

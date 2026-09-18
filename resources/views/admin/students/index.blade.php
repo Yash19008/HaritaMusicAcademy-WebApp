@@ -560,21 +560,6 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Music Category (Course)</label>
-                            <div class="student-check-list" id="sfCourseList" style="max-height: 120px;">
-                                @foreach ($courses as $course)
-                                    <label>
-                                        <input type="checkbox" name="courses[]" value="{{ $course->id }}"
-                                            class="sf-course-checkbox"
-                                            style="width:15px;height:15px;accent-color:var(--primary);">
-                                        <span>{{ $course->name }}</span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                    <div class="grid grid-2 gap-3">
-                        <div class="form-group">
                             <label class="form-label">Assigned Instructor</label>
                             <select name="teacher_id" id="sfTeacher" class="form-control">
                                 <option value="">— Select Teacher —</option>
@@ -584,6 +569,20 @@
                             </select>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Music Category (Course)</label>
+                        <div class="student-check-list" id="sfCourseList" style="max-height: 120px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem;">
+                            @foreach ($courses as $course)
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
+                                    <input type="checkbox" name="courses[]" value="{{ $course->id }}"
+                                        class="sf-course-checkbox"
+                                        style="width:15px;height:15px;accent-color:var(--primary);">
+                                    <span>{{ $course->name }}</span>
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="grid grid-2 gap-3">
                         <div class="form-group">
                             <label class="form-label">Referral Source</label>
@@ -625,7 +624,7 @@
                                 <option value="" data-credits="0">— Custom / No Package —</option>
                                 @if (isset($creditPackages))
                                     @foreach ($creditPackages as $package)
-                                        <option value="{{ $package->id }}" data-credits="{{ $package->credits }}">
+                                        <option value="{{ $package->id }}" data-credits="{{ $package->credits }}" data-format="{{ $package->enrollment_format ?? 'Individual' }}">
                                             {{ $package->name }} ({{ $package->credits }} Credits)</option>
                                     @endforeach
                                 @endif
@@ -858,8 +857,58 @@
         }
 
         // ── Student modal ─────────────────────────────────────────────
+        function calculateStudentEndDate() {
+            const joiningDateStr = document.getElementById('sfJoiningDate').value;
+            const packageSelect = document.getElementById('sfCreditPackage');
+            
+            if (!joiningDateStr || packageSelect.selectedIndex <= 0) return;
+            
+            const packageName = packageSelect.options[packageSelect.selectedIndex].text;
+            const match = packageName.match(/\((\d+)\s+Months?\)/i);
+            
+            if (match && match[1]) {
+                const monthsToAdd = parseInt(match[1]);
+                const joiningDate = new Date(joiningDateStr);
+                
+                // Add months
+                joiningDate.setMonth(joiningDate.getMonth() + monthsToAdd);
+                
+                // Format to YYYY-MM-DD
+                const yyyy = joiningDate.getFullYear();
+                const mm = String(joiningDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(joiningDate.getDate()).padStart(2, '0');
+                
+                document.getElementById('sfEndDate').value = `${yyyy}-${mm}-${dd}`;
+            }
+        }
+
         function toggleGroupSelect(val) {
             document.getElementById('groupSelectContainer').style.display = val === 'Group' ? 'block' : 'none';
+            
+            // Filter credit packages
+            const packageSelect = document.getElementById('sfCreditPackage');
+            if (packageSelect) {
+                let foundAny = false;
+                for (let i = 0; i < packageSelect.options.length; i++) {
+                    const opt = packageSelect.options[i];
+                    if (opt.value === "") continue; // skip the 'Custom' option
+                    const format = opt.getAttribute('data-format');
+                    if (format === val || !format) {
+                        opt.hidden = false;
+                        opt.disabled = false;
+                        foundAny = true;
+                    } else {
+                        opt.hidden = true;
+                        opt.disabled = true;
+                    }
+                }
+                
+                // If currently selected option is hidden, reset selection
+                if (packageSelect.selectedIndex > 0 && packageSelect.options[packageSelect.selectedIndex].hidden) {
+                    packageSelect.value = '';
+                    document.getElementById('sfCredits').value = 0;
+                }
+            }
         }
 
         function openAddStudent() {
@@ -869,6 +918,11 @@
             document.getElementById('studentModalTitle').textContent = 'Add New Student';
             document.getElementById('groupSelectContainer').style.display = 'none';
             document.querySelectorAll('.sf-course-checkbox').forEach(cb => cb.checked = false);
+            
+            // Trigger format filter
+            document.getElementById('sfFormat').value = 'Individual';
+            toggleGroupSelect('Individual');
+            
             showModal('studentModal');
         }
 

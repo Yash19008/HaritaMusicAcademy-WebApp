@@ -40,6 +40,10 @@ class ClassBookingController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('sync_status')) {
+            $query->where('google_sync_status', $request->sync_status);
+        }
+
         $bookings = $query->get();
         $students = Student::with(['user:id,name', 'teacher:id,user_id', 'teacher.user:id,name', 'course:id,name'])
             ->select('id', 'user_id', 'teacher_id', 'course_id', 'credits', 'status')
@@ -173,6 +177,14 @@ class ClassBookingController extends Controller
                 }
 
                 $booking->update(['status' => 'cancelled']);
+                
+                if ($booking->google_event_id && $booking->google_sync_status === 'synced') {
+                    if ($booking->recurrence_group_id) {
+                        app(\App\Services\GoogleCalendarService::class)->deleteEventInstance($booking);
+                    } else {
+                        app(\App\Services\GoogleCalendarService::class)->cancelEvent($booking);
+                    }
+                }
             });
 
             $msg = 'Class cancelled. 1 Credit automatically refunded.';
@@ -223,11 +235,21 @@ class ClassBookingController extends Controller
             return back()->with('error', 'The selected teacher is on an approved leave on this date. Please choose another date.');
         }
 
+        $originalStartsAt = clone $booking->starts_at;
+
         $booking->update([
             'starts_at' => $startsAt,
             'ends_at' => $endsAt,
             'status' => 'scheduled', // Reset to scheduled if it was cancelled
         ]);
+
+        if ($booking->google_event_id && $booking->google_sync_status === 'synced') {
+            if ($booking->recurrence_group_id) {
+                app(\App\Services\GoogleCalendarService::class)->updateEventInstance($booking, $originalStartsAt);
+            } else {
+                app(\App\Services\BookingService::class)->updateGoogleCalendarEvent($booking);
+            }
+        }
 
         \Illuminate\Support\Facades\Log::info("Booking {$booking->id} was rescheduled by admin " . auth()->id());
 
@@ -247,6 +269,38 @@ class ClassBookingController extends Controller
             'success' => true,
             'message' => 'Attendance updated successfully.',
             'booking' => $booking
+        ]);
+    }
+
+    public function setMeetLink(Request $request, ClassBooking $booking)
+    {
+        $validated = $request->validate([
+            'meet_link' => ['required', 'string', 'url', 'regex:/^https:\/\/meet\.google\.com\/.+$/']
+        ]);
+
+        if ($booking->status === 'completed' || $booking->status === 'cancelled') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cannot set meet link for completed or cancelled classes.'
+            ], 400);
+        }
+
+        $booking->update([
+            'google_meet_link' => $validated['meet_link'],
+            'google_sync_status' => 'manual',
+            'google_sync_message' => 'Meet link manually set by admin on ' . now()->format('Y-m-d H:i:s'),
+            'meet_link_generated_at' => now(),
+            'meet_link_source_booking_id' => $booking->id,
+            'google_sync_attempts' => 0,
+            'next_retry_at' => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Meet link updated successfully.',
+            'meetLink' => $booking->google_meet_link,
+            'syncStatus' => 'manual',
+            'bookingId' => $booking->id
         ]);
     }
 }

@@ -205,11 +205,9 @@ class BookingService
                 'duration_minutes' => 40,
                 'type' => 'one-time',
                 'status' => 'scheduled',
+                'google_sync_status' => 'pending',
                 'notes' => $notes
             ]);
-            
-            // 5. Create Google Calendar Event — will be handled by queue
-            // $this->createGoogleCalendarEvent($booking);
             
             return $booking;
         });
@@ -304,6 +302,9 @@ class BookingService
                 ->get();
             $weekOffs = $teacher->week_off ? explode(',', strtoupper($teacher->week_off)) : [];
             
+            $recurrenceGroupId = \Illuminate\Support\Str::uuid()->toString();
+            $isFirstBooking = true;
+            
             while ($creditsToDeduct < $creditsAvailable && $safetyCounter < 365) {
                 if (in_array($currentDate->dayOfWeek, $targetDays)) {
                     // This is a target day, construct the full datetime
@@ -323,11 +324,13 @@ class BookingService
                             'duration_minutes' => 40,
                             'type' => 'recurring',
                             'status' => 'scheduled',
-                            'notes' => $notes
+                            'google_sync_status' => 'pending',
+                            'notes' => $notes,
+                            'recurrence_group_id' => $recurrenceGroupId,
+                            'is_recurring_master' => $isFirstBooking,
                         ]);
                         
-                        // Google Calendar Event will be handled by queue
-                        // $this->createGoogleCalendarEvent($booking);
+                        $isFirstBooking = false;
                         
                         $bookedClasses[] = $booking;
                         $creditsToDeduct++;
@@ -390,11 +393,9 @@ class BookingService
                 'duration_minutes' => 40,
                 'type' => 'one-time',
                 'status' => 'scheduled',
+                'google_sync_status' => 'pending',
                 'notes' => $notes
             ]);
-            
-            // Google Calendar Event will be handled by queue
-            // $this->createGoogleCalendarEvent($booking);
             
             return $booking;
         });
@@ -439,6 +440,9 @@ class BookingService
                 ->get();
             $weekOffs = $teacher->week_off ? explode(',', strtoupper($teacher->week_off)) : [];
             
+            $recurrenceGroupId = \Illuminate\Support\Str::uuid()->toString();
+            $isFirstBooking = true;
+            
             while ($classesBookedCount < $minCredits && $safetyCounter < 365) {
                 if (in_array($currentDate->dayOfWeek, $targetDays)) {
                     $startsAt = $currentDate->copy()->setTimeFromTimeString($timeString);
@@ -454,11 +458,14 @@ class BookingService
                             'duration_minutes' => 40,
                             'type' => 'recurring',
                             'status' => 'scheduled',
-                            'notes' => $notes
+                            'google_sync_status' => 'pending',
+                            'notes' => $notes,
+                            'recurrence_group_id' => $recurrenceGroupId,
+                            'is_recurring_master' => $isFirstBooking,
                         ]);
                         
-                        // Google Calendar Event will be handled by queue
-                        // $this->createGoogleCalendarEvent($booking);
+                        $isFirstBooking = false;
+                        
                         $bookedClasses[] = $booking;
                         $classesBookedCount++;
                     }
@@ -503,6 +510,40 @@ class BookingService
         if ($result->message) {
             Log::info('Google Calendar createMeetEvent [' . $result->status . ']: ' . $result->message);
         }
+    }
+
+    /**
+     * Resolves a meet link for reuse, if eligible.
+     */
+    public function resolveMeetLinkForReuse(ClassBooking $booking): ?ClassBooking
+    {
+        if (!config('services.google.meet_link_reuse', true)) {
+            return null;
+        }
+
+        // Only group or recurring individual bookings are eligible for reuse
+        if ($booking->type === 'one-time' && !$booking->student_group_id) {
+            return null;
+        }
+
+        $query = ClassBooking::where('teacher_id', $booking->teacher_id)
+            ->where('id', '!=', $booking->id)
+            ->whereNotNull('google_meet_link')
+            ->where('google_sync_status', 'synced');
+
+        if ($booking->student_group_id) {
+            $query->where('student_group_id', $booking->student_group_id);
+        } else {
+            $query->where('student_id', $booking->student_id)
+                  ->whereNull('student_group_id');
+        }
+
+        $days = config('services.google.meet_link_reuse_days', 30);
+        $threshold = Carbon::now()->subDays($days);
+
+        return $query->where('meet_link_generated_at', '>', $threshold)
+            ->orderBy('meet_link_generated_at', 'desc')
+            ->first();
     }
 
     /**

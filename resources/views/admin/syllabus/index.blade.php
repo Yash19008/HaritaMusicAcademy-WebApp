@@ -50,7 +50,7 @@
             <tbody>
                 @foreach($syllabi as $item)
                 <tr>
-                    <td>{{ $item->course->name }}</td>
+                    <td>{{ optional($item->course)->name ?? 'Course Deleted' }}</td>
                     <td>{{ $item->title }}</td>
                     <td title="{{ $item->description }}">{{ Str::limit($item->description, 30) }}</td>
                     <td>

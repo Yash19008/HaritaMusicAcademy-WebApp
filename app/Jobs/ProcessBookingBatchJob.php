@@ -46,17 +46,6 @@ class ProcessBookingBatchJob implements ShouldQueue
             return;
         }
 
-        // 1. Sync with Google Calendar for all bookings that don't have it yet
-        foreach ($bookings as $booking) {
-            if (!$booking->google_event_id) {
-                try {
-                    $bookingService->createGoogleCalendarEvent($booking);
-                } catch (\Exception $e) {
-                    \Log::error('ProcessBookingBatchJob: Failed to create google calendar event for booking ' . $booking->id . ': ' . $e->getMessage());
-                }
-            }
-        }
-
         // 2. Send emails
         $firstBooking = $bookings->first();
         if ($this->isRecurring) {

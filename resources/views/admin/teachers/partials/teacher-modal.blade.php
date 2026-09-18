@@ -66,17 +66,18 @@
             </div>
           </div>
 
-          <div class="grid grid-2 gap-3">
-            <div class="form-group">
-              <label class="form-label">Music Category</label>
-              <div style="overflow-y: auto; padding: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px;">
-                @foreach(\App\Models\Course::orderBy('name')->get() as $course)
-                  <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
-                    <input type="checkbox" class="tch-category-cb" name="categories[]" value="{{ $course->name }}" style="width:13px; height:13px;"> {{ $course->name }}
-                  </label>
-                @endforeach
-              </div>
+          <div class="form-group">
+            <label class="form-label">Music Category</label>
+            <div style="overflow-y: auto; padding: 0.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px;">
+              @foreach(\App\Models\Course::orderBy('name')->get() as $course)
+                <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
+                  <input type="checkbox" class="tch-category-cb" name="categories[]" value="{{ $course->name }}" style="width:13px; height:13px;"> {{ $course->name }}
+                </label>
+              @endforeach
             </div>
+          </div>
+
+          <div class="grid grid-2 gap-3">
             <div class="form-group">
               <label class="form-label">Week Off Days</label>
               <div style="height: 90px; overflow-y: auto; padding: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 4px;">
@@ -86,6 +87,10 @@
                   </label>
                 @endforeach
               </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tchYoutube">YouTube Video Link</label>
+              <input type="text" id="tchYoutube" name="youtube_url" class="form-control" placeholder="e.g. https://www.youtube.com/watch?v=...">
             </div>
           </div>
 
@@ -119,10 +124,6 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="tchYoutube">YouTube Video Link</label>
-            <input type="text" id="tchYoutube" name="youtube_url" class="form-control" placeholder="e.g. https://www.youtube.com/watch?v=...">
-          </div>
 
           <div class="form-group">
             <label class="form-label" for="tchBio">Short Biography</label>

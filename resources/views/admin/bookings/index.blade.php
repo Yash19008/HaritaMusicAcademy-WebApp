@@ -516,6 +516,10 @@
                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
+                <select name="sync_status" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;">
+                    <option value="">All Sync Statuses</option>
+                    <option value="failed_permanent" {{ request('sync_status') == 'failed_permanent' ? 'selected' : '' }}>⚠️ Sync Failed</option>
+                </select>
                 <button type="submit" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Filter</button>
                 @if(request()->anyFilled(['start_date', 'end_date', 'status']))
                     <a href="{{ route('admin.class-booking') }}" class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e2e8f0; color: #475569; border: none; text-decoration: none;">Clear</a>
@@ -576,17 +580,30 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <a href="{{ $booking->google_meet_link ?? 'https://meet.google.com' }}" target="_blank"
-                                    class="meet-btn">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <polygon points="23 7 16 12 23 17 23 7" />
-                                        <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
-                                    </svg>
-                                    Join Meet
-                                </a>
+                            <td id="meet-cell-{{ $booking->id }}">
+                                @if($booking->google_sync_status === 'failed_permanent')
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-direction: column;">
+                                      <span class="text-danger" style="font-size: 0.75rem; font-weight: 600;">
+                                        ⚠️ Sync Failed
+                                      </span>
+                                      <button class="btn btn-sm btn-outline-primary" style="padding: 2px 6px; font-size: 0.7rem;" onclick="openSetMeetLinkModal('{{ $booking->id }}', '{{ addslashes($booking->student->user->name ?? $booking->student->name ?? 'N/A') }}', '{{ $booking->starts_at->format('d M Y, h:i A') }}')">Set Link</button>
+                                    </div>
+                                @elseif($booking->google_sync_status === 'pending' || $booking->google_sync_status === 'failed')
+                                    <span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">⏳ Syncing...</span>
+                                @elseif($booking->google_meet_link || $booking->meet_link)
+                                    <a href="{{ $booking->google_meet_link ?? $booking->meet_link ?? 'https://meet.google.com' }}" target="_blank"
+                                        class="meet-btn">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round">
+                                            <polygon points="23 7 16 12 23 17 23 7" />
+                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                        </svg>
+                                        Join Meet
+                                    </a>
+                                @else
+                                    <span class="text-muted" style="font-size: 0.75rem;">N/A</span>
+                                @endif
                             </td>
                             <td>
                                 <form action="{{ route('admin.bookings.status', $booking) }}" method="POST">
@@ -613,8 +630,8 @@
                                     {{-- Header: who requested --}}
                                     <div style="font-size:0.72rem; margin-bottom:0.35rem; line-height:1.5;">
                                         <span style="font-weight:700; color: #51040e;">
-                                            {{ $booking->rescheduled_by === 'Teacher' ? '👨‍🏫' : '🎓' }}
-                                            Requested by {{ $booking->rescheduled_by ?? 'User' }}
+                                            {{ $booking->reschedule_requested_by === 'Teacher' ? '👨‍🏫' : '🎓' }}
+                                            Requested by {{ $booking->reschedule_requested_by ?? 'User' }}
                                         </span><br>
                                         @if($booking->reschedule_requested_starts_at)
                                             <span style="color:var(--text-muted);">📅 {{ $booking->reschedule_requested_starts_at->format('d M Y, h:i A') }}</span>
@@ -777,6 +794,35 @@
             </div>
         </div>
     </div>
+
+<!-- SET MEET LINK MODAL -->
+<div id="setMeetLinkModal" class="modal-backdrop">
+    <div class="modal" style="max-width: 450px; padding: 0;">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 1.25rem 1.5rem;">
+            <h3 class="font-semibold" style="font-size:1rem;">Set Meet Link Manually</h3>
+            <button type="button" class="modal-close" onclick="document.getElementById('setMeetLinkModal').classList.remove('show')" style="font-size:1.5rem;line-height:1;color:#888;">×</button>
+        </div>
+        <form onsubmit="submitMeetLink(event)">
+            <input type="hidden" id="manualMeetClassId">
+            <div class="modal-body" style="padding:1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                <div style="background: rgba(81,4,14,0.04); border: 1px solid rgba(81,4,14,0.1); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+                    <div style="margin-bottom: 0.5rem;"><span class="text-muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Student:</span> <strong id="manualMeetStudent" style="color:#51040e;"></strong></div>
+                    <div><span class="text-muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Class Time:</span> <strong id="manualMeetTime" style="color:var(--text-main);"></strong></div>
+                </div>
+                
+                <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" for="manualMeetUrl" style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Google Meet URL</label>
+                    <input type="url" id="manualMeetUrl" class="form-control" placeholder="https://meet.google.com/abc-defg-hij" required pattern="^https:\/\/meet\.google\.com\/.+$">
+                    <small class="text-muted" style="display: block; margin-top: 0.25rem;">Must be a valid Google Meet URL.</small>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:0.75rem;">
+                <button type="button" onclick="document.getElementById('setMeetLinkModal').classList.remove('show')" style="padding:0.4rem 1.2rem;font-weight:600;border:1px solid var(--border-color);background:#fff;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);">Cancel</button>
+                <button type="submit" id="btnSaveMeetLink" style="padding:0.4rem 1.4rem;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);color:#fff;background:var(--primary);">Save Meet Link</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @endsection
 
@@ -1407,6 +1453,65 @@
                 console.error('Error:', error);
                 alert('An error occurred while updating attendance');
             });
+        }
+        
+        function openSetMeetLinkModal(classId, studentName, classTime) {
+            document.getElementById("manualMeetClassId").value = classId;
+            document.getElementById("manualMeetStudent").textContent = studentName;
+            document.getElementById("manualMeetTime").textContent = classTime;
+            document.getElementById("manualMeetUrl").value = "";
+            document.getElementById("setMeetLinkModal").classList.add('show');
+        }
+
+        async function submitMeetLink(e) {
+            e.preventDefault();
+            
+            const classId = document.getElementById("manualMeetClassId").value;
+            const url = document.getElementById("manualMeetUrl").value;
+            const btn = document.getElementById("btnSaveMeetLink");
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = "Saving...";
+                
+                const response = await fetch(`/admin/bookings/${classId}/meet-link`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ meet_link: url })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    const cell = document.getElementById('meet-cell-' + classId);
+                    if (cell) {
+                        cell.innerHTML = `
+                            <a href="${url}" target="_blank" class="meet-btn">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polygon points="23 7 16 12 23 17 23 7" />
+                                    <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                </svg>
+                                Join Meet
+                            </a>
+                        `;
+                    }
+                    document.getElementById("setMeetLinkModal").classList.remove('show');
+                } else {
+                    alert(data.message || "Failed to save meet link.");
+                }
+            } catch (error) {
+                alert("An error occurred while saving.");
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Save Meet Link";
+            }
         }
     </script>
 @endpush

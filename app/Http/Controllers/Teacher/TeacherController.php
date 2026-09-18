@@ -279,28 +279,20 @@ class TeacherController extends Controller
 
     public function resources(): View
     {
-        $directory = 'teacher_resources';
-        $disk = \Illuminate\Support\Facades\Storage::disk('public');
-        
-        if (!$disk->exists($directory)) {
-            $disk->makeDirectory($directory);
-        }
-        
-        $files = $disk->files($directory);
-        
-        $resources = [];
-        foreach ($files as $file) {
-            $resources[] = [
-                'name' => basename($file),
-                'path' => $file,
-                'size' => round($disk->size($file) / 1024, 2) . ' KB',
-                'url'  => route('teacher.resources.download', ['filename' => basename($file)]),
-            ];
+        $allFolders = \App\Models\ResourceFolder::with(['files' => function($query) {
+            $query->orderBy('sort_order');
+        }])->where('is_active', true)->orderBy('sort_order')->get();
+
+        $generalFolders = $allFolders->where('type', 'general');
+       $teacher = auth()->user()->teacher;
+        $courses = collect();
+        if ($teacher && $teacher->categories_array) {
+            $courses = \App\Models\Course::whereIn('name', $teacher->categories_array)->with(['syllabi' => function($query) {
+                $query->where('is_active', true)->orderBy('sort_order');
+            }])->get();
         }
 
-        $curricula = \App\Models\Curriculum::where('is_active', true)->orderBy('sort_order')->get();
-
-        return view('teacher.resources.index', compact('resources', 'curricula'));
+        return view('teacher.resources.index', compact('generalFolders', 'courses'));
     }
 
     public function downloadResource($filename)

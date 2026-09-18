@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreditPackage extends Model
 {
-    protected $fillable = ['name', 'credits'];
+    protected $fillable = ['name', 'credits', 'enrollment_format'];
 }

@@ -367,8 +367,14 @@
 
       <!-- ACTIVE SCHEDULE FOR RESCHEDULING (All Roles) -->
       <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
           <h4 class="font-semibold">Active Scheduled Classes</h4>
+          <div style="display: flex; gap: 0.5rem;">
+            <select id="filterSyncStatus" class="form-control" style="width: auto; font-size: 0.85rem; padding: 0.3rem 0.5rem;" onchange="loadActiveClasses()">
+              <option value="all">All Sync Statuses</option>
+              <option value="failed_permanent">⚠️ Sync Failed (Needs Action)</option>
+            </select>
+          </div>
         </div>
         <div class="card-body p-3">
           <table class="table display responsive nowrap" id="rescheduleTable" style="width: 100%;">
@@ -389,6 +395,34 @@
       </div>
 
       
+      <!-- SET MEET LINK MODAL -->
+      <div id="setMeetLinkModal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+          <div class="modal-header">
+            <h3>Set Meet Link Manually</h3>
+            <span class="close" onclick="hideModal('setMeetLinkModal')">&times;</span>
+          </div>
+          <form onsubmit="submitMeetLink(event)">
+            <input type="hidden" id="manualMeetClassId">
+            <div class="modal-body" style="display: flex; flex-direction: column; gap: 1rem;">
+              <div style="background: var(--bg-main); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+                <div style="margin-bottom: 0.5rem;"><span class="text-muted">Student:</span> <strong id="manualMeetStudent"></strong></div>
+                <div><span class="text-muted">Class Time:</span> <strong id="manualMeetTime"></strong></div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label" for="manualMeetUrl">Google Meet URL</label>
+                <input type="url" id="manualMeetUrl" class="form-control" placeholder="https://meet.google.com/abc-defg-hij" required pattern="^https:\/\/meet\.google\.com\/.+$">
+                <small class="text-muted" style="display: block; margin-top: 0.25rem;">Must be a valid Google Meet URL.</small>
+              </div>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+              <button type="button" class="btn btn-secondary" onclick="hideModal('setMeetLinkModal')">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSaveMeetLink">Save Meet Link</button>
+            </div>
+          </form>
+        </div>
+      </div>
 @endsection
 
 @push('scripts')
@@ -413,8 +447,9 @@
             'duration' => $b->duration_minutes . ' mins',
             'studentName' => $b->student->name ?? 'N/A',
             'teacherName' => $b->teacher->name ?? 'N/A',
-            'meetLink' => $b->meet_link,
+            'meetLink' => $b->google_meet_link ?? $b->meet_link,
             'status' => ucfirst($b->status),
+            'google_sync_status' => $b->google_sync_status ?? 'synced',
             'recurrence' => $b->type === 'recurring' ? 'Recurring' : null,
         ];
     })->values());
@@ -737,11 +772,16 @@ let dtActiveClasses = null;
       }
       container.innerHTML = "";
 
+      const filterSyncStatus = document.getElementById("filterSyncStatus")?.value || 'all';
+
       const activeClasses = classes.filter(cls => {
         if (cls.status !== "Scheduled" && cls.status !== "Reschedule Requested") return false;
         // In real backend, these are already filtered if needed, but we do client-side filter just in case based on role
         if (role === 'teacher' && cls.teacherName !== "Meera Sharma") return false;
         if (role === 'student' && cls.studentName !== "Ananya Iyer") return false;
+        
+        if (filterSyncStatus !== 'all' && cls.google_sync_status !== filterSyncStatus) return false;
+        
         return true;
       });
 
@@ -756,12 +796,28 @@ let dtActiveClasses = null;
         const dateStr = dateObj.toLocaleDateString('en-US', formatOptions);
         const otherParty = role === 'student' ? cls.teacherName : cls.studentName;
 
-        const meetLinkHtml = cls.meetLink
-          ? `<a href="${cls.meetLink}" target="_blank" class="meet-btn">
+        let meetLinkHtml = '';
+        if (cls.google_sync_status === 'failed_permanent') {
+          meetLinkHtml = `
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="text-danger" style="font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 2px;">
+                ⚠️ Sync Failed
+              </span>
+              <button class="btn btn-sm btn-outline-primary" style="padding: 2px 6px; font-size: 0.7rem;" onclick="openSetMeetLinkModal('${cls.id}')">Set Link</button>
+            </div>
+          `;
+        } else if (cls.google_sync_status === 'pending' || cls.google_sync_status === 'failed') {
+          meetLinkHtml = `<span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">⏳ Syncing...</span>`;
+        } else if (cls.meetLink) {
+          meetLinkHtml = `
+             <a href="${cls.meetLink}" target="_blank" class="meet-btn">
               <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: middle;"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
               Join Meet
-             </a>`
-          : `<span class="text-muted" style="font-size: 0.75rem;">N/A</span>`;
+             </a>
+          `;
+        } else {
+          meetLinkHtml = `<span class="text-muted" style="font-size: 0.75rem;">N/A</span>`;
+        }
 
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -888,6 +944,66 @@ let dtActiveClasses = null;
       hideModal("rescheduleModal");
       loadActiveClasses();
       alert("Reschedule request submitted successfully! Awaiting review.");
+    }
+
+    function openSetMeetLinkModal(classId) {
+      const cls = serverBookings.find(c => c.id === classId);
+      if (!cls) return;
+
+      document.getElementById("manualMeetClassId").value = cls.id;
+      document.getElementById("manualMeetStudent").textContent = cls.studentName;
+      
+      const dateObj = new Date(cls.dateTime);
+      const formatOptions = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+      document.getElementById("manualMeetTime").textContent = dateObj.toLocaleDateString('en-US', formatOptions);
+      
+      document.getElementById("manualMeetUrl").value = "";
+      
+      showModal("setMeetLinkModal");
+    }
+
+    async function submitMeetLink(e) {
+      e.preventDefault();
+      
+      const classId = document.getElementById("manualMeetClassId").value;
+      const url = document.getElementById("manualMeetUrl").value;
+      const btn = document.getElementById("btnSaveMeetLink");
+      
+      try {
+        btn.disabled = true;
+        btn.textContent = "Saving...";
+        
+        const response = await fetch(`/admin/bookings/${classId}/meet-link`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ meet_link: url })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          // Update local data array and re-render table
+          const idx = serverBookings.findIndex(c => c.id === classId);
+          if (idx !== -1) {
+            serverBookings[idx].google_sync_status = 'manual';
+            serverBookings[idx].meetLink = url;
+            loadActiveClasses();
+          }
+          hideModal("setMeetLinkModal");
+        } else {
+          alert(data.message || "Failed to save meet link.");
+        }
+      } catch (error) {
+        alert("An error occurred while saving.");
+        console.error(error);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Save Meet Link";
+      }
     }
 </script>
 @endpush

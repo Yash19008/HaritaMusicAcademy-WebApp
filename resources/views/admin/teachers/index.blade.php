@@ -182,17 +182,23 @@
                                 placeholder="e.g. Hindustani Classical, Piano">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Music Category</label>
-                            <div class="form-control week-off-grid" style="height:auto; min-height:60px;">
-                                @foreach ($courses as $course)
-                                    <label>
-                                        <input type="checkbox" class="tch-category-cb" name="categories[]"
-                                            value="{{ $course->name }}"
-                                            style="width:13px;height:13px;accent-color:var(--primary);">
-                                        {{ $course->name }}
-                                    </label>
-                                @endforeach
-                            </div>
+                            <label class="form-label">YouTube Video Link</label>
+                            <input type="text" name="youtube_url" id="tfYoutube" class="form-control"
+                                placeholder="https://youtube.com/watch?v=...">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Music Category</label>
+                        <div class="form-control" style="height:auto; min-height:60px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:0.25rem; align-items:start;">
+                            @foreach ($courses as $course)
+                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
+                                    <input type="checkbox" class="tch-category-cb" name="categories[]"
+                                        value="{{ $course->name }}"
+                                        style="width:13px;height:13px;accent-color:var(--primary);">
+                                    {{ $course->name }}
+                                </label>
+                            @endforeach
                         </div>
                     </div>
 
@@ -253,23 +259,16 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-2 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Week Off Days</label>
-                            <div class="form-control week-off-grid">
-                                @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
-                                    <label>
-                                        <input type="checkbox" name="week_off[]" value="{{ $day }}"
-                                            style="width:13px;height:13px;accent-color:var(--primary);">
-                                        {{ $day }}
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">YouTube Video Link</label>
-                            <input type="text" name="youtube_url" id="tfYoutube" class="form-control"
-                                placeholder="https://youtube.com/watch?v=...">
+                    <div class="form-group">
+                        <label class="form-label">Week Off Days</label>
+                        <div class="form-control week-off-grid">
+                            @foreach (['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as $day)
+                                <label>
+                                    <input type="checkbox" name="week_off[]" value="{{ $day }}"
+                                        style="width:13px;height:13px;accent-color:var(--primary);">
+                                    {{ $day }}
+                                </label>
+                            @endforeach
                         </div>
                     </div>
 

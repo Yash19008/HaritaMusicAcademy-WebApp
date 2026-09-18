@@ -31,6 +31,13 @@
                         </a>
                     </div>
 
+                    <div style="margin-top: 1.5rem;">
+                        <a href="{{ route('login') }}"
+                            style="color: #C8A56A; font-weight: 600; text-decoration: none; font-size: 0.95rem;">
+                            Already a member? Go to your Dashboard &rarr;
+                        </a>
+                    </div>
+
                     <!-- Statistics Block -->
                     <div class="hero-luxury-stats">
                         <div class="stat-item">
@@ -63,6 +70,95 @@
         </div>
     </section>
 
+    <!-- Advanced Learning Platform Section -->
+    <section class="platform-section" id="platform"
+        style="padding: 6rem 0; background: var(--bg-card); position: relative; overflow: hidden;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 4rem;" class="reveal-scale">
+                <span class="section-label">PLATFORM INFRASTRUCTURE</span>
+                <h2 class="section-title">An Advanced Learning Environment</h2>
+                <p style="max-width: 600px; margin: 1.5rem auto 0; color: #475569; font-size: 1.1rem; line-height: 1.6;">
+                    Experience seamless online education with dedicated portals for both students and teachers. Track
+                    progress, access study materials, and manage your musical journey in one place.
+                </p>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 1.5rem 0;">
+                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;"></div>
+                    <div style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
+                    </div>
+                    <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;"></div>
+                </div>
+            </div>
+
+            <!-- Student Portal -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4rem; margin-bottom: 6rem;"
+                class="reveal-left">
+                <div style="flex: 1; min-width: 300px;">
+                    <img src="{{ asset('landing/assets/images/student-dashboard-mockup.png') }}"
+                        alt="Student Dashboard Mockup"
+                        style="width: 100%; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(200, 165, 106, 0.2); mix-blend-mode: multiply;">
+                </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <h3 style="font-family: var(--font-serif); font-size: 2.2rem; color: #1e293b; margin-bottom: 1rem;">
+                        Dedicated Student Portal</h3>
+                    <p style="color: #475569; font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
+                        Our student dashboard provides everything you need for your musical journey. View upcoming classes,
+                        join live sessions securely, access practice logs, and download study materials uploaded directly by
+                        your teachers.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 2rem; color: #334155; font-size: 1.05rem;">
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> General Class Management
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> Secure Live Class Access
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> Centralized Study
+                            Materials
+                        </li>
+                    </ul>
+                    <a href="{{ route('login') }}" class="btn btn-secondary"
+                        style="border-color: var(--color-accent); color: #b48c4a; font-weight: 600;">Student Login
+                        &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Teacher Portal -->
+            <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4rem; flex-direction: row-reverse;"
+                class="reveal-right">
+                <div style="flex: 1; min-width: 300px;">
+                    <img src="{{ asset('landing/assets/images/student-dashboard-mockup.png') }}"
+                        alt="Teacher Dashboard Mockup"
+                        style="width: 100%; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(200, 165, 106, 0.2); mix-blend-mode: multiply;">
+                </div>
+                <div style="flex: 1; min-width: 300px;">
+                    <h3 style="font-family: var(--font-serif); font-size: 2.2rem; color: #1e293b; margin-bottom: 1rem;">
+                        Comprehensive Teacher Portal</h3>
+                    <p style="color: #475569; font-size: 1.1rem; line-height: 1.6; margin-bottom: 2rem;">
+                        Teachers are equipped with powerful tools to manage their roster efficiently. They can view daily
+                        schedules, manage student progress, upload custom syllabus files, and seamlessly run their online
+                        classes.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: 2rem; color: #334155; font-size: 1.05rem;">
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> Roster & Schedule
+                            Management
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> Easy Syllabus Uploads
+                        </li>
+                        <li style="margin-bottom: 0.75rem; display: flex; align-items: center; gap: 10px;">
+                            <span style="color: var(--color-accent); font-weight: bold;">✓</span> Student Progress Tracking
+                        </li>
+                    </ul>
+                    <a href="{{ route('login') }}" class="btn btn-secondary"
+                        style="border-color: var(--color-accent); color: #b48c4a; font-weight: 600;">Teacher Login
+                        &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- 9. Booking Widget / Trial Class Section (Snapshot 3  Demo Calendar Widget) -->
     <section class="booking-widget-section" id="trial">
         <div class="container">
@@ -72,8 +168,7 @@
                 <div class="booking-widget-col reveal-left">
                     <span class="section-label" style="margin-bottom: 0.5rem;">BOOK YOUR DEMO</span>
                     <div style="display: flex; justify-content: flex-start; margin: 0.25rem 0 0.75rem 0;">
-                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
+                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                                 stroke-linecap="round" />
                             <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -105,7 +200,8 @@
                                 <h4 class="booking-step-title">Make Payment</h4>
                                 <p class="booking-step-desc">Securely pay
                                     {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }}
-                                    online.</p>
+                                    online.
+                                </p>
                             </div>
                         </div>
                         <div class="booking-step-item">
@@ -191,7 +287,8 @@
                             <h3 class="security-card-title">Safe & Secure Payments</h3>
                             <p class="security-card-desc">
                                 {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} Demo
-                                Class Fee is Fully Adjustable.</p>
+                                Class Fee is Fully Adjustable.
+                            </p>
                             <div class="security-features-list">
 
                                 <div class="security-feature-bullet">
@@ -240,7 +337,8 @@
                         Class</h3>
                     <p style="margin:0.25rem 0 0; font-size:0.8rem; color:#888;">
                         {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} · Fully
-                        adjustable towards course fee</p>
+                        adjustable towards course fee
+                    </p>
                 </div>
                 <button class="modal-close" onclick="closeDemoModal()"
                     style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888;">&times;</button>
@@ -284,7 +382,9 @@
                     <!-- Row 3: Plan Type + Programme -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Plan Type *</label>
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Plan
+                                Type *</label>
                             <select id="demo_plan_type" name="plan_type" required onchange="updateProgrammeOptions()"
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
                                 <option value="">Select Plan Type...</option>
@@ -293,7 +393,9 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Programme *</label>
+                            <label
+                                style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.82rem; color:#444;">Programme
+                                *</label>
                             <select id="demo_programme" name="programme" required
                                 style="width:100%; padding:0.7rem 0.9rem; border:1.5px solid #ddd; border-radius:8px; background:white; font-size:0.9rem; box-sizing:border-box;">
                                 <option value="">Select Programme...</option>
@@ -358,8 +460,7 @@
                     <!-- Security trust signals -->
                     <div
                         style="display:flex; align-items:center; gap:0.5rem; background:#f9fafb; border-radius:8px; padding:0.6rem 0.9rem; margin-top:0.5rem;">
-                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#16a34a"
-                            stroke-width="2">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
@@ -379,9 +480,8 @@
                         <span id="demoSubmitText">Pay
                             {{ $locale['currency_sym'] ?? '₹' }}{{ number_format($locale['demo_price'] ?? 499) }} &amp;
                             Book Demo</span>
-                        <svg id="demoSubmitSpinner" style="display:none; animation:spin 1s linear infinite;"
-                            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2.5">
+                        <svg id="demoSubmitSpinner" style="display:none; animation:spin 1s linear infinite;" width="18"
+                            height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <path
                                 d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
                         </svg>
@@ -396,8 +496,7 @@
         <div class="modal" style="max-width:420px; text-align:center; padding:2.5rem;">
             <div
                 style="width:70px; height:70px; background:#dcfce7; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
-                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#16a34a"
-                    stroke-width="2.5">
+                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#16a34a" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
             </div>
@@ -426,7 +525,7 @@
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
-        (function() {
+        (function () {
             const VERIFY_URL = "{{ route('payment.verify') }}";
             const CREATE_URL = "{{ route('payment.create') }}";
             const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || "{{ csrf_token() }}";
@@ -435,7 +534,7 @@
             const DEMO_PRICE = {{ $locale['demo_price'] ?? 499 }};
             const CUR_SYM = "{{ $locale['currency_sym'] ?? '₹' }}";
 
-            window.handleDemoSubmit = async function(e) {
+            window.handleDemoSubmit = async function (e) {
                 e.preventDefault();
                 const form = document.getElementById('demoBookingForm');
                 const errBox = document.getElementById('demoFormError');
@@ -459,7 +558,7 @@
                     errBox.style.display = 'block';
                     return;
                 }
-                
+
                 // Format Plan Type for backend
                 const planTypeFormatted = planTypeRaw.charAt(0).toUpperCase() + planTypeRaw.slice(1);
                 const instrument = `${planTypeFormatted} - ${programmeRaw}`;
@@ -521,11 +620,11 @@
                             color: '#51040e'
                         },
                         modal: {
-                            ondismiss: function() {
+                            ondismiss: function () {
                                 // User closed modal without paying — no action needed
                             }
                         },
-                        handler: async function(response) {
+                        handler: async function (response) {
                             // Step 3: Verify payment signature server-side
                             btn.disabled = true;
                             btnText.textContent = 'Verifying…';
@@ -571,7 +670,7 @@
                     };
 
                     const rzp = new Razorpay(options);
-                    rzp.on('payment.failed', function(resp) {
+                    rzp.on('payment.failed', function (resp) {
                         errBox.textContent = 'Payment failed: ' + (resp.error?.description ||
                             'Please try again.');
                         errBox.style.display = 'block';
@@ -596,10 +695,9 @@
                 <div class="split-left-sticky reveal-left">
                     <span class="split-left-label">SOMETHING FOR EVERYONE</span>
                     <div style="display: flex; justify-content: flex-start; margin: 0.25rem 0 0.75rem 0;">
-                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A"
-                                stroke-width="1.5" stroke-linecap="round" />
+                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
+                                stroke-linecap="round" />
                             <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
                         </svg>
                     </div>
@@ -721,8 +819,7 @@
             <div class="section-header reveal-scale">
                 <span class="section-label">Academic Roadmap</span>
                 <div style="display: flex; justify-content: center; margin: 0.25rem auto 0.75rem auto;">
-                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                             stroke-linecap="round" />
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -796,10 +893,9 @@
                     <span class="split-left-label">OUR STEP-BY-STEP METHODOLOGY</span>
 
                     <div style="display: flex; justify-content: flex-start; margin: 0.25rem 0 0.75rem 0;">
-                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A"
-                                stroke-width="1.5" stroke-linecap="round" />
+                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
+                                stroke-linecap="round" />
                             <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
                         </svg>
                     </div>
@@ -969,8 +1065,7 @@
             <div class="section-header-center">
                 <span class="section-label">THE HMA ADVANTAGE</span>
                 <div style="display: flex; justify-content: left; margin: 0.25rem 0 0.75rem 0;">
-                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                             stroke-linecap="round" />
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -1087,8 +1182,7 @@
             <div class="section-header reveal-scale" style="text-align: center; margin-bottom: 3rem;">
                 <span class="section-label">GLOBAL MUSIC FAMILY</span>
                 <div style="display: flex; justify-content: center; margin: 0.25rem auto 0.75rem auto;">
-                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                             stroke-linecap="round" />
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -1175,10 +1269,9 @@
                 <div class="split-left-sticky reveal-left">
                     <span class="split-left-label">TRUSTED BY LEARNERS</span>
                     <div style="display: flex; justify-content: flex-start; margin: 0.25rem 0 0.75rem 0;">
-                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A"
-                                stroke-width="1.5" stroke-linecap="round" />
+                        <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
+                                stroke-linecap="round" />
                             <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
                         </svg>
                     </div>
@@ -1274,8 +1367,7 @@
             <div class="section-header reveal-scale">
                 <span class="section-label">Tuition Plans</span>
                 <div style="display: flex; justify-content: center; margin: 0.25rem auto 0.75rem auto;">
-                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                             stroke-linecap="round" />
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -1323,16 +1415,16 @@
                                 </div>
                                 <h3 class="plan-tier-title">{{ $plan['tier'] }}</h3>
                                 <div class="plan-detail-row">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="14" height="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"
+                                        height="14">
                                         <path
                                             d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                                     </svg>
                                     <span>{{ $plan['classes'] }} Live Classes</span>
                                 </div>
                                 <div class="plan-detail-row">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="14" height="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"
+                                        height="14">
                                         <circle cx="12" cy="12" r="10" />
                                         <polyline points="12 6 12 12 16 14" />
                                     </svg>
@@ -1342,7 +1434,9 @@
                             <div class="new-pricing-card-price">
                                 <span class="price-amount">{{ $sym }}{{ number_format($plan['price']) }}</span>
                             </div>
-                            <a href="#trial" class="btn btn-solid pricing-cta" onclick="selectPlanAndScroll('individual', '{{ $plan['programme'] }} ({{ $plan['tier'] }})')">Enroll Now</a>
+                            <a href="#trial" class="btn btn-solid pricing-cta"
+                                onclick="selectPlanAndScroll('individual', '{{ $plan['programme'] }} ({{ $plan['tier'] }})')">Enroll
+                                Now</a>
                         </div>
                     @endforeach
                 </div>
@@ -1359,8 +1453,8 @@
                                     <span class="plan-duration-pill">{{ $plan['duration'] }}</span>
                                 </div>
                                 <div class="group-type-label">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="15" height="15">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15"
+                                        height="15">
                                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                         <circle cx="9" cy="7" r="4" />
                                         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -1369,16 +1463,16 @@
                                     Group Learning
                                 </div>
                                 <div class="plan-detail-row" style="margin-top:0.75rem;">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="14" height="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"
+                                        height="14">
                                         <path
                                             d="M15 10l4.553-2.069A1 1 0 0121 8.869v6.262a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" />
                                     </svg>
                                     <span>{{ $plan['classes'] }} Live Classes</span>
                                 </div>
                                 <div class="plan-detail-row">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        width="14" height="14">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14"
+                                        height="14">
                                         <circle cx="12" cy="12" r="10" />
                                         <polyline points="12 6 12 12 16 14" />
                                     </svg>
@@ -1389,7 +1483,8 @@
                                 <span class="price-amount">{{ $sym }}{{ number_format($plan['price']) }}</span>
                                 <span class="price-per-label">per student</span>
                             </div>
-                            <a href="#trial" class="btn btn-solid pricing-cta" onclick="selectPlanAndScroll('group', '{{ $plan['programme'] }}')">Enroll Now</a>
+                            <a href="#trial" class="btn btn-solid pricing-cta"
+                                onclick="selectPlanAndScroll('group', '{{ $plan['programme'] }}')">Enroll Now</a>
                         </div>
                     @endforeach
                 </div>
@@ -1557,8 +1652,7 @@
             <div class="section-header reveal-scale">
                 <span class="section-label">Support</span>
                 <div style="display: flex; justify-content: center; margin: 0.25rem auto 0.75rem auto;">
-                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
+                    <svg width="60" height="12" viewBox="0 0 60 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5 6C15 1.5, 20 10.5, 30 6 C40 1.5, 45 10.5, 55 6" stroke="#C8A56A" stroke-width="1.5"
                             stroke-linecap="round" />
                         <circle cx="30" cy="6" r="2.5" fill="#C8A56A" />
@@ -1568,8 +1662,7 @@
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin: 1.25rem 0;">
                     <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
                     </div>
-                    <div
-                        style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
+                    <div style="width: 5px; height: 5px; transform: rotate(45deg); background-color: var(--color-accent);">
                     </div>
                     <div style="width: 50px; height: 1px; background-color: var(--color-accent); opacity: 0.35;">
                     </div>
@@ -1895,10 +1988,10 @@
         function selectPlanAndScroll(type, programme) {
             autoSelectedPlan = type;
             autoSelectedProgramme = programme;
-            
+
             // Scroll to #trial section
             const trialSection = document.getElementById('trial');
-            if(trialSection) {
+            if (trialSection) {
                 trialSection.scrollIntoView({ behavior: 'smooth' });
             }
         }
@@ -1921,15 +2014,15 @@
         function updateProgrammeOptions(selectedProg = '') {
             const planType = document.getElementById('demo_plan_type').value;
             const progSelect = document.getElementById('demo_programme');
-            
+
             progSelect.innerHTML = '<option value="">Select Programme...</option>';
-            
+
             if (planType && programmesData[planType]) {
                 programmesData[planType].forEach(prog => {
                     const opt = document.createElement('option');
                     opt.value = prog;
                     opt.textContent = prog;
-                    if(prog === selectedProg) {
+                    if (prog === selectedProg) {
                         opt.selected = true;
                     }
                     progSelect.appendChild(opt);

@@ -42,6 +42,11 @@ return [
         'impersonate_user'     => env('GOOGLE_IMPERSONATE_USER'),
         'access_token'         => env('GOOGLE_ACCESS_TOKEN'), // for dev/testing only
         'send_updates'         => env('GOOGLE_SEND_UPDATES', 'all'),
+        
+        // Priority Queue / Link Reuse
+        'meet_link_reuse'      => env('GOOGLE_MEET_LINK_REUSE', true),
+        'meet_link_reuse_days' => env('GOOGLE_MEET_LINK_REUSE_DAYS', 30),
+        'sync_batch_size'      => env('GOOGLE_CALENDAR_SYNC_BATCH_SIZE', 2),
     ],
 
     'slack' => [

@@ -13,10 +13,12 @@ class ClassBooking extends Model
         'duration_minutes', 'type', 'status', 'google_meet_link', 'student_attended',
         'teacher_attended', 'notes', 'student_group_id', 'google_event_id',
         'recurrence_rule', 'google_sync_status', 'google_sync_error', 'parent_booking_id',
+        'google_calendar_id', 'google_event_payload', 'google_sync_message',
         'reschedule_requested_datetime', 'reschedule_requested_starts_at',
         'reschedule_requested_ends_at', 'reschedule_requested_reason',
         'reschedule_requested_by', 'reschedule_status',
         'teacher_join_token', 'student_join_token',
+        'google_sync_attempts', 'next_retry_at', 'meet_link_source_booking_id', 'meet_link_generated_at'
     ];
 
     protected static function booted(): void
@@ -42,7 +44,14 @@ class ClassBooking extends Model
             'google_event_payload'           => 'array',
             'student_attended'               => 'boolean',
             'teacher_attended'               => 'boolean',
+            'next_retry_at'                  => 'datetime',
+            'meet_link_generated_at'         => 'datetime',
         ];
+    }
+
+    public function meetLinkSource(): BelongsTo
+    {
+        return $this->belongsTo(ClassBooking::class, 'meet_link_source_booking_id');
     }
 
     /**

@@ -36,6 +36,7 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::get('/teachers/{teacher}/slots',             [\App\Http\Controllers\Admin\ClassBookingController::class, 'getAvailableSlots'])->name('class-booking.slots');
         Route::post('/bookings',                            [\App\Http\Controllers\Admin\ClassBookingController::class, 'store'])->name('bookings.store');
         Route::put('/bookings/{booking}/status',            [\App\Http\Controllers\Admin\ClassBookingController::class, 'updateStatus'])->name('bookings.status');
+        Route::patch('/bookings/{booking}/meet-link',       [\App\Http\Controllers\Admin\ClassBookingController::class, 'setMeetLink'])->name('bookings.set-meet-link');
         Route::post('/class-booking/{booking}/attendance',  [\App\Http\Controllers\Admin\ClassBookingController::class, 'updateAttendance'])->name('class-booking.attendance');
         
         // Rescheduling
@@ -123,12 +124,15 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::delete('/syllabus/{syllabus}', [\App\Http\Controllers\Admin\SyllabusController::class, 'destroy'])->name('syllabus.destroy');
         Route::get('/syllabus/{syllabus}/download', [\App\Http\Controllers\Admin\SyllabusController::class, 'download'])->name('syllabus.download');
 
-        // Curriculum
-        Route::get('/curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'index'])->name('curriculum.index');
-        Route::post('/curriculum', [\App\Http\Controllers\Admin\CurriculumController::class, 'store'])->name('curriculum.store');
-        Route::put('/curriculum/{curriculum}', [\App\Http\Controllers\Admin\CurriculumController::class, 'update'])->name('curriculum.update');
-        Route::delete('/curriculum/{curriculum}', [\App\Http\Controllers\Admin\CurriculumController::class, 'destroy'])->name('curriculum.destroy');
-        Route::get('/curriculum/{curriculum}/download', [\App\Http\Controllers\Admin\CurriculumController::class, 'download'])->name('curriculum.download');
+        // Resources & Curriculum
+        Route::get('/resource-folders', [\App\Http\Controllers\Admin\ResourceFolderController::class, 'index'])->name('resource-folders.index');
+        Route::post('/resource-folders', [\App\Http\Controllers\Admin\ResourceFolderController::class, 'store'])->name('resource-folders.store');
+        Route::put('/resource-folders/{resourceFolder}', [\App\Http\Controllers\Admin\ResourceFolderController::class, 'update'])->name('resource-folders.update');
+        Route::delete('/resource-folders/{resourceFolder}', [\App\Http\Controllers\Admin\ResourceFolderController::class, 'destroy'])->name('resource-folders.destroy');
+        
+        Route::get('/resource-folders/{resourceFolder}/files', [\App\Http\Controllers\Admin\ResourceFileController::class, 'index'])->name('resource-folders.files.index');
+        Route::post('/resource-folders/{resourceFolder}/files', [\App\Http\Controllers\Admin\ResourceFileController::class, 'store'])->name('resource-folders.files.store');
+        Route::delete('/resource-folders/{resourceFolder}/files/{resourceFile}', [\App\Http\Controllers\Admin\ResourceFileController::class, 'destroy'])->name('resource-folders.files.destroy');
 
         // Profile
         Route::get('/profile', [AdminController::class, 'profile'])->name('profile');

@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('app:send-class-reminders')
     ->everyMinute()
     ->withoutOverlapping(2);
+
+Schedule::command('app:sync-google-calendar')
+    ->everyMinute()
+    ->withoutOverlapping(2);

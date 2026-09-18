@@ -263,6 +263,24 @@
           </div>
         </div>
 
+        @if($failedClassesCount > 0)
+        <!-- Failed Classes Alert -->
+        <div class="card mb-4" style="border: 1px solid #ef4444;">
+          <div class="card-body" style="background-color: #fef2f2; border-radius: var(--radius-md); padding: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div style="font-size: 1.5rem;">⚠️</div>
+              <div>
+                <h4 class="font-bold text-danger" style="margin: 0; color: #b91c1c;">Meet Link Sync Failed</h4>
+                <p style="margin: 0; color: #7f1d1d; font-size: 0.85rem; margin-top: 0.2rem;">
+                  There are <strong>{{ $failedClassesCount }}</strong> upcoming classes that failed to generate a Meet link automatically.
+                </p>
+              </div>
+            </div>
+            <a href="{{ route('admin.class-booking', ['sync_status' => 'failed_permanent']) }}" class="btn btn-primary btn-sm" style="background-color: #ef4444; border-color: #ef4444;">Review & Fix</a>
+          </div>
+        </div>
+        @endif
+
         <!-- Charts grid -->
         <div class="grid grid-2 gap-4 mb-4">
           <div class="card">

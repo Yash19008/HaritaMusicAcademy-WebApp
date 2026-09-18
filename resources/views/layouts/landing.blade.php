@@ -116,7 +116,7 @@
                 <a href="#why-us" class="nav-link">Why Us</a>
                 <a href="#pricing" class="nav-link">Pricing</a>
                 <a href="#faq" class="nav-link">FAQ</a>
-
+                <a href="{{ route('login') }}" class="nav-link" style="color: #C8A56A; font-weight: 600;">Login / Dashboard &rarr;</a>
 
                 <a href="#trial" class="btn btn-primary" style="padding: 0.6rem 1.5rem; font-size: 0.85rem;">Book
                     Demo</a>
@@ -138,6 +138,7 @@
         <a href="#why-us" class="mobile-nav-link">Why Us</a>
         <a href="#pricing" class="mobile-nav-link">Pricing</a>
         <a href="#faq" class="mobile-nav-link">FAQ</a>
+        <a href="{{ route('login') }}" class="mobile-nav-link" style="color: #C8A56A; font-weight: 600;">Login / Dashboard &rarr;</a>
         <a href="#trial" class="btn btn-primary">Book Demo Class</a>
     </nav>
 

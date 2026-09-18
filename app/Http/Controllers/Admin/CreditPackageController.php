@@ -12,8 +12,9 @@ class CreditPackageController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'    => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'credits' => ['required', 'integer', 'min:1'],
+            'enrollment_format' => ['required', 'in:Individual,Group'],
         ]);
 
         CreditPackage::create($data);
@@ -24,8 +25,9 @@ class CreditPackageController extends Controller
     public function update(Request $request, CreditPackage $creditPackage): RedirectResponse
     {
         $data = $request->validate([
-            'name'    => ['required', 'string', 'max:255'],
+            'name' => ['required', 'string', 'max:255'],
             'credits' => ['required', 'integer', 'min:1'],
+            'enrollment_format' => ['required', 'in:Individual,Group'],
         ]);
 
         $creditPackage->update($data);
