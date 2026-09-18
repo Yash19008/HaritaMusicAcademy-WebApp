@@ -285,7 +285,7 @@ class ClassBookingController extends Controller
             ], 400);
         }
 
-        $booking->update([
+        $updateData = [
             'google_meet_link' => $validated['meet_link'],
             'google_sync_status' => 'manual',
             'google_sync_message' => 'Meet link manually set by admin on ' . now()->format('Y-m-d H:i:s'),
@@ -293,7 +293,17 @@ class ClassBookingController extends Controller
             'meet_link_source_booking_id' => $booking->id,
             'google_sync_attempts' => 0,
             'next_retry_at' => null,
-        ]);
+        ];
+
+        if ($booking->recurrence_group_id) {
+            ClassBooking::where('recurrence_group_id', $booking->recurrence_group_id)
+                ->whereIn('status', ['scheduled', 'rescheduled'])
+                ->update($updateData);
+            // Refresh to get updated values
+            $booking->refresh();
+        } else {
+            $booking->update($updateData);
+        }
 
         return response()->json([
             'success' => true,

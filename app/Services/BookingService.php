@@ -535,7 +535,8 @@ class BookingService
             $query->where('student_group_id', $booking->student_group_id);
         } else {
             $query->where('student_id', $booking->student_id)
-                  ->whereNull('student_group_id');
+                  ->whereNull('student_group_id')
+                  ->whereNull('recurrence_group_id');
         }
 
         $days = config('services.google.meet_link_reuse_days', 30);

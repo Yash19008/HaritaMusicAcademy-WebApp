@@ -19,7 +19,7 @@ class ClassBooking extends Model
         'reschedule_requested_by', 'reschedule_status',
         'teacher_join_token', 'student_join_token',
         'google_sync_attempts', 'next_retry_at', 'meet_link_source_booking_id', 'meet_link_generated_at',
-        'recurrence_group_id', 'is_recurring_master'
+        'recurrence_group_id', 'is_recurring_master', 'google_original_start'
     ];
 
     protected static function booted(): void

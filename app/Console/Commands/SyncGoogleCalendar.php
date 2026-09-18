@@ -35,7 +35,7 @@ class SyncGoogleCalendar extends Command
         $now = Carbon::now();
 
         // --- STEP 1: Process Recurring Groups ---
-        $this->processRecurringGroups($gcalService, $now);
+        $this->processRecurringGroups($gcalService, $now, $batchSize);
 
         // --- STEP 2: Process One-Time Bookings ---
         $bookings = DB::transaction(function () use ($batchSize, $now) {
@@ -126,10 +126,10 @@ class SyncGoogleCalendar extends Command
         return self::SUCCESS;
     }
 
-    private function processRecurringGroups(GoogleCalendarService $gcalService, Carbon $now)
+    private function processRecurringGroups(GoogleCalendarService $gcalService, Carbon $now, int $batchSize)
     {
         // Find master bookings that are pending
-        $masters = DB::transaction(function () use ($now) {
+        $masters = DB::transaction(function () use ($now, $batchSize) {
             return ClassBooking::where('is_recurring_master', true)
                 ->whereIn('google_sync_status', ['pending', 'failed'])
                 ->where('google_sync_attempts', '<', 5)
@@ -137,6 +137,7 @@ class SyncGoogleCalendar extends Command
                     $query->whereNull('next_retry_at')
                           ->orWhere('next_retry_at', '<=', $now);
                 })
+                ->limit($batchSize) // Batch size limit reduced to prevent Google API quota issues
                 ->lockForUpdate()
                 ->get();
         });
@@ -157,26 +158,50 @@ class SyncGoogleCalendar extends Command
                 $siblings = ClassBooking::where('recurrence_group_id', $master->recurrence_group_id)
                     ->orderBy('starts_at', 'asc')
                     ->get();
+                    
+                if ($master->google_event_id) {
+                    $this->info("Master already has event ID {$master->google_event_id}. Skipping creation.");
+                    // We shouldn't reach here if it's pending, but just in case of race condition or DB partial update.
+                    continue;
+                }
 
                 $result = $gcalService->createRecurringEvent($master, $siblings);
 
                 if ($result->status === 'synced') {
                     $now = Carbon::now();
-                    // Update all siblings with the same event info
-                    ClassBooking::where('recurrence_group_id', $master->recurrence_group_id)
-                        ->update([
-                            'google_sync_status'          => 'synced',
-                            'google_sync_message'         => null,
-                            'google_event_id'             => $result->eventId,
-                            'google_calendar_id'          => config('services.google.calendar_id', 'primary'),
-                            'google_meet_link'            => $result->meetLink,
-                            'meet_link_source_booking_id' => $master->id,
-                            'meet_link_generated_at'      => $now,
-                            'next_retry_at'               => null,
-                        ]);
+                    
+                    DB::transaction(function () use ($master, $siblings, $result, $now) {
+                        $daysMap = [0 => 'SU', 1 => 'MO', 2 => 'TU', 3 => 'WE', 4 => 'TH', 5 => 'FR', 6 => 'SA'];
+                        $byDay = [];
+                        foreach ($siblings as $booking) {
+                            $byDay[] = $daysMap[$booking->starts_at->dayOfWeek];
+                        }
+                        $byDay = array_unique($byDay);
+                        $byDayStr = implode(',', $byDay);
+                        $count = $siblings->count();
+                        $rrule = "RRULE:FREQ=WEEKLY;BYDAY={$byDayStr};COUNT={$count}";
+
+                        foreach ($siblings as $sibling) {
+                            $originalStart = $sibling->starts_at->copy()->setTimezone('UTC')->format('Ymd\THis\Z');
+                            $sibling->update([
+                                'google_sync_status'          => 'synced',
+                                'google_sync_message'         => null,
+                                'google_event_id'             => $result->eventId,
+                                'google_calendar_id'          => config('services.google.calendar_id', 'primary'),
+                                'google_meet_link'            => $result->meetLink,
+                                'meet_link_source_booking_id' => $master->id,
+                                'meet_link_generated_at'      => $now,
+                                'next_retry_at'               => null,
+                                'google_original_start'       => $originalStart,
+                                'recurrence_rule'             => clone $sibling === clone $master ? clone $rrule : null,
+                            ]);
+                        }
                         
-                    // Also save the payload on the master for reference
-                    $master->updateQuietly(['google_event_payload' => $result->payload]);
+                        $master->updateQuietly([
+                            'google_event_payload' => $result->payload,
+                            'recurrence_rule' => $rrule
+                        ]);
+                    });
                 } else {
                     $this->handleFailure($master, $attempt, $result->message);
                 }
