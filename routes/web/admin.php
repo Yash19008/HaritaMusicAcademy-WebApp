@@ -20,6 +20,7 @@ Route::middleware(['auth', 'role.access:admin'])
         Route::put('/students/{student}',             [AdminController::class, 'updateStudent'])->name('students.update');
         Route::delete('/students/{student}',          [AdminController::class, 'destroyStudent'])->name('students.destroy');
         Route::post('/students/{student}/resend-credentials', [AdminController::class, 'resendCredentials'])->name('students.resend-credentials');
+        Route::get('/students/{student}/json',        [AdminController::class, 'getStudentJson'])->name('students.json');
         Route::post('/students/bulk-import',          [AdminController::class, 'bulkImportStudents'])->name('students.bulk-import');
         Route::post('/student-groups',                [AdminController::class, 'storeGroup'])->name('groups.store');
         Route::put('/student-groups/{studentGroup}',  [AdminController::class, 'updateGroup'])->name('groups.update');

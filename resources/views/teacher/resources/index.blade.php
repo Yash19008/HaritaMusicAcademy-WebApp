@@ -4,7 +4,7 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
+<!--<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">-->
 <style>
     .nav-tabs {
         border-bottom: 2px solid rgba(0,0,0,0.05);
@@ -250,7 +250,7 @@
 <div id="syllabus" class="tab-content">
     <div class="card">
         <div class="card-body p-3">
-            <table class="table display responsive nowrap" id="teacherSyllabusTable" style="width:100%">
+            <table class="table display nowrap" id="teacherSyllabusTable" style="width:100%">
                 <thead>
                     <tr>
                         <th>Course</th>

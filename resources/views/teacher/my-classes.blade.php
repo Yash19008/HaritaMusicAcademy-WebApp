@@ -500,6 +500,22 @@
                                             </div>
                                         @elseif($status === 'reschedule_requested')
                                             <span style="font-size: 0.75rem; color: var(--text-muted); font-style: italic;">Awaiting approval…</span>
+                                        @elseif($status === 'completed')
+                                            @php
+                                                $canMarkAttendance = $booking->teacher_attended === null && now()->isSameDay($booking->starts_at);
+                                            @endphp
+                                            @if($canMarkAttendance)
+                                                <button class="btn-reschedule" style="color: var(--primary); border-color: var(--primary);" 
+                                                    onclick="markAttendance({{ $booking->id }})">
+                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                                    </svg>
+                                                    Mark Attendance
+                                                </button>
+                                            @else
+                                                <span style="color: var(--text-light); font-size: 0.78rem;">—</span>
+                                            @endif
                                         @else
                                             <span style="color: var(--text-light); font-size: 0.78rem;">—</span>
                                         @endif
@@ -676,5 +692,29 @@
                 closeRescheduleModal();
             }
         });
+
+        function markAttendance(bookingId) {
+            if (!confirm('Mark your attendance for this class?')) return;
+
+            fetch(`{{ url('teacher/my-classes') }}/${bookingId}/mark-attendance`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Attendance marked successfully!');
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to mark attendance.');
+                }
+            })
+            .catch(err => {
+                alert('An error occurred. Please try again.');
+            });
+        }
     </script>
 @endpush

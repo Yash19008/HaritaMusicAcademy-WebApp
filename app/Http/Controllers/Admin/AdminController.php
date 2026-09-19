@@ -95,13 +95,13 @@ class AdminController extends Controller
 
     public function students(): View
     {
-        $students = Student::select('id', 'name', 'email', 'phone', 'status', 'credits', 'enrolled_level', 'enrolled_format', 'teacher_id')
-            ->with(['courses', 'teacher', 'groups'])->latest()->get();
+        $students = Student::with(['courses', 'teacher', 'groups'])->latest()->get();
         $teachers = Teacher::select('id', 'name')->get();
         $courses = \App\Models\Course::where('status', 'active')->get();
         $groups   = StudentGroup::with('members')->withCount('members')->get();
         $creditPackages = \App\Models\CreditPackage::all();
-        return view('admin.students.index', compact('students', 'teachers', 'groups', 'courses', 'creditPackages'));
+        $maxGroupUsers = \App\Models\Setting::get('max_group_users', 4);
+        return view('admin.students.index', compact('students', 'teachers', 'groups', 'courses', 'creditPackages', 'maxGroupUsers'));
     }
 
     public function storeStudent(Request $request): RedirectResponse
@@ -126,11 +126,13 @@ class AdminController extends Controller
             'emergency_contact_phone' => ['nullable', 'string'],
             'enrolled_format' => ['required', 'in:Individual,Group'],
             'assigned_group' => ['nullable', 'exists:student_groups,id'],
+            'credit_package_id' => ['nullable', 'exists:credit_packages,id'],
         ]);
 
         $password = \Str::random(10);
 
-        $user = User::create([
+        \DB::transaction(function () use ($data, $password) {
+            $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => \Hash::make($password),
@@ -154,22 +156,23 @@ class AdminController extends Controller
             $student->courses()->attach($data['courses']);
         }
         
-        if ($student->credits > 0) {
-            \App\Models\CreditTransaction::create([
-                'student_id' => $student->id,
-                'action' => 'Added',
-                'quantity' => $student->credits,
-                'reason' => 'Initial credits assigned upon registration.',
-            ]);
-        }
+            if ($student->credits > 0) {
+                \App\Models\CreditTransaction::create([
+                    'student_id' => $student->id,
+                    'action' => 'Added',
+                    'quantity' => $student->credits,
+                    'reason' => 'Initial credits assigned upon registration.',
+                ]);
+            }
 
-        try {
-            \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $password));
-        } catch (\Exception $e) {
-            \Log::error('Failed to send student credentials email: ' . $e->getMessage());
-        }
+            try {
+                \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $password));
+            } catch (\Exception $e) {
+                \Log::error('Failed to send student credentials email: ' . $e->getMessage());
+            }
+        });
 
-        return back()->with('success', 'Student added successfully. Login credentials sent to ' . $user->email);
+        return back()->with('success', 'Student added successfully.');
     }
 
     public function updateStudent(Request $request, Student $student): RedirectResponse
@@ -199,9 +202,11 @@ class AdminController extends Controller
             'emergency_contact_phone' => ['nullable', 'string'],
             'enrolled_format' => ['required', 'in:Individual,Group'],
             'assigned_group' => ['nullable', 'exists:student_groups,id'],
+            'credit_package_id' => ['nullable', 'exists:credit_packages,id'],
         ]);
 
-        if ($student->user) {
+        \DB::transaction(function () use ($data, $student) {
+            if ($student->user) {
             $student->user->update([
                 'name' => $data['name'],
                 'email' => $data['email'],
@@ -224,26 +229,89 @@ class AdminController extends Controller
             $student->groups()->detach();
         }
 
-        if (isset($data['courses'])) {
-            $student->courses()->sync($data['courses']);
-        } else {
-            $student->courses()->detach();
-        }
+            if (isset($data['courses'])) {
+                $student->courses()->sync($data['courses']);
+            } else {
+                $student->courses()->detach();
+            }
+
+            // Check if credits were updated and log transaction
+            if (isset($data['credits'])) {
+                $oldCredits = $student->getOriginal('credits') ?? 0;
+                $newCredits = (int) $data['credits'];
+                $diff = $newCredits - $oldCredits;
+
+                if ($diff !== 0) {
+                    \App\Models\CreditTransaction::create([
+                        'student_id' => $student->id,
+                        'action'     => $diff > 0 ? 'Added' : 'Deducted',
+                        'quantity'   => abs($diff),
+                        'reason'     => 'Admin manually adjusted credits via Edit Profile.',
+                    ]);
+                }
+            }
+        });
 
         return back()->with('success', 'Student updated successfully.');
+    }
+
+    public function getStudentJson(Student $student)
+    {
+        $student->load(['courses', 'teacher', 'groups']);
+        
+        return response()->json([
+            'id' => $student->id,
+            'name' => $student->name,
+            'email' => $student->email,
+            'phone' => $student->phone,
+            'country' => $student->country,
+            'timezone' => $student->timezone,
+            'teacher_id' => $student->teacher_id,
+            'credits' => $student->credits,
+            'joining_date' => $student->joining_date ? \Carbon\Carbon::parse($student->joining_date)->format('Y-m-d') : '',
+            'enrolled_level' => $student->enrolled_level,
+            'referral_source' => $student->referral_source,
+            'emergency_contact_name' => $student->emergency_contact_name,
+            'emergency_contact_phone' => $student->emergency_contact_phone,
+            'course_ids' => $student->courses->pluck('id')->toArray(),
+            'enrolled_format' => $student->enrolled_format ?? 'Individual',
+            'status' => $student->status ?? 'active',
+            'group_id' => optional($student->groups->first())->id ?? '',
+            'age' => $student->age ?? '',
+            'end_date' => $student->end_date ? \Carbon\Carbon::parse($student->end_date)->format('Y-m-d') : '',
+            'credit_package_id' => $student->credit_package_id ?? '',
+        ]);
     }
 
     public function destroyStudent(Student $student): RedirectResponse
     {
         if (ClassBooking::where('student_id', $student->id)->where('starts_at', '>=', now())->exists()) {
-            return back()->with('error', 'Cannot delete student: There are upcoming scheduled classes.');
+            $msg = '<div style="margin-bottom:0.75rem;"><strong>Cannot delete student: There are upcoming scheduled classes.</strong></div>' .
+                   '<div style="margin-bottom:0.5rem;">To safely delete this student:</div>' .
+                   '<ol style="margin-left:1.5rem; list-style-type:decimal; margin-bottom:0;">' .
+                   '<li style="margin-bottom:0.25rem;">Go to <a href="'.route('admin.class-booking').'" style="color:#0d9488; text-decoration:underline; font-weight:600;">Class Bookings</a></li>' .
+                   '<li style="margin-bottom:0.25rem;">Search for the student\'s name</li>' .
+                   '<li style="margin-bottom:0.25rem;">Cancel all their <strong>Scheduled</strong> classes.</li>' .
+                   '<li>Try deleting the student again.</li>' .
+                   '</ol>';
+            return back()->with('error', $msg);
         }
 
         $user = $student->user;
-        $student->delete();
-        if ($user) {
-            $user->delete();
-        }
+        
+        \DB::transaction(function () use ($student, $user) {
+            // Manually delete related records to avoid FK constraint errors
+            \App\Models\CreditTransaction::where('student_id', $student->id)->delete();
+            \App\Models\Feedback::where('student_id', $student->id)->delete();
+            \App\Models\ClassBooking::where('student_id', $student->id)->delete();
+            $student->courses()->detach();
+            $student->groups()->detach();
+            
+            $student->forceDelete();
+            if ($user) {
+                $user->delete();
+            }
+        });
         return back()->with('success', 'Student removed.');
     }
 
@@ -271,6 +339,7 @@ class AdminController extends Controller
     public function bulkImportStudents(Request $request)
     {
         $request->validate(['csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:2048']]);
+        $createUsers = $request->boolean('create_users', false);
 
         $file   = $request->file('csv_file');
         $handle = fopen($file->getRealPath(), 'r');
@@ -314,21 +383,51 @@ class AdminController extends Controller
                 $teacher_id = $teachers[strtolower(trim($data['teacher']))]->id ?? null;
             }
 
+            // Validate status and format
+            $status = strtolower(trim($data['status'] ?? 'active'));
+            if (!in_array($status, ['active', 'inactive'])) $status = 'active';
+
+            $format = htmlspecialchars(trim($data['format'] ?? 'Individual'), ENT_QUOTES, 'UTF-8');
+            if (!in_array($format, ['Individual', 'Group'])) $format = 'Individual';
+
             try {
-                Student::create([
-                    'name'       => htmlspecialchars(trim($data['name'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8'),
-                    'email'      => $email,
-                    'phone'      => htmlspecialchars(trim($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                    'course_id'  => $course_id,
-                    'teacher_id' => $teacher_id,
-                    'status'     => strtolower(trim($data['status'] ?? 'active')),
-                    'credits'    => (int) ($data['credits'] ?? 0),
-                    'enrolled_level'  => htmlspecialchars(trim($data['level'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                    'referral_source' => htmlspecialchars(trim($data['referral'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                    'enrolled_format' => htmlspecialchars(trim($data['format'] ?? 'Individual'), ENT_QUOTES, 'UTF-8'),
-                    'emergency_contact_name'  => htmlspecialchars(trim($data['emergency_name'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                    'emergency_contact_phone' => htmlspecialchars(trim($data['emergency_phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
-                ]);
+                \DB::transaction(function () use ($data, $email, $course_id, $teacher_id, $status, $format, $createUsers) {
+                    $userId = null;
+                    if ($createUsers) {
+                        $password = \Str::random(10);
+                        $user = User::create([
+                            'name' => htmlspecialchars(trim($data['name'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8'),
+                            'email' => $email,
+                            'password' => \Hash::make($password),
+                            'timezone' => 'Asia/Kolkata',
+                            'status' => $status,
+                        ]);
+                        $user->assignRole('student');
+                        $userId = $user->id;
+
+                        try {
+                            \Mail::to($user->email)->send(new \App\Mail\StudentCreatedMail($user, $password));
+                        } catch (\Exception $e) {
+                            \Log::error("Failed to send bulk import email to {$email}: " . $e->getMessage());
+                        }
+                    }
+
+                    Student::create([
+                        'user_id'    => $userId,
+                        'name'       => htmlspecialchars(trim($data['name'] ?? 'Unknown'), ENT_QUOTES, 'UTF-8'),
+                        'email'      => $email,
+                        'phone'      => htmlspecialchars(trim($data['phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                        'course_id'  => $course_id,
+                        'teacher_id' => $teacher_id,
+                        'status'     => $status,
+                        'credits'    => (int) ($data['credits'] ?? 0),
+                        'enrolled_level'  => htmlspecialchars(trim($data['level'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                        'referral_source' => htmlspecialchars(trim($data['referral'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                        'enrolled_format' => $format,
+                        'emergency_contact_name'  => htmlspecialchars(trim($data['emergency_name'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                        'emergency_contact_phone' => htmlspecialchars(trim($data['emergency_phone'] ?? ''), ENT_QUOTES, 'UTF-8'),
+                    ]);
+                });
                 $imported++;
             } catch (\Throwable $e) {
                 $skipped++;
@@ -497,6 +596,18 @@ class AdminController extends Controller
 
     public function destroyTeacher(Teacher $teacher): RedirectResponse
     {
+        if (ClassBooking::where('teacher_id', $teacher->id)->where('starts_at', '>=', now())->exists()) {
+            $msg = '<div style="margin-bottom:0.75rem;"><strong>Cannot delete teacher: There are upcoming scheduled classes assigned to them.</strong></div>' .
+                   '<div style="margin-bottom:0.5rem;">To safely delete this teacher:</div>' .
+                   '<ol style="margin-left:1.5rem; list-style-type:decimal; margin-bottom:0;">' .
+                   '<li style="margin-bottom:0.25rem;">Go to <a href="'.route('admin.class-booking').'" style="color:#0d9488; text-decoration:underline; font-weight:600;">Class Bookings</a></li>' .
+                   '<li style="margin-bottom:0.25rem;">Search for the teacher\'s name</li>' .
+                   '<li style="margin-bottom:0.25rem;">Cancel or Edit (re-assign) all their <strong>Scheduled</strong> classes.</li>' .
+                   '<li>Try deleting the teacher again.</li>' .
+                   '</ol>';
+            return back()->with('error', $msg);
+        }
+
         $user = $teacher->user;
         $teacher->delete();
         if ($user) {

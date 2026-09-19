@@ -15,3 +15,7 @@ Schedule::command('app:send-class-reminders')
 Schedule::command('app:sync-google-calendar')
     ->everyMinute()
     ->withoutOverlapping(2);
+
+Schedule::command('app:auto-complete-classes')
+    ->everyMinute()
+    ->withoutOverlapping(2);

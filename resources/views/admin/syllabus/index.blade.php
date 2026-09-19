@@ -4,7 +4,6 @@
 
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.dataTables.min.css">
 <style>
   .btn-upload { background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: var(--radius-sm); border: none; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 500; font-size: 0.9rem; }
   .btn-upload:hover { background: var(--primary-dark); color: white; }
@@ -35,7 +34,7 @@
             </select>
         </form>
 
-        <table class="table display responsive nowrap" id="syllabusTable" style="width:100%">
+        <table class="table display" id="syllabusTable" style="width:100%">
             <thead>
                 <tr>
                     <th>Course</th>
@@ -54,7 +53,9 @@
                     <td>{{ $item->title }}</td>
                     <td title="{{ $item->description }}">{{ Str::limit($item->description, 30) }}</td>
                     <td>
-                        <a href="{{ route('admin.syllabus.download', $item) }}" target="_blank" class="text-primary hover-underline">{{ $item->file_name }}</a>
+                        <div style="max-width: 200px; white-space: normal; word-break: break-all;">
+                            <a href="{{ route('admin.syllabus.download', $item) }}" target="_blank" class="text-primary hover-underline">{{ $item->file_name }}</a>
+                        </div>
                         <div class="text-muted" style="font-size: 0.8rem;">{{ $item->fileSizeForHumans }}</div>
                     </td>
                     <td>{{ $item->sort_order }}</td>
@@ -67,14 +68,14 @@
                     </td>
                     <td>
                         <div class="d-flex align-center justify-center gap-2">
-                            <button class="btn btn-sm" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary); border:none;" 
+                            <button class="btn btn-sm" style="background: #e0e7ff; color: #4f46e5; border:none;" 
                                 onclick="openEditModal({{ $item->id }}, {{ $item->course_id }}, '{{ addslashes($item->title) }}', '{{ addslashes($item->description) }}', {{ $item->sort_order }}, {{ $item->is_active ? 'true' : 'false' }})" title="Edit">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                             </button>
                             <form action="{{ route('admin.syllabus.destroy', $item) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this syllabus?');" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm" style="background: rgba(231, 76, 60, 0.1); color: #e74c3c; border:none;" title="Delete">
+                                <button type="submit" class="btn btn-sm" style="background: #fceaea; color: #e74c3c; border:none;" title="Delete">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                                 </button>
                             </form>
@@ -152,11 +153,9 @@
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 <script>
     $(document).ready(function () {
         $('#syllabusTable').DataTable({
-            responsive: true,
             language: { search: "", searchPlaceholder: "Search syllabus..." }
         });
     });

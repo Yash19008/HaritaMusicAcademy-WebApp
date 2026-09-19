@@ -15,7 +15,7 @@ class Student extends Model
         'user_id', 'teacher_id', 'name', 'email', 'phone', 'enrolled_level', 
         'course_id', 'referral_source', 'emergency_contact_name', 
         'emergency_contact_phone', 'enrolled_format', 'credits', 'status', 
-        'joining_date', 'age', 'country', 'end_date', 'renewal_interest', 'intro_video'
+        'joining_date', 'age', 'country', 'end_date', 'renewal_interest', 'intro_video', 'credit_package_id'
     ];
 
     public function courses()

@@ -309,8 +309,10 @@
                     <div class="form-group mb-3">
                         <label class="form-label">Booking Mode</label>
                         <div class="segmented-control">
-                            <button type="button" id="btnIndividualMode" class="segmented-control-btn active" onclick="setBookingMode('individual')">Individual</button>
-                            <button type="button" id="btnGroupMode" class="segmented-control-btn" onclick="setBookingMode('group')">Group</button>
+                            <button type="button" id="btnIndividualMode" class="segmented-control-btn active"
+                                onclick="setBookingMode('individual')">Individual</button>
+                            <button type="button" id="btnGroupMode" class="segmented-control-btn"
+                                onclick="setBookingMode('group')">Group</button>
                         </div>
                     </div>
                     <input type="hidden" name="booking_mode" id="bookingMode" value="individual">
@@ -502,27 +504,39 @@
     </div>
 
     <!-- BOTTOM SECTION: ACTIVE BOOKINGS -->
-    <div class="card mt-4">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <h4 class="font-semibold" style="font-family: var(--font-serif); font-size: 1.25rem; margin: 0;">Active Scheduled Classes</h4>
-            <form action="{{ route('admin.class-booking') }}" method="GET" style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
-                <input type="date" name="start_date" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;" value="{{ request('start_date', now()->format('Y-m-d')) }}">
+    <div class="card mt-4" id="active-scheduled-classes">
+        <div class="card-header"
+            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h4 class="font-semibold" style="font-family: var(--font-serif); font-size: 1.25rem; margin: 0;">Active
+                Scheduled Classes</h4>
+            <form action="{{ route('admin.class-booking') }}" method="GET"
+                style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; margin: 0;">
+                <input type="date" name="start_date" class="form-control"
+                    style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;"
+                    value="{{ request('start_date', now()->format('Y-m-d')) }}">
                 <span style="color: var(--text-muted); font-size: 0.85rem;">to</span>
-                <input type="date" name="end_date" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;" value="{{ request('end_date') }}">
-                <select name="status" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;">
+                <input type="date" name="end_date" class="form-control"
+                    style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;" value="{{ request('end_date') }}">
+                <select name="status" class="form-control"
+                    style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;">
                     <option value="">All Statuses</option>
                     <option value="scheduled" {{ request('status') == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                    <option value="reschedule_requested" {{ request('status') == 'reschedule_requested' ? 'selected' : '' }}>Reschedule Req.</option>
+                    <option value="reschedule_requested"
+                        {{ request('status') == 'reschedule_requested' ? 'selected' : '' }}>Reschedule Req.</option>
                     <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
                     <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                 </select>
-                <select name="sync_status" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;">
+                <select name="sync_status" class="form-control"
+                    style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.85rem;">
                     <option value="">All Sync Statuses</option>
-                    <option value="failed_permanent" {{ request('sync_status') == 'failed_permanent' ? 'selected' : '' }}>⚠️ Sync Failed</option>
+                    <option value="failed_permanent" {{ request('sync_status') == 'failed_permanent' ? 'selected' : '' }}>
+                        ⚠️ Sync Failed</option>
                 </select>
-                <button type="submit" class="btn btn-primary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Filter</button>
-                @if(request()->anyFilled(['start_date', 'end_date', 'status']))
-                    <a href="{{ route('admin.class-booking') }}" class="btn btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e2e8f0; color: #475569; border: none; text-decoration: none;">Clear</a>
+                <button type="submit" class="btn btn-primary"
+                    style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Filter</button>
+                @if (request()->anyFilled(['start_date', 'end_date', 'status']))
+                    <a href="{{ route('admin.class-booking') }}" class="btn btn-secondary"
+                        style="padding: 0.25rem 0.75rem; font-size: 0.85rem; background: #e2e8f0; color: #475569; border: none; text-decoration: none;">Clear</a>
                 @endif
             </form>
         </div>
@@ -552,8 +566,10 @@
                                 </div>
                             </td>
                             <td>
-                                @if($booking->student_group_id)
-                                    <span style="display:inline-block; padding: 2px 6px; background:#f0fdf4; color:#166534; border-radius:10px; font-size:0.75rem; margin-bottom:4px;">Group Class</span><br>
+                                @if ($booking->student_group_id)
+                                    <span
+                                        style="display:inline-block; padding: 2px 6px; background:#f0fdf4; color:#166534; border-radius:10px; font-size:0.75rem; margin-bottom:4px;">Group
+                                        Class</span><br>
                                     {{ $booking->studentGroup->name ?? 'N/A' }}
                                 @else
                                     {{ $booking->student->user->name ?? 'N/A' }}
@@ -563,41 +579,60 @@
                             <td>
                                 <div style="display: flex; gap: 0.5rem; flex-direction: column;">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Teacher:</span>
-                                        <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;" onchange="updateAttendance({{ $booking->id }}, 'teacher_attended', this.value)">
+                                        <span
+                                            style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Teacher:</span>
+                                        <select class="form-control"
+                                            style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;"
+                                            onchange="updateAttendance({{ $booking->id }}, 'teacher_attended', this.value)">
                                             <option value="">—</option>
-                                            <option value="1" {{ $booking->teacher_attended === true ? 'selected' : '' }}>Present</option>
-                                            <option value="0" {{ $booking->teacher_attended === false ? 'selected' : '' }}>Absent</option>
+                                            <option value="1"
+                                                {{ $booking->teacher_attended === true ? 'selected' : '' }}>Present
+                                            </option>
+                                            <option value="0"
+                                                {{ $booking->teacher_attended === false ? 'selected' : '' }}>Absent
+                                            </option>
                                         </select>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Student:</span>
-                                        <select class="form-control" style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;" onchange="updateAttendance({{ $booking->id }}, 'student_attended', this.value)">
+                                        <span
+                                            style="font-size: 0.75rem; color: var(--text-muted); width: 45px;">Student:</span>
+                                        <select class="form-control"
+                                            style="padding: 2px 4px; font-size: 0.75rem; width: auto; display: inline-block; border-color: #e2e8f0; border-radius: 4px; height: auto;"
+                                            onchange="updateAttendance({{ $booking->id }}, 'student_attended', this.value)">
                                             <option value="">—</option>
-                                            <option value="1" {{ $booking->student_attended === true ? 'selected' : '' }}>Present</option>
-                                            <option value="0" {{ $booking->student_attended === false ? 'selected' : '' }}>Absent</option>
+                                            <option value="1"
+                                                {{ $booking->student_attended === true ? 'selected' : '' }}>Present
+                                            </option>
+                                            <option value="0"
+                                                {{ $booking->student_attended === false ? 'selected' : '' }}>Absent
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
                             </td>
                             <td id="meet-cell-{{ $booking->id }}">
-                                @if($booking->google_sync_status === 'failed_permanent')
+                                @if ($booking->google_sync_status === 'failed_permanent')
                                     <div style="display: flex; align-items: center; gap: 0.5rem; flex-direction: column;">
-                                      <span class="text-danger" style="font-size: 0.75rem; font-weight: 600;">
-                                        ⚠️ Sync Failed
-                                      </span>
-                                      <button class="btn btn-sm btn-outline-primary" style="padding: 2px 6px; font-size: 0.7rem;" onclick="openSetMeetLinkModal('{{ $booking->id }}', '{{ addslashes($booking->student->user->name ?? $booking->student->name ?? 'N/A') }}', '{{ $booking->starts_at->format('d M Y, h:i A') }}')">Set Link</button>
+                                        <span class="text-danger" style="font-size: 0.75rem; font-weight: 600;">
+                                            ⚠️ Sync Failed
+                                        </span>
+                                        <button class="btn btn-sm btn-outline-primary"
+                                            style="padding: 2px 6px; font-size: 0.7rem;"
+                                            onclick="openSetMeetLinkModal('{{ $booking->id }}', '{{ addslashes($booking->student->user->name ?? ($booking->student->name ?? 'N/A')) }}', '{{ $booking->starts_at->format('d M Y, h:i A') }}')">Set
+                                            Link</button>
                                     </div>
                                 @elseif($booking->google_sync_status === 'pending' || $booking->google_sync_status === 'failed')
-                                    <span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">⏳ Syncing...</span>
+                                    <span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">⏳
+                                        Syncing...</span>
                                 @elseif($booking->google_meet_link || $booking->meet_link)
-                                    <a href="{{ $booking->google_meet_link ?? $booking->meet_link ?? 'https://meet.google.com' }}" target="_blank"
-                                        class="meet-btn">
+                                    <a href="{{ $booking->google_meet_link ?? ($booking->meet_link ?? 'https://meet.google.com') }}"
+                                        target="_blank" class="meet-btn">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round">
                                             <polygon points="23 7 16 12 23 17 23 7" />
-                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                                            <rect x="1" y="5" width="15" height="14" rx="2"
+                                                ry="2" />
                                         </svg>
                                         Join Meet
                                     </a>
@@ -618,10 +653,15 @@
                             @elseif($booking->status == 'cancelled') background-color: #fff0f0; color: #dc2626; border: 1px solid #fca5a5; @endif
                         "
                                         {{ $booking->status === 'completed' || $booking->status === 'cancelled' ? 'disabled' : '' }}>
-                                        <option value="scheduled" {{ $booking->status == 'scheduled' ? 'selected' : '' }}>Scheduled</option>
-                                        <option value="reschedule_requested" {{ $booking->status == 'reschedule_requested' ? 'selected' : '' }}>Reschedule Req.</option>
-                                        <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>Completed</option>
-                                        <option value="cancelled" {{ $booking->status == 'cancelled' ? 'selected' : '' }}>Cancelled (+1 Refund)</option>
+                                        <option value="scheduled" {{ $booking->status == 'scheduled' ? 'selected' : '' }}>
+                                            Scheduled</option>
+                                        <option value="reschedule_requested"
+                                            {{ $booking->status == 'reschedule_requested' ? 'selected' : '' }}>Reschedule
+                                            Req.</option>
+                                        <option value="completed" {{ $booking->status == 'completed' ? 'selected' : '' }}>
+                                            Completed</option>
+                                        <option value="cancelled" {{ $booking->status == 'cancelled' ? 'selected' : '' }}>
+                                            Cancelled (+1 Refund)</option>
                                     </select>
                                 </form>
                             </td>
@@ -633,13 +673,14 @@
                                             {{ $booking->reschedule_requested_by === 'Teacher' ? '👨‍🏫' : '🎓' }}
                                             Requested by {{ $booking->reschedule_requested_by ?? 'User' }}
                                         </span><br>
-                                        @if($booking->reschedule_requested_starts_at)
-                                            <span style="color:var(--text-muted);">📅 {{ $booking->reschedule_requested_starts_at->format('d M Y, h:i A') }}</span>
+                                        @if ($booking->reschedule_requested_starts_at)
+                                            <span style="color:var(--text-muted);">📅
+                                                {{ $booking->reschedule_requested_starts_at->format('d M Y, h:i A') }}</span>
                                         @endif
                                     </div>
 
                                     {{-- Reason pill - clickable to show full reason --}}
-                                    @if($booking->reschedule_reason)
+                                    @if ($booking->reschedule_reason)
                                         <div style="margin-bottom:0.4rem;">
                                             <span
                                                 onclick="showRescheduleReason('{{ addslashes($booking->reschedule_reason) }}', '{{ $booking->rescheduled_by ?? 'User' }}', '{{ $booking->reschedule_requested_starts_at?->format('d M Y, h:i A') }}')"
@@ -652,19 +693,23 @@
 
                                     {{-- Approve / Reject buttons --}}
                                     <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                                        <form action="{{ route('admin.bookings.reschedule.approve', $booking) }}" method="POST" style="margin:0;">
+                                        <form action="{{ route('admin.bookings.reschedule.approve', $booking) }}"
+                                            method="POST" style="margin:0;">
                                             @csrf
                                             <button type="button"
                                                 onclick="confirmRescheduleAction(this.closest('form'), 'approve', '{{ $booking->rescheduled_by ?? 'User' }}', '{{ $booking->reschedule_requested_starts_at?->format('d M Y, h:i A') }}')"
                                                 style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.3rem 0.7rem;font-size:0.73rem;font-weight:700;color:#fff;background:#059669;border:none;border-radius:6px;cursor:pointer;font-family:var(--font-main);transition:all 0.2s;"
-                                                onmouseover="this.style.background='#047857'" onmouseout="this.style.background='#059669'">✓ Approve</button>
+                                                onmouseover="this.style.background='#047857'"
+                                                onmouseout="this.style.background='#059669'">✓ Approve</button>
                                         </form>
-                                        <form action="{{ route('admin.bookings.reschedule.reject', $booking) }}" method="POST" style="margin:0;">
+                                        <form action="{{ route('admin.bookings.reschedule.reject', $booking) }}"
+                                            method="POST" style="margin:0;">
                                             @csrf
                                             <button type="button"
                                                 onclick="confirmRescheduleAction(this.closest('form'), 'reject', '{{ $booking->rescheduled_by ?? 'User' }}', '{{ $booking->reschedule_requested_starts_at?->format('d M Y, h:i A') }}')"
                                                 style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.3rem 0.7rem;font-size:0.73rem;font-weight:700;color:#dc2626;background:#fff0f0;border:1px solid #fca5a5;border-radius:6px;cursor:pointer;font-family:var(--font-main);transition:all 0.2s;"
-                                                onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff0f0'">✕ Reject</button>
+                                                onmouseover="this.style.background='#fee2e2'"
+                                                onmouseout="this.style.background='#fff0f0'">✕ Reject</button>
                                         </form>
                                     </div>
                                 @elseif ($booking->status === 'completed')
@@ -695,7 +740,8 @@
                 <button type="button" class="modal-close" onclick="closeRescheduleModal()"
                     style="font-size: 1.5rem; line-height: 1; color: #888;">&times;</button>
             </div>
-            <form id="rescheduleForm" method="POST" style="margin: 0;" onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').innerHTML = 'Processing...';">
+            <form id="rescheduleForm" method="POST" style="margin: 0;"
+                onsubmit="this.querySelector('button[type=submit]').disabled = true; this.querySelector('button[type=submit]').innerHTML = 'Processing...';">
                 @csrf
                 @method('PUT')
                 <div class="modal-body" style="padding: 1.5rem; color: #4b5563;">
@@ -711,10 +757,12 @@
 
                     <div class="booking-grid" style="grid-template-columns: 1fr 1fr; display: grid; gap: 1rem;">
                         <div class="form-group mb-0" style="grid-column: span 2;">
-                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600; color: #374151;">New Teacher</label>
-                            <select id="reschTeacher" name="teacher_id" class="form-control" required onchange="fetchAdminRescheduleSlots()">
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600; color: #374151;">New
+                                Teacher</label>
+                            <select id="reschTeacher" name="teacher_id" class="form-control" required
+                                onchange="fetchAdminRescheduleSlots()">
                                 <option value="">Select Teacher</option>
-                                @foreach($teachers as $t)
+                                @foreach ($teachers as $t)
                                     <option value="{{ $t->id }}">{{ $t->user->name }}</option>
                                 @endforeach
                             </select>
@@ -733,8 +781,10 @@
                             </select>
                         </div>
                         <div class="form-group mb-0" style="grid-column: span 2;">
-                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600; color: #374151;">Reason <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
-                            <textarea id="reschReason" name="reschedule_reason" class="form-control" rows="2" placeholder="Admin note for this reschedule…" style="resize:none;"></textarea>
+                            <label class="form-label" style="font-size: 0.8rem; font-weight: 600; color: #374151;">Reason
+                                <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                            <textarea id="reschReason" name="reschedule_reason" class="form-control" rows="2"
+                                placeholder="Admin note for this reschedule…" style="resize:none;"></textarea>
                         </div>
                     </div>
                 </div>
@@ -756,24 +806,37 @@
         <div class="modal" style="max-width: 460px; padding: 0;">
             <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 1.25rem 1.5rem;">
                 <h3 class="font-semibold" style="font-size:1rem;">Reschedule Request Details</h3>
-                <button type="button" class="modal-close" onclick="document.getElementById('rescheduleReasonModal').classList.remove('show')" style="font-size:1.5rem;line-height:1;color:#888;">×</button>
+                <button type="button" class="modal-close"
+                    onclick="document.getElementById('rescheduleReasonModal').classList.remove('show')"
+                    style="font-size:1.5rem;line-height:1;color:#888;">×</button>
             </div>
             <div class="modal-body" style="padding:1.5rem;">
                 <div style="margin-bottom:1rem;">
-                    <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Requested By</div>
+                    <div
+                        style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">
+                        Requested By</div>
                     <div id="rrm-by" style="font-size:0.9rem;font-weight:700;color:#51040e;"></div>
                 </div>
                 <div style="margin-bottom:1rem;">
-                    <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Proposed Date & Time</div>
+                    <div
+                        style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">
+                        Proposed Date & Time</div>
                     <div id="rrm-date" style="font-size:0.9rem;color:var(--text-main);"></div>
                 </div>
                 <div>
-                    <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Reason</div>
-                    <div id="rrm-reason" style="font-size:0.9rem;color:var(--text-main);background:rgba(81,4,14,0.04);border:1px solid rgba(81,4,14,0.1);border-radius:8px;padding:0.75rem;line-height:1.55;"></div>
+                    <div
+                        style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">
+                        Reason</div>
+                    <div id="rrm-reason"
+                        style="font-size:0.9rem;color:var(--text-main);background:rgba(81,4,14,0.04);border:1px solid rgba(81,4,14,0.1);border-radius:8px;padding:0.75rem;line-height:1.55;">
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer" style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rescheduleReasonModal').classList.remove('show')" style="padding:0.4rem 1.2rem;font-weight:600;">Close</button>
+            <div class="modal-footer"
+                style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary"
+                    onclick="document.getElementById('rescheduleReasonModal').classList.remove('show')"
+                    style="padding:0.4rem 1.2rem;font-weight:600;">Close</button>
             </div>
         </div>
     </div>
@@ -783,46 +846,69 @@
         <div class="modal" style="max-width: 420px; padding: 0;">
             <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 1.25rem 1.5rem;">
                 <h3 class="font-semibold" id="rcm-title" style="font-size:1rem;"></h3>
-                <button type="button" class="modal-close" onclick="document.getElementById('rescheduleConfirmModal').classList.remove('show')" style="font-size:1.5rem;line-height:1;color:#888;">×</button>
+                <button type="button" class="modal-close"
+                    onclick="document.getElementById('rescheduleConfirmModal').classList.remove('show')"
+                    style="font-size:1.5rem;line-height:1;color:#888;">×</button>
             </div>
             <div class="modal-body" style="padding:1.5rem;">
                 <p id="rcm-message" style="font-size:0.9rem;color:var(--text-main);line-height:1.55;"></p>
             </div>
-            <div class="modal-footer" style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:0.75rem;">
-                <button type="button" onclick="document.getElementById('rescheduleConfirmModal').classList.remove('show')" style="padding:0.4rem 1.2rem;font-weight:600;border:1px solid var(--border-color);background:#fff;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);">Cancel</button>
-                <button type="button" id="rcm-confirm-btn" style="padding:0.4rem 1.4rem;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);" onclick="rcmConfirm()">Confirm</button>
+            <div class="modal-footer"
+                style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:0.75rem;">
+                <button type="button"
+                    onclick="document.getElementById('rescheduleConfirmModal').classList.remove('show')"
+                    style="padding:0.4rem 1.2rem;font-weight:600;border:1px solid var(--border-color);background:#fff;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);">Cancel</button>
+                <button type="button" id="rcm-confirm-btn"
+                    style="padding:0.4rem 1.4rem;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);"
+                    onclick="rcmConfirm()">Confirm</button>
             </div>
         </div>
     </div>
 
-<!-- SET MEET LINK MODAL -->
-<div id="setMeetLinkModal" class="modal-backdrop">
-    <div class="modal" style="max-width: 450px; padding: 0;">
-        <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 1.25rem 1.5rem;">
-            <h3 class="font-semibold" style="font-size:1rem;">Set Meet Link Manually</h3>
-            <button type="button" class="modal-close" onclick="document.getElementById('setMeetLinkModal').classList.remove('show')" style="font-size:1.5rem;line-height:1;color:#888;">×</button>
+    <!-- SET MEET LINK MODAL -->
+    <div id="setMeetLinkModal" class="modal-backdrop">
+        <div class="modal" style="max-width: 450px; padding: 0;">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-light); padding: 1.25rem 1.5rem;">
+                <h3 class="font-semibold" style="font-size:1rem;">Set Meet Link Manually</h3>
+                <button type="button" class="modal-close"
+                    onclick="document.getElementById('setMeetLinkModal').classList.remove('show')"
+                    style="font-size:1.5rem;line-height:1;color:#888;">×</button>
+            </div>
+            <form onsubmit="submitMeetLink(event)">
+                <input type="hidden" id="manualMeetClassId">
+                <div class="modal-body" style="padding:1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                    <div
+                        style="background: rgba(81,4,14,0.04); border: 1px solid rgba(81,4,14,0.1); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+                        <div style="margin-bottom: 0.5rem;"><span class="text-muted"
+                                style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Student:</span>
+                            <strong id="manualMeetStudent" style="color:#51040e;"></strong></div>
+                        <div><span class="text-muted"
+                                style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Class
+                                Time:</span> <strong id="manualMeetTime" style="color:var(--text-main);"></strong></div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label class="form-label" for="manualMeetUrl"
+                            style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Google
+                            Meet URL</label>
+                        <input type="url" id="manualMeetUrl" class="form-control"
+                            placeholder="https://meet.google.com/abc-defg-hij" required
+                            pattern="^https:\/\/meet\.google\.com\/.+$">
+                        <small class="text-muted" style="display: block; margin-top: 0.25rem;">Must be a valid Google Meet
+                            URL.</small>
+                    </div>
+                </div>
+                <div class="modal-footer"
+                    style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:0.75rem;">
+                    <button type="button" onclick="document.getElementById('setMeetLinkModal').classList.remove('show')"
+                        style="padding:0.4rem 1.2rem;font-weight:600;border:1px solid var(--border-color);background:#fff;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);">Cancel</button>
+                    <button type="submit" id="btnSaveMeetLink"
+                        style="padding:0.4rem 1.4rem;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);color:#fff;background:var(--primary);">Save
+                        Meet Link</button>
+                </div>
+            </form>
         </div>
-        <form onsubmit="submitMeetLink(event)">
-            <input type="hidden" id="manualMeetClassId">
-            <div class="modal-body" style="padding:1.5rem; display: flex; flex-direction: column; gap: 1rem;">
-                <div style="background: rgba(81,4,14,0.04); border: 1px solid rgba(81,4,14,0.1); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
-                    <div style="margin-bottom: 0.5rem;"><span class="text-muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Student:</span> <strong id="manualMeetStudent" style="color:#51040e;"></strong></div>
-                    <div><span class="text-muted" style="font-weight:700;text-transform:uppercase;letter-spacing:0.05em;font-size:0.75rem;">Class Time:</span> <strong id="manualMeetTime" style="color:var(--text-main);"></strong></div>
-                </div>
-                
-                <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" for="manualMeetUrl" style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.3rem;">Google Meet URL</label>
-                    <input type="url" id="manualMeetUrl" class="form-control" placeholder="https://meet.google.com/abc-defg-hij" required pattern="^https:\/\/meet\.google\.com\/.+$">
-                    <small class="text-muted" style="display: block; margin-top: 0.25rem;">Must be a valid Google Meet URL.</small>
-                </div>
-            </div>
-            <div class="modal-footer" style="padding:1rem 1.5rem;border-top:1px solid var(--border-light);display:flex;justify-content:flex-end;gap:0.75rem;">
-                <button type="button" onclick="document.getElementById('setMeetLinkModal').classList.remove('show')" style="padding:0.4rem 1.2rem;font-weight:600;border:1px solid var(--border-color);background:#fff;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);">Cancel</button>
-                <button type="submit" id="btnSaveMeetLink" style="padding:0.4rem 1.4rem;font-weight:700;border:none;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-main);color:#fff;background:var(--primary);">Save Meet Link</button>
-            </div>
-        </form>
     </div>
-</div>
 
 @endsection
 
@@ -845,8 +931,10 @@
             populateReschTimeDropdown();
 
             // Initialize bookTime as empty since date/teacher aren't selected
-            document.getElementById('bookTime').innerHTML = '<option value="">-- Select teacher and date first --</option>';
-            document.getElementById('bookTimeSlot').innerHTML = '<option value="">-- Select teacher and days first --</option>';
+            document.getElementById('bookTime').innerHTML =
+                '<option value="">-- Select teacher and date first --</option>';
+            document.getElementById('bookTimeSlot').innerHTML =
+                '<option value="">-- Select teacher and days first --</option>';
         });
 
         function setBookingMode(mode) {
@@ -855,7 +943,7 @@
                 document.getElementById('btnGroupMode').classList.add('active');
                 document.getElementById('btnIndividualMode').classList.remove('active');
                 document.getElementById('studentSelectGroup').style.display = 'none';
-                document.getElementById('groupSelectGroup').style.display = 'block';
+                document.getElementById('groupSelectGroup').style.display = 'flex';
                 document.getElementById('bookStudent').removeAttribute('required');
                 document.getElementById('bookGroup').setAttribute('required', 'required');
                 onGroupSelectChange();
@@ -900,7 +988,7 @@
             studentStatusCard.style.display = 'flex';
 
             document.getElementById('hiddenInstrument').value = 'Group Music Class';
-            
+
             warning.style.display = 'none';
             btnSubmit.disabled = false;
             document.getElementById('recurrCreditsVal').textContent = membersCount + " members";
@@ -1028,9 +1116,9 @@
                     if (data.slots && data.slots.length > 0) {
                         data.slots.forEach(slot => {
                             // Extract only "HH:mm" from "Y-m-d H:i:s" so combining with date gives valid ISO datetime
-                            const timePart = slot.start_time.includes('T')
-                                ? slot.start_time.split('T')[1].substring(0, 5)
-                                : slot.start_time.split(' ')[1].substring(0, 5);
+                            const timePart = slot.start_time.includes('T') ?
+                                slot.start_time.split('T')[1].substring(0, 5) :
+                                slot.start_time.split(' ')[1].substring(0, 5);
                             select.innerHTML +=
                                 `<option value="${timePart}">${slot.display_time}</option>`;
                         });
@@ -1047,13 +1135,22 @@
         }
 
         function getNextDateForDay(dayStr) {
-            const dayMap = {'SUN':0, 'MON':1, 'TUE':2, 'WED':3, 'THU':4, 'FRI':5, 'SAT':6};
+            const dayMap = {
+                'SUN': 0,
+                'MON': 1,
+                'TUE': 2,
+                'WED': 3,
+                'THU': 4,
+                'FRI': 5,
+                'SAT': 6
+            };
             const target = dayMap[dayStr];
             const d = new Date();
             d.setDate(d.getDate() + 1);
-            for (let i=0; i<7; i++) {
+            for (let i = 0; i < 7; i++) {
                 if (d.getDay() === target) {
-                    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+                    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate())
+                        .padStart(2, '0');
                 }
                 d.setDate(d.getDate() + 1);
             }
@@ -1063,14 +1160,15 @@
         function fetchRecurringAvailableSlots() {
             const teacherSelect = document.getElementById('bookTeacher');
             const selectRecurring = document.getElementById('bookTimeSlot');
-            const checkedDays = Array.from(document.querySelectorAll('input[name="week_days[]"]:checked')).map(el => el.value);
-            
+            const checkedDays = Array.from(document.querySelectorAll('input[name="week_days[]"]:checked')).map(el => el
+                .value);
+
             if (!teacherSelect || !teacherSelect.value) {
                 selectRecurring.innerHTML = '<option value="">-- Select teacher first --</option>';
                 updateLivePreview();
                 return;
             }
-            
+
             if (checkedDays.length === 0) {
                 selectRecurring.innerHTML = '<option value="">-- Select days of week first --</option>';
                 updateLivePreview();
@@ -1090,7 +1188,8 @@
                         data.slots.forEach(slot => {
                             const timePart = slot.start_time.split(' ')[1]; // "H:i:s"
                             const timePartShort = timePart.substring(0, 5); // "H:i"
-                            selectRecurring.innerHTML += `<option value="${timePartShort}">${slot.display_time}</option>`;
+                            selectRecurring.innerHTML +=
+                                `<option value="${timePartShort}">${slot.display_time}</option>`;
                         });
                     } else {
                         selectRecurring.innerHTML = '<option value="">-- No slots available --</option>';
@@ -1241,7 +1340,15 @@
 
             // Show current schedule in read-only field
             const dateObj = new Date(currentDateTime);
-            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+            const options = {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
             document.getElementById('currentScheduledInput').value = dateObj.toLocaleString('en-US', options);
 
             // Pre-select teacher, reset date/time/reason
@@ -1258,7 +1365,7 @@
 
         function fetchAdminRescheduleSlots() {
             const teacherId = document.getElementById('reschTeacher').value;
-            const date      = document.getElementById('reschDate').value;
+            const date = document.getElementById('reschDate').value;
             const timeSelect = document.getElementById('reschTime');
 
             if (!teacherId || !date) {
@@ -1271,28 +1378,31 @@
             timeSelect.disabled = true;
 
             fetch(`/admin/reschedule/slots?teacher_id=${teacherId}&date=${date}`, {
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(res => res.json())
-            .then(slots => {
-                if (!Array.isArray(slots) || slots.length === 0) {
-                    timeSelect.innerHTML = '<option value="">No available slots on this date</option>';
-                    return;
-                }
-                timeSelect.innerHTML = '<option value="">— Select a time slot —</option>';
-                slots.forEach(slot => {
-                    // Use display_time from API (already formatted as "08:00 AM - 08:40 AM")
-                    const label = slot.display_time;
-                    const opt   = document.createElement('option');
-                    opt.value   = label;
-                    opt.textContent = label;
-                    timeSelect.appendChild(opt);
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(slots => {
+                    if (!Array.isArray(slots) || slots.length === 0) {
+                        timeSelect.innerHTML = '<option value="">No available slots on this date</option>';
+                        return;
+                    }
+                    timeSelect.innerHTML = '<option value="">— Select a time slot —</option>';
+                    slots.forEach(slot => {
+                        // Use display_time from API (already formatted as "08:00 AM - 08:40 AM")
+                        const label = slot.display_time;
+                        const opt = document.createElement('option');
+                        opt.value = label;
+                        opt.textContent = label;
+                        timeSelect.appendChild(opt);
+                    });
+                    timeSelect.disabled = false;
+                })
+                .catch(() => {
+                    timeSelect.innerHTML = '<option value="">Error loading slots — try again</option>';
                 });
-                timeSelect.disabled = false;
-            })
-            .catch(() => {
-                timeSelect.innerHTML = '<option value="">Error loading slots — try again</option>';
-            });
         }
 
         function closeRescheduleModal() {
@@ -1401,10 +1511,10 @@
             const isApprove = action === 'approve';
 
             document.getElementById('rcm-title').textContent = isApprove ? '✓ Approve Reschedule?' : '✕ Reject Reschedule?';
-            document.getElementById('rcm-message').innerHTML = isApprove
-                ? `You are about to <strong>approve</strong> the reschedule request from <strong>${requestedBy}</strong>.<br><br>
-                   The class will be rescheduled to <strong>${proposedDate || 'the proposed time'}</strong> and notifications will be sent automatically.`
-                : `You are about to <strong>reject</strong> the reschedule request from <strong>${requestedBy}</strong>.<br><br>
+            document.getElementById('rcm-message').innerHTML = isApprove ?
+                `You are about to <strong>approve</strong> the reschedule request from <strong>${requestedBy}</strong>.<br><br>
+                   The class will be rescheduled to <strong>${proposedDate || 'the proposed time'}</strong> and notifications will be sent automatically.` :
+                `You are about to <strong>reject</strong> the reschedule request from <strong>${requestedBy}</strong>.<br><br>
                    The class will remain on its <strong>original schedule</strong> and the requester will be notified.`;
 
             const btn = document.getElementById('rcm-confirm-btn');
@@ -1432,29 +1542,29 @@
             payload[field] = value;
 
             fetch(`/admin/class-booking/${bookingId}/attendance`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    if (typeof showToast !== 'undefined') showToast('Attendance updated successfully', 'success');
-                    else alert('Attendance updated successfully');
-                } else {
-                    alert('Failed to update attendance');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while updating attendance');
-            });
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (typeof showToast !== 'undefined') showToast('Attendance updated successfully', 'success');
+                        else alert('Attendance updated successfully');
+                    } else {
+                        alert('Failed to update attendance');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while updating attendance');
+                });
         }
-        
+
         function openSetMeetLinkModal(classId, studentName, classTime) {
             document.getElementById("manualMeetClassId").value = classId;
             document.getElementById("manualMeetStudent").textContent = studentName;
@@ -1465,27 +1575,30 @@
 
         async function submitMeetLink(e) {
             e.preventDefault();
-            
+
             const classId = document.getElementById("manualMeetClassId").value;
             const url = document.getElementById("manualMeetUrl").value;
             const btn = document.getElementById("btnSaveMeetLink");
-            
+
             try {
                 btn.disabled = true;
                 btn.textContent = "Saving...";
-                
+
                 const response = await fetch(`/admin/bookings/${classId}/meet-link`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ meet_link: url })
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        meet_link: url
+                    })
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok && data.success) {
                     const cell = document.getElementById('meet-cell-' + classId);
                     if (cell) {

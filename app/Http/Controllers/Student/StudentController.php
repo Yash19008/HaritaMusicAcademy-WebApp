@@ -307,4 +307,65 @@ class StudentController extends Controller
 
         return view('student.syllabus', compact('student', 'courses'));
     }
+
+    public function resources(): View
+    {
+        $allFolders = \App\Models\ResourceFolder::with(['files' => function($query) {
+            $query->orderBy('sort_order');
+        }])->where('is_active', true)->orderBy('sort_order')->get();
+
+        $generalFolders = $allFolders->where('type', 'general');
+        $student = auth()->user()->student;
+        $courses = collect();
+        if ($student) {
+            $courses = $student->courses()->with(['syllabi' => function($query) {
+                $query->where('is_active', true)->orderBy('sort_order');
+            }])->get();
+        }
+
+        return view('student.resources.index', compact('generalFolders', 'courses'));
+    }
+
+    public function downloadResource($filename)
+    {
+        $path = 'student_resources/' . $filename;
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->download($path);
+        }
+        
+        $teacherPath = 'teacher_resources/' . $filename;
+        if (\Illuminate\Support\Facades\Storage::disk('public')->exists($teacherPath)) {
+            return \Illuminate\Support\Facades\Storage::disk('public')->download($teacherPath);
+        }
+        
+        return abort(404, 'File not found');
+    }
+
+    public function markAttendance(ClassBooking $booking): \Illuminate\Http\JsonResponse
+    {
+        $student = $this->student();
+        
+        // Authorization: Verify student belongs to this booking
+        if ($booking->student_id !== $student->id && (!$booking->student_group_id || !$student->groups()->where('student_groups.id', $booking->student_group_id)->exists())) {
+            return response()->json(['error' => 'Unauthorized access to this booking.'], 403);
+        }
+
+        // Must be the same day
+        if (!now()->isSameDay($booking->starts_at)) {
+            return response()->json(['error' => 'Attendance can only be marked on the day of the class.'], 400);
+        }
+
+        // Must be completed or after end time
+        $endTime = $booking->ends_at ?? $booking->starts_at->copy()->addMinutes($booking->duration_minutes ?? 40);
+        if ($booking->status !== 'completed' && now()->isBefore($endTime)) {
+            return response()->json(['error' => 'Attendance can only be marked after the class is completed.'], 400);
+        }
+
+        if ($booking->student_attended === null) {
+            $booking->student_attended = true;
+            $booking->save();
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

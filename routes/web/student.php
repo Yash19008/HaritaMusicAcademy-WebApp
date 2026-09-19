@@ -12,6 +12,7 @@ Route::middleware(['auth', 'role.access:student'])
         Route::get('/teachers/{teacher}/slots', [StudentController::class, 'getAvailableSlots'])->name('teachers.slots');
         Route::post('/my-classes/book',[StudentController::class, 'bookClass'])->name('my-classes.book');
         Route::post('/my-classes/{booking}/reschedule',[\App\Http\Controllers\RescheduleController::class, 'requestReschedule'])->name('my-classes.reschedule');
+        Route::post('/my-classes/{booking}/mark-attendance', [StudentController::class, 'markAttendance'])->name('my-classes.mark-attendance');
         Route::get('/reschedule/slots',               [\App\Http\Controllers\RescheduleController::class, 'getAvailableSlots'])->name('reschedule.slots');
         Route::get('/credits',         [StudentController::class, 'credits'])->name('credits');
         Route::get('/feedback',        [StudentController::class, 'feedback'])->name('feedback');
@@ -23,6 +24,10 @@ Route::middleware(['auth', 'role.access:student'])
         Route::post('/settings',       [StudentController::class, 'saveSettings'])->name('settings.save');
         Route::get('/syllabus',        [StudentController::class, 'syllabus'])->name('syllabus');
         Route::get('/syllabus/{syllabus}/download', [\App\Http\Controllers\Admin\SyllabusController::class, 'download'])->name('syllabus.download');
+          
+        Route::get('/resources',       [StudentController::class, 'resources'])->name('resources');
+        Route::get('/resources/download/{filename}', [StudentController::class, 'downloadResource'])->name('resources.download');
+        
         Route::post('/intro-video',    [StudentController::class, 'uploadIntroVideo'])->name('intro-video.upload');
         Route::post('/renewal-interest', [StudentController::class, 'submitRenewalInterest'])->name('renewal-interest.submit');
     });

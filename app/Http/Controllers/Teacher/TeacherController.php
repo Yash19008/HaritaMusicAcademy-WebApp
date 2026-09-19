@@ -303,4 +303,32 @@ class TeacherController extends Controller
         }
         return abort(404, 'File not found');
     }
+
+    public function markAttendance(\App\Models\ClassBooking $booking): \Illuminate\Http\JsonResponse
+    {
+        $teacher = $this->teacher();
+        
+        // Authorization: Verify teacher belongs to this booking
+        if ($booking->teacher_id !== $teacher->id) {
+            return response()->json(['error' => 'Unauthorized access to this booking.'], 403);
+        }
+
+        // Must be the same day
+        if (!now()->isSameDay($booking->starts_at)) {
+            return response()->json(['error' => 'Attendance can only be marked on the day of the class.'], 400);
+        }
+
+        // Must be completed or after end time
+        $endTime = $booking->ends_at ?? $booking->starts_at->copy()->addMinutes($booking->duration_minutes ?? 40);
+        if ($booking->status !== 'completed' && now()->isBefore($endTime)) {
+            return response()->json(['error' => 'Attendance can only be marked after the class is completed.'], 400);
+        }
+
+        if ($booking->teacher_attended === null) {
+            $booking->teacher_attended = true;
+            $booking->save();
+        }
+
+        return response()->json(['success' => true]);
+    }
 }

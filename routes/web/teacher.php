@@ -11,6 +11,7 @@ Route::middleware(['auth', 'role.access:teacher'])
         Route::get('/my-classes',     [TeacherController::class, 'myClasses'])->name('my-classes');
         Route::get('/demo-classes',   [TeacherController::class, 'demoClasses'])->name('demo-classes');
         Route::post('/my-classes/{booking}/reschedule',[\App\Http\Controllers\RescheduleController::class, 'requestReschedule'])->name('my-classes.reschedule');
+        Route::post('/my-classes/{booking}/mark-attendance',[TeacherController::class, 'markAttendance'])->name('my-classes.mark-attendance');
         Route::get('/reschedule/slots',               [\App\Http\Controllers\RescheduleController::class, 'getAvailableSlots'])->name('reschedule.slots');
         Route::get('/leaves',         [TeacherController::class, 'leaves'])->name('leaves');
         Route::get('/leaves/loss',    [TeacherController::class, 'calculateLoss'])->name('leaves.loss');

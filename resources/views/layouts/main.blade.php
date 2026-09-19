@@ -37,9 +37,21 @@
             @endif
 
             @if (session('error'))
-                <div class="alert alert-danger"
-                    style="margin-bottom: 1rem; padding: 1rem; background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 0.375rem;">
-                    <strong>×</strong> {{ session('error') }}
+                <div id="sessionErrorModal" class="modal-backdrop show" style="display: flex; z-index: 9999;">
+                    <div class="modal" style="max-width: 450px; border-top: 4px solid #ef4444;">
+                        <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+                            <h3 class="font-bold text-danger" style="color: #b91c1c; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 1.25rem;">⚠️</span> Action Blocked
+                            </h3>
+                            <button class="modal-close" onclick="document.getElementById('sessionErrorModal').style.display='none'">x</button>
+                        </div>
+                        <div class="modal-body" style="padding-top: 1rem; padding-bottom: 1.5rem; color: #4b5563; font-size: 0.95rem; line-height: 1.5;">
+                            {!! session('error') !!}
+                        </div>
+                        <div class="modal-footer" style="display: flex; justify-content: flex-end; padding-top: 0; border-top: none;">
+                            <button class="btn btn-primary" style="background-color: #ef4444; border-color: #ef4444;" onclick="document.getElementById('sessionErrorModal').style.display='none'">Got it</button>
+                        </div>
+                    </div>
                 </div>
             @endif
 

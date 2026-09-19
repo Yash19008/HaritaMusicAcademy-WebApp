@@ -75,6 +75,62 @@
         .student-check-list label:hover {
             background: var(--bg-hover, #f8f9fa);
         }
+
+        /* Custom Searchable Dropdown */
+        .search-select-wrap {
+            position: relative;
+        }
+
+        .search-select-wrap input.search-select-input {
+            width: 100%;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.65rem center;
+            background-size: 0.85rem;
+            padding-right: 2rem;
+        }
+
+        .search-select-wrap input.search-select-input:focus {
+            cursor: text;
+        }
+
+        .search-select-dropdown {
+            display: none;
+            position: absolute;
+            z-index: 9999;
+            left: 0;
+            right: 0;
+            top: calc(100% + 2px);
+            background: var(--bg-card, #fff);
+            border: 1px solid #cbd5e1;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .search-select-dropdown.open {
+            display: block;
+        }
+
+        .search-select-option {
+            padding: 0.45rem 0.75rem;
+            font-size: 12.5px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+
+        .search-select-option:hover,
+        .search-select-option.highlighted {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .search-select-option.no-results {
+            color: var(--text-muted);
+            font-style: italic;
+        }
     </style>
 @endpush
 
@@ -97,11 +153,9 @@
                     <select id="instrumentFilter" class="form-control" style="width:160px;"
                         onchange="if(dtStudents) dtStudents.column(3).search(this.value).draw()">
                         <option value="">All Instruments</option>
-                        <option value="Vocal">Vocals</option>
-                        <option value="Sitar">Sitar</option>
-                        <option value="Violin">Violin</option>
-                        <option value="Flute">Flute</option>
-                        <option value="Tabla">Tabla</option>
+                        @foreach ($courses as $course)
+                            <option value="{{ $course->name }}">{{ $course->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="d-flex gap-2">
@@ -184,7 +238,8 @@
                             </td>
                             <td>
                                 <div class="actions-dropdown-container">
-                                    <button class="actions-kebab-btn" onclick="toggleActionsDropdown(event,this)">⋮</button>
+                                    <button class="actions-kebab-btn"
+                                        onclick="toggleActionsDropdown(event,this)">⋮</button>
                                     <div class="actions-dropdown-menu" style="min-width:175px;">
                                         <button class="actions-dropdown-item"
                                             onclick="openEditStudent({{ $student->id }})">✏️ Edit Profile</button>
@@ -269,7 +324,7 @@
                             </td>
                             <td>{{ $group->teacher->name ?? '— Unassigned —' }}</td>
                             <td class="text-center font-bold">{{ $group->members_count }} /
-                                {{ \App\Models\Setting::get('max_group_users', 4) }}</td>
+                                {{ $maxGroupUsers }}</td>
                             <td>
                                 <span
                                     class="badge {{ strtolower($group->status ?? 'active') === 'active' ? 'badge-success' : 'badge-danger' }}">
@@ -341,213 +396,25 @@
                     <div class="grid grid-2 gap-3">
                         <div class="form-group">
                             <label class="form-label">Country</label>
-                            <select name="country" id="sfCountry" class="form-control">
-                                <option value="">— Select Country —</option>
-                                <option value="Afghanistan">Afghanistan</option>
-                                <option value="Albania">Albania</option>
-                                <option value="Algeria">Algeria</option>
-                                <option value="Andorra">Andorra</option>
-                                <option value="Angola">Angola</option>
-                                <option value="Antigua and Barbuda">Antigua and Barbuda</option>
-                                <option value="Argentina">Argentina</option>
-                                <option value="Armenia">Armenia</option>
-                                <option value="Australia">Australia</option>
-                                <option value="Austria">Austria</option>
-                                <option value="Azerbaijan">Azerbaijan</option>
-                                <option value="Bahamas">Bahamas</option>
-                                <option value="Bahrain">Bahrain</option>
-                                <option value="Bangladesh">Bangladesh</option>
-                                <option value="Barbados">Barbados</option>
-                                <option value="Belarus">Belarus</option>
-                                <option value="Belgium">Belgium</option>
-                                <option value="Belize">Belize</option>
-                                <option value="Benin">Benin</option>
-                                <option value="Bhutan">Bhutan</option>
-                                <option value="Bolivia">Bolivia</option>
-                                <option value="Bosnia and Herzegovina">Bosnia and Herzegovina</option>
-                                <option value="Botswana">Botswana</option>
-                                <option value="Brazil">Brazil</option>
-                                <option value="Brunei">Brunei</option>
-                                <option value="Bulgaria">Bulgaria</option>
-                                <option value="Burkina Faso">Burkina Faso</option>
-                                <option value="Burundi">Burundi</option>
-                                <option value="Cabo Verde">Cabo Verde</option>
-                                <option value="Cambodia">Cambodia</option>
-                                <option value="Cameroon">Cameroon</option>
-                                <option value="Canada">Canada</option>
-                                <option value="Central African Republic">Central African Republic</option>
-                                <option value="Chad">Chad</option>
-                                <option value="Chile">Chile</option>
-                                <option value="China">China</option>
-                                <option value="Colombia">Colombia</option>
-                                <option value="Comoros">Comoros</option>
-                                <option value="Congo (Republic of the Congo)">Congo (Republic of the Congo)</option>
-                                <option value="Costa Rica">Costa Rica</option>
-                                <option value="Côte d'Ivoire (Ivory Coast)">Côte d'Ivoire (Ivory Coast)</option>
-                                <option value="Croatia">Croatia</option>
-                                <option value="Cuba">Cuba</option>
-                                <option value="Cyprus">Cyprus</option>
-                                <option value="Czech Republic (Czechia)">Czech Republic (Czechia)</option>
-                                <option value="Democratic Republic of the Congo">Democratic Republic of the Congo</option>
-                                <option value="Denmark">Denmark</option>
-                                <option value="Djibouti">Djibouti</option>
-                                <option value="Dominica">Dominica</option>
-                                <option value="Dominican Republic">Dominican Republic</option>
-                                <option value="Ecuador">Ecuador</option>
-                                <option value="Egypt">Egypt</option>
-                                <option value="El Salvador">El Salvador</option>
-                                <option value="Equatorial Guinea">Equatorial Guinea</option>
-                                <option value="Eritrea">Eritrea</option>
-                                <option value="Estonia">Estonia</option>
-                                <option value="Eswatini">Eswatini</option>
-                                <option value="Ethiopia">Ethiopia</option>
-                                <option value="Fiji">Fiji</option>
-                                <option value="Finland">Finland</option>
-                                <option value="France">France</option>
-                                <option value="Gabon">Gabon</option>
-                                <option value="Gambia">Gambia</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Germany">Germany</option>
-                                <option value="Ghana">Ghana</option>
-                                <option value="Greece">Greece</option>
-                                <option value="Grenada">Grenada</option>
-                                <option value="Guatemala">Guatemala</option>
-                                <option value="Guinea">Guinea</option>
-                                <option value="Guinea-Bissau">Guinea-Bissau</option>
-                                <option value="Guyana">Guyana</option>
-                                <option value="Haiti">Haiti</option>
-                                <option value="Holy See (Vatican City)">Holy See (Vatican City)</option>
-                                <option value="Honduras">Honduras</option>
-                                <option value="Hungary">Hungary</option>
-                                <option value="Iceland">Iceland</option>
-                                <option value="India" selected>India</option>
-                                <option value="Indonesia">Indonesia</option>
-                                <option value="Iran">Iran</option>
-                                <option value="Iraq">Iraq</option>
-                                <option value="Ireland">Ireland</option>
-                                <option value="Israel">Israel</option>
-                                <option value="Italy">Italy</option>
-                                <option value="Jamaica">Jamaica</option>
-                                <option value="Japan">Japan</option>
-                                <option value="Jordan">Jordan</option>
-                                <option value="Kazakhstan">Kazakhstan</option>
-                                <option value="Kenya">Kenya</option>
-                                <option value="Kiribati">Kiribati</option>
-                                <option value="Kuwait">Kuwait</option>
-                                <option value="Kyrgyzstan">Kyrgyzstan</option>
-                                <option value="Laos">Laos</option>
-                                <option value="Latvia">Latvia</option>
-                                <option value="Lebanon">Lebanon</option>
-                                <option value="Lesotho">Lesotho</option>
-                                <option value="Liberia">Liberia</option>
-                                <option value="Libya">Libya</option>
-                                <option value="Liechtenstein">Liechtenstein</option>
-                                <option value="Lithuania">Lithuania</option>
-                                <option value="Luxembourg">Luxembourg</option>
-                                <option value="Madagascar">Madagascar</option>
-                                <option value="Malawi">Malawi</option>
-                                <option value="Malaysia">Malaysia</option>
-                                <option value="Maldives">Maldives</option>
-                                <option value="Mali">Mali</option>
-                                <option value="Malta">Malta</option>
-                                <option value="Marshall Islands">Marshall Islands</option>
-                                <option value="Mauritania">Mauritania</option>
-                                <option value="Mauritius">Mauritius</option>
-                                <option value="Mexico">Mexico</option>
-                                <option value="Micronesia">Micronesia</option>
-                                <option value="Moldova">Moldova</option>
-                                <option value="Monaco">Monaco</option>
-                                <option value="Mongolia">Mongolia</option>
-                                <option value="Montenegro">Montenegro</option>
-                                <option value="Morocco">Morocco</option>
-                                <option value="Mozambique">Mozambique</option>
-                                <option value="Myanmar">Myanmar</option>
-                                <option value="Namibia">Namibia</option>
-                                <option value="Nauru">Nauru</option>
-                                <option value="Nepal">Nepal</option>
-                                <option value="Netherlands">Netherlands</option>
-                                <option value="New Zealand">New Zealand</option>
-                                <option value="Nicaragua">Nicaragua</option>
-                                <option value="Niger">Niger</option>
-                                <option value="Nigeria">Nigeria</option>
-                                <option value="North Korea">North Korea</option>
-                                <option value="North Macedonia">North Macedonia</option>
-                                <option value="Norway">Norway</option>
-                                <option value="Oman">Oman</option>
-                                <option value="Pakistan">Pakistan</option>
-                                <option value="Palau">Palau</option>
-                                <option value="Palestine">Palestine</option>
-                                <option value="Panama">Panama</option>
-                                <option value="Papua New Guinea">Papua New Guinea</option>
-                                <option value="Paraguay">Paraguay</option>
-                                <option value="Peru">Peru</option>
-                                <option value="Philippines">Philippines</option>
-                                <option value="Poland">Poland</option>
-                                <option value="Portugal">Portugal</option>
-                                <option value="Qatar">Qatar</option>
-                                <option value="Romania">Romania</option>
-                                <option value="Russia">Russia</option>
-                                <option value="Rwanda">Rwanda</option>
-                                <option value="Saint Kitts and Nevis">Saint Kitts and Nevis</option>
-                                <option value="Saint Lucia">Saint Lucia</option>
-                                <option value="Saint Vincent and the Grenadines">Saint Vincent and the Grenadines</option>
-                                <option value="Samoa">Samoa</option>
-                                <option value="San Marino">San Marino</option>
-                                <option value="São Tomé and Príncipe">São Tomé and Príncipe</option>
-                                <option value="Saudi Arabia">Saudi Arabia</option>
-                                <option value="Senegal">Senegal</option>
-                                <option value="Serbia">Serbia</option>
-                                <option value="Seychelles">Seychelles</option>
-                                <option value="Sierra Leone">Sierra Leone</option>
-                                <option value="Singapore">Singapore</option>
-                                <option value="Slovakia">Slovakia</option>
-                                <option value="Slovenia">Slovenia</option>
-                                <option value="Solomon Islands">Solomon Islands</option>
-                                <option value="Somalia">Somalia</option>
-                                <option value="South Africa">South Africa</option>
-                                <option value="South Korea">South Korea</option>
-                                <option value="South Sudan">South Sudan</option>
-                                <option value="Spain">Spain</option>
-                                <option value="Sri Lanka">Sri Lanka</option>
-                                <option value="Sudan">Sudan</option>
-                                <option value="Suriname">Suriname</option>
-                                <option value="Sweden">Sweden</option>
-                                <option value="Switzerland">Switzerland</option>
-                                <option value="Syria">Syria</option>
-                                <option value="Tajikistan">Tajikistan</option>
-                                <option value="Tanzania">Tanzania</option>
-                                <option value="Thailand">Thailand</option>
-                                <option value="Timor-Leste">Timor-Leste</option>
-                                <option value="Togo">Togo</option>
-                                <option value="Tonga">Tonga</option>
-                                <option value="Trinidad and Tobago">Trinidad and Tobago</option>
-                                <option value="Tunisia">Tunisia</option>
-                                <option value="Türkiye">Türkiye</option>
-                                <option value="Turkmenistan">Turkmenistan</option>
-                                <option value="Tuvalu">Tuvalu</option>
-                                <option value="Uganda">Uganda</option>
-                                <option value="Ukraine">Ukraine</option>
-                                <option value="United Arab Emirates">United Arab Emirates</option>
-                                <option value="United Kingdom">United Kingdom</option>
-                                <option value="United States">United States</option>
-                                <option value="Uruguay">Uruguay</option>
-                                <option value="Uzbekistan">Uzbekistan</option>
-                                <option value="Vanuatu">Vanuatu</option>
-                                <option value="Venezuela">Venezuela</option>
-                                <option value="Vietnam">Vietnam</option>
-                                <option value="Yemen">Yemen</option>
-                                <option value="Zambia">Zambia</option>
-                                <option value="Zimbabwe">Zimbabwe</option>
-                            </select>
+                            <input type="hidden" name="country" id="sfCountry">
+                            <div class="search-select-wrap" id="sfCountryWrap">
+                                <input type="text" class="form-control search-select-input" id="sfCountrySearch"
+                                    placeholder="— Select Country —" autocomplete="off" readonly
+                                    onfocus="openSearchSelect('sfCountryWrap')">
+                                <div class="search-select-dropdown" id="sfCountryDropdown">
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Timezone</label>
-                            <select name="timezone" id="sfTimezone" class="form-control">
-                                @foreach (timezone_identifiers_list() as $tz)
-                                    <option value="{{ $tz }}" {{ $tz === 'Asia/Kolkata' ? 'selected' : '' }}>
-                                        {{ $tz }}</option>
-                                @endforeach
-                            </select>
+                            <input type="hidden" name="timezone" id="sfTimezone" value="Asia/Kolkata">
+                            <div class="search-select-wrap" id="sfTimezoneWrap">
+                                <input type="text" class="form-control search-select-input" id="sfTimezoneSearch"
+                                    placeholder="Asia/Kolkata" autocomplete="off" readonly
+                                    onfocus="openSearchSelect('sfTimezoneWrap')">
+                                <div class="search-select-dropdown" id="sfTimezoneDropdown">
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-2 gap-3">
@@ -571,9 +438,11 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Music Category (Course)</label>
-                        <div class="student-check-list" id="sfCourseList" style="max-height: 120px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem;">
+                        <div class="student-check-list" id="sfCourseList"
+                            style="max-height: 120px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.25rem;">
                             @foreach ($courses as $course)
-                                <label style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
+                                <label
+                                    style="display:flex; align-items:center; gap:0.25rem; font-size:12.5px; font-weight:normal; margin:0;">
                                     <input type="checkbox" name="courses[]" value="{{ $course->id }}"
                                         class="sf-course-checkbox"
                                         style="width:15px;height:15px;accent-color:var(--primary);">
@@ -617,42 +486,6 @@
                                 <option value="Group">Group Student</option>
                             </select>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Credit Package</label>
-                            <select id="sfCreditPackage" class="form-control"
-                                onchange="document.getElementById('sfCredits').value = this.options[this.selectedIndex].dataset.credits || 0; calculateStudentEndDate();">
-                                <option value="" data-credits="0">— Custom / No Package —</option>
-                                @if (isset($creditPackages))
-                                    @foreach ($creditPackages as $package)
-                                        <option value="{{ $package->id }}" data-credits="{{ $package->credits }}" data-format="{{ $package->enrollment_format ?? 'Individual' }}">
-                                            {{ $package->name }} ({{ $package->credits }} Credits)</option>
-                                    @endforeach
-                                @endif
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-2 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Initial Credits</label>
-                            <input type="number" name="credits" id="sfCredits" class="form-control" value="0"
-                                min="0" onchange="calculateStudentEndDate()">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">End Date</label>
-                            <input type="date" name="end_date" id="sfEndDate" class="form-control">
-                        </div>
-                    </div>
-                    <div class="grid grid-2 gap-3">
-                        <div class="form-group">
-                            <label class="form-label">Account Status *</label>
-                            <select name="status" id="sfStatus" class="form-control" required>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="form-group"></div>
-                    </div>
-                    <div class="grid grid-1 gap-3">
                         <div class="form-group" id="groupSelectContainer" style="display:none;">
                             <label class="form-label">Assign to Group</label>
                             <select name="assigned_group" id="sfGroup" class="form-control">
@@ -660,6 +493,42 @@
                                 @foreach ($groups as $group)
                                     <option value="{{ $group->id }}">{{ $group->name }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Credit Package</label>
+                            <select name="credit_package_id" id="sfCreditPackage" class="form-control"
+                                onchange="document.getElementById('sfCredits').value = this.options[this.selectedIndex].dataset.credits || 0; calculateStudentEndDate();">
+                                <option value="" data-credits="0">— Custom / No Package —</option>
+                                @if (isset($creditPackages))
+                                    @foreach ($creditPackages as $package)
+                                        <option value="{{ $package->id }}" data-credits="{{ $package->credits }}"
+                                            data-format="{{ $package->enrollment_format ?? 'Individual' }}">
+                                            {{ $package->name }} ({{ $package->credits }} Credits)</option>
+                                    @endforeach
+                                @endif
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Initial Credits</label>
+                            <input type="number" name="credits" id="sfCredits" class="form-control" value="0"
+                                min="0" onchange="calculateStudentEndDate()">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">End Date</label>
+                            <input type="date" name="end_date" id="sfEndDate" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Account Status *</label>
+                            <select name="status" id="sfStatus" class="form-control" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
                             </select>
                         </div>
                     </div>
@@ -699,7 +568,7 @@
                     </div>
                     <div class="form-group mb-3">
                         <label class="form-label">Select Students (1 –
-                            {{ \App\Models\Setting::get('max_group_users', 4) }} max)</label>
+                            {{ $maxGroupUsers }} max)</label>
                         <div class="student-check-list" id="groupStudentsList">
                             @foreach ($students as $student)
                                 <label>
@@ -761,6 +630,13 @@
                     <input type="file" id="csvFileInput" style="display:none;" accept=".csv"
                         onchange="handleCSVFileSelect(event)">
                 </div>
+                
+                <div class="mb-3">
+                    <label class="d-flex align-center gap-2" style="font-size:13px;cursor:pointer;">
+                        <input type="checkbox" id="chkCreateUsers" value="1" checked>
+                        Create user accounts and send login credentials via email
+                    </label>
+                </div>
 
                 {{-- Preview Section (hidden until file selected) --}}
                 <div id="bulkPreviewSection" style="display:none;">
@@ -805,37 +681,145 @@
     <script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
 
     <script>
+        // ── Custom Searchable Dropdown ────────────────────────────────
+        const COUNTRIES = ['Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina',
+            'Armenia', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus',
+            'Belgium', 'Belize', 'Benin', 'Bhutan', 'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei',
+            'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia', 'Cameroon', 'Canada',
+            'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros',
+            'Congo (Republic of the Congo)', 'Costa Rica', "Côte d'Ivoire (Ivory Coast)", 'Croatia', 'Cuba', 'Cyprus',
+            'Czech Republic (Czechia)', 'Democratic Republic of the Congo', 'Denmark', 'Djibouti', 'Dominica',
+            'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia',
+            'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana',
+            'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Holy See (Vatican City)',
+            'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland', 'Israel', 'Italy',
+            'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia',
+            'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar',
+            'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico',
+            'Micronesia', 'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia',
+            'Nauru', 'Nepal', 'Netherlands', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea',
+            'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestine', 'Panama', 'Papua New Guinea',
+            'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda',
+            'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino',
+            "São Tomé and Príncipe", 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore',
+            'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Korea', 'South Sudan', 'Spain',
+            'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Tajikistan', 'Tanzania', 'Thailand',
+            'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Türkiye', 'Turkmenistan', 'Tuvalu',
+            'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+            'Vanuatu', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+        ];
+        const TIMEZONES = @json(timezone_identifiers_list());
+
+        function buildDropdown(wrapId, items) {
+            const wrap = document.getElementById(wrapId);
+            const dd = wrap.querySelector('.search-select-dropdown');
+            dd.innerHTML = '';
+            const all = ['', ...items]; // blank = clear
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'search-select-option';
+                div.textContent = item;
+                div.dataset.value = item;
+                div.addEventListener('mousedown', function(e) {
+                    e.preventDefault();
+                    selectSearchSelectOption(wrapId, item, item);
+                });
+                dd.appendChild(div);
+            });
+        }
+
+        function openSearchSelect(wrapId) {
+            const wrap = document.getElementById(wrapId);
+            const inp = wrap.querySelector('.search-select-input');
+            const dd = wrap.querySelector('.search-select-dropdown');
+            inp.readOnly = false;
+            inp.select();
+            dd.classList.add('open');
+            inp.oninput = function() {
+                filterDropdown(wrapId, inp.value);
+            };
+        }
+
+        function filterDropdown(wrapId, query) {
+            const wrap = document.getElementById(wrapId);
+            const dd = wrap.querySelector('.search-select-dropdown');
+            const q = query.toLowerCase();
+            let found = 0;
+            dd.querySelectorAll('.search-select-option').forEach(opt => {
+                const match = opt.dataset.value.toLowerCase().includes(q);
+                opt.style.display = match ? '' : 'none';
+                if (match) found++;
+            });
+            let noRes = dd.querySelector('.no-results');
+            if (found === 0) {
+                if (!noRes) {
+                    noRes = document.createElement('div');
+                    noRes.className = 'search-select-option no-results';
+                    noRes.textContent = 'No results';
+                    dd.appendChild(noRes);
+                }
+                noRes.style.display = '';
+            } else if (noRes) noRes.style.display = 'none';
+        }
+
+        function selectSearchSelectOption(wrapId, label, value) {
+            const wrap = document.getElementById(wrapId);
+            const inp = wrap.querySelector('.search-select-input');
+            const dd = wrap.querySelector('.search-select-dropdown');
+            const hiddenId = wrapId === 'sfCountryWrap' ? 'sfCountry' : 'sfTimezone';
+            inp.value = label;
+            inp.readOnly = true;
+            document.getElementById(hiddenId).value = value;
+            dd.classList.remove('open');
+        }
+
+        function setSearchSelect(wrapId, value) {
+            const wrap = document.getElementById(wrapId);
+            const inp = wrap.querySelector('.search-select-input');
+            const hiddenId = wrapId === 'sfCountryWrap' ? 'sfCountry' : 'sfTimezone';
+            inp.value = value || '';
+            inp.readOnly = true;
+            document.getElementById(hiddenId).value = value || '';
+        }
+
+        function clearSearchSelect(wrapId, placeholder) {
+            const wrap = document.getElementById(wrapId);
+            const inp = wrap.querySelector('.search-select-input');
+            const hiddenId = wrapId === 'sfCountryWrap' ? 'sfCountry' : 'sfTimezone';
+            inp.value = '';
+            inp.placeholder = placeholder;
+            inp.readOnly = true;
+            document.getElementById(hiddenId).value = '';
+        }
+
+        // Close dropdowns on outside click
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.search-select-wrap').forEach(wrap => {
+                if (!wrap.contains(e.target)) {
+                    const dd = wrap.querySelector('.search-select-dropdown');
+                    const inp = wrap.querySelector('.search-select-input');
+                    // If user typed but didn't select, restore previous value
+                    const hiddenId = wrap.id === 'sfCountryWrap' ? 'sfCountry' : 'sfTimezone';
+                    const saved = document.getElementById(hiddenId).value;
+                    inp.value = saved;
+                    inp.readOnly = true;
+                    dd.classList.remove('open');
+                }
+            });
+        });
+
+        // Initialise dropdown lists once DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            buildDropdown('sfCountryWrap', COUNTRIES);
+            buildDropdown('sfTimezoneWrap', TIMEZONES);
+            // Set default timezone display
+            setSearchSelect('sfTimezoneWrap', 'Asia/Kolkata');
+        });
+
         let dtStudents = null;
         let dtGroups = null;
 
-        @php
-            $studentsJson = $students
-                ->map(function ($s) {
-                    return [
-                        'id' => $s->id,
-                        'name' => $s->name,
-                        'email' => $s->email,
-                        'country' => $s->country ?? '',
-                        'timezone' => $s->user->timezone ?? 'Asia/Kolkata',
-                        'phone' => $s->phone ?? '',
-                        'enrolled_level' => $s->enrolled_level ?? 'Foundation Level',
-                        'course_ids' => $s->courses->pluck('id')->toArray(),
-                        'teacher_id' => $s->teacher_id ?? '',
-                        'referral_source' => $s->referral_source ?? '',
-                        'joining_date' => $s->joining_date ? \Carbon\Carbon::parse($s->joining_date)->format('Y-m-d') : '',
-                        'emergency_contact_name' => $s->emergency_contact_name ?? '',
-                        'emergency_contact_phone' => $s->emergency_contact_phone ?? '',
-                        'enrolled_format' => $s->enrolled_format ?? 'Individual',
-                        'credits' => $s->credits ?? 0,
-                        'status' => $s->status ?? 'active',
-                        'group_id' => optional($s->groups->first())->id ?? '',
-                        'age' => $s->age ?? '',
-                    ];
-                })
-                ->values();
-        @endphp
-        // All students as JSON for Edit modal pre-fill
-        const allStudents = @json($studentsJson);
+        // allStudents JSON removed for performance. Data fetched via AJAX.
 
         document.addEventListener('DOMContentLoaded', function() {
             dtStudents = setupDataTable('studentsTable');
@@ -860,31 +844,31 @@
         function calculateStudentEndDate() {
             const joiningDateStr = document.getElementById('sfJoiningDate').value;
             const packageSelect = document.getElementById('sfCreditPackage');
-            
+
             if (!joiningDateStr || packageSelect.selectedIndex <= 0) return;
-            
+
             const packageName = packageSelect.options[packageSelect.selectedIndex].text;
             const match = packageName.match(/\((\d+)\s+Months?\)/i);
-            
+
             if (match && match[1]) {
                 const monthsToAdd = parseInt(match[1]);
                 const joiningDate = new Date(joiningDateStr);
-                
+
                 // Add months
                 joiningDate.setMonth(joiningDate.getMonth() + monthsToAdd);
-                
+
                 // Format to YYYY-MM-DD
                 const yyyy = joiningDate.getFullYear();
                 const mm = String(joiningDate.getMonth() + 1).padStart(2, '0');
                 const dd = String(joiningDate.getDate()).padStart(2, '0');
-                
+
                 document.getElementById('sfEndDate').value = `${yyyy}-${mm}-${dd}`;
             }
         }
 
         function toggleGroupSelect(val) {
-            document.getElementById('groupSelectContainer').style.display = val === 'Group' ? 'block' : 'none';
-            
+            document.getElementById('groupSelectContainer').style.display = val === 'Group' ? 'flex' : 'none';
+
             // Filter credit packages
             const packageSelect = document.getElementById('sfCreditPackage');
             if (packageSelect) {
@@ -902,7 +886,7 @@
                         opt.disabled = true;
                     }
                 }
-                
+
                 // If currently selected option is hidden, reset selection
                 if (packageSelect.selectedIndex > 0 && packageSelect.options[packageSelect.selectedIndex].hidden) {
                     packageSelect.value = '';
@@ -918,43 +902,58 @@
             document.getElementById('studentModalTitle').textContent = 'Add New Student';
             document.getElementById('groupSelectContainer').style.display = 'none';
             document.querySelectorAll('.sf-course-checkbox').forEach(cb => cb.checked = false);
-            
+
             // Trigger format filter
             document.getElementById('sfFormat').value = 'Individual';
             toggleGroupSelect('Individual');
-            
+
+            // Reset searchable dropdowns
+            clearSearchSelect('sfCountryWrap', '— Select Country —');
+            setSearchSelect('sfTimezoneWrap', 'Asia/Kolkata');
+
             showModal('studentModal');
         }
 
         function openEditStudent(id) {
-            const s = allStudents.find(x => x.id === id);
-            if (!s) return;
-
-            document.getElementById('sfName').value = s.name;
-            document.getElementById('sfEmail').value = s.email;
-            document.getElementById('sfPhone').value = s.phone;
-            document.getElementById('sfAge').value = s.age;
-            document.getElementById('sfCountry').value = s.country;
-            document.getElementById('sfTimezone').value = s.timezone;
-            document.getElementById('sfLevel').value = s.enrolled_level;
-            document.querySelectorAll('.sf-course-checkbox').forEach(cb => {
-                cb.checked = s.course_ids && s.course_ids.includes(parseInt(cb.value));
-            });
-            document.getElementById('sfTeacher').value = s.teacher_id;
-            document.getElementById('sfReferral').value = s.referral_source;
-            document.getElementById('sfJoiningDate').value = s.joining_date;
-            document.getElementById('sfEmgName').value = s.emergency_contact_name;
-            document.getElementById('sfEmgPhone').value = s.emergency_contact_phone;
-            document.getElementById('sfFormat').value = s.enrolled_format;
-            document.getElementById('sfCredits').value = s.credits;
-            document.getElementById('sfStatus').value = s.status;
-            toggleGroupSelect(s.enrolled_format);
-            if (s.group_id) document.getElementById('sfGroup').value = s.group_id;
-
-            document.getElementById('sfMethod').value = 'PUT';
-            document.getElementById('studentForm').action = '{{ url('admin/students') }}/' + id;
-            document.getElementById('studentModalTitle').textContent = 'Edit Student Profile';
+            // Show loading state (optional)
+            document.getElementById('studentModalTitle').textContent = 'Loading...';
+            document.getElementById('studentForm').reset();
             showModal('studentModal');
+
+            fetch(`{{ url('admin/students') }}/${id}/json`)
+                .then(r => r.json())
+                .then(s => {
+                    document.getElementById('sfName').value = s.name;
+                    document.getElementById('sfEmail').value = s.email;
+                    document.getElementById('sfPhone').value = s.phone;
+                    document.getElementById('sfAge').value = s.age;
+                    setSearchSelect('sfCountryWrap', s.country);
+                    setSearchSelect('sfTimezoneWrap', s.timezone || 'Asia/Kolkata');
+                    document.getElementById('sfLevel').value = s.enrolled_level;
+                    document.querySelectorAll('.sf-course-checkbox').forEach(cb => {
+                        cb.checked = s.course_ids && s.course_ids.includes(parseInt(cb.value));
+                    });
+                    document.getElementById('sfTeacher').value = s.teacher_id;
+                    document.getElementById('sfReferral').value = s.referral_source;
+                    document.getElementById('sfJoiningDate').value = s.joining_date;
+                    document.getElementById('sfEmgName').value = s.emergency_contact_name;
+                    document.getElementById('sfEmgPhone').value = s.emergency_contact_phone;
+                    document.getElementById('sfFormat').value = s.enrolled_format;
+                    document.getElementById('sfCredits').value = s.credits;
+                    document.getElementById('sfEndDate').value = s.end_date;
+                    document.getElementById('sfCreditPackage').value = s.credit_package_id;
+                    document.getElementById('sfStatus').value = s.status;
+                    toggleGroupSelect(s.enrolled_format);
+                    if (s.group_id) document.getElementById('sfGroup').value = s.group_id;
+
+                    document.getElementById('sfMethod').value = 'PUT';
+                    document.getElementById('studentForm').action = '{{ url('admin/students') }}/' + id;
+                    document.getElementById('studentModalTitle').textContent = 'Edit Student Profile';
+                })
+                .catch(err => {
+                    alert('Error loading student data.');
+                    hideModal('studentModal');
+                });
         }
 
         // ── Group modal ───────────────────────────────────────────────
@@ -1068,6 +1067,7 @@
 
             const formData = new FormData();
             formData.append('csv_file', parsedCSVFile);
+            formData.append('create_users', document.getElementById('chkCreateUsers').checked ? '1' : '0');
             formData.append('_token', '{{ csrf_token() }}');
 
             fetch('{{ route('admin.students.bulk-import') }}', {
@@ -1081,16 +1081,23 @@
                     const hasErrors = data.errors && data.errors.length > 0;
                     resultEl.style.background = hasErrors ? '#fef2f2' : '#ecfdf5';
                     resultEl.style.color = hasErrors ? '#dc2626' : '#059669';
-                    let html =
-                        `<strong>✅ Imported: ${data.imported}</strong> &nbsp; <strong>⚠️ Skipped: ${data.skipped}</strong>`;
+                    
+                    // Prevent XSS by building DOM nodes instead of raw innerHTML
+                    resultEl.innerHTML = `<strong>✅ Imported: ${data.imported}</strong> &nbsp; <strong>⚠️ Skipped: ${data.skipped}</strong>`;
+                    
                     if (hasErrors) {
-                        html += '<ul style="margin-top:.5rem;padding-left:1.2rem;font-size:12px;">';
+                        const ul = document.createElement('ul');
+                        ul.style.marginTop = '.5rem';
+                        ul.style.paddingLeft = '1.2rem';
+                        ul.style.fontSize = '12px';
                         data.errors.forEach(e => {
-                            html += `<li>${e}</li>`;
+                            const li = document.createElement('li');
+                            li.textContent = e;
+                            ul.appendChild(li);
                         });
-                        html += '</ul>';
+                        resultEl.appendChild(ul);
                     }
-                    resultEl.innerHTML = html;
+                    
                     btn.textContent = 'Done';
                     // Reload page after short delay so table refreshes
                     setTimeout(() => window.location.reload(), 1800);
@@ -1128,28 +1135,7 @@
             document.body.removeChild(a);
         }
 
-        function calculateStudentEndDate() {
-            const joiningDateStr = document.getElementById('sfJoiningDate').value;
-            const creditsStr = document.getElementById('sfCredits').value;
 
-            if (joiningDateStr && creditsStr) {
-                const joiningDate = new Date(joiningDateStr);
-                const credits = parseInt(creditsStr, 10);
-
-                if (!isNaN(credits)) {
-                    // 1 credit = 1 day
-                    const endDate = new Date(joiningDate);
-                    endDate.setDate(endDate.getDate() + credits);
-
-                    // Format to YYYY-MM-DD
-                    const year = endDate.getFullYear();
-                    const month = String(endDate.getMonth() + 1).padStart(2, '0');
-                    const day = String(endDate.getDate()).padStart(2, '0');
-
-                    document.getElementById('sfEndDate').value = `${year}-${month}-${day}`;
-                }
-            }
-        }
 
         // ── Intro Video Viewer ────────────────────────────────────────
         function openIntroVideo(studentName, videoUrl, uploadedAt) {
@@ -1308,7 +1294,7 @@
     </style>
 @endpush
 
-<div id="introVideoViewerModal" onclick="if(event.target===this)closeIntroVideoViewer()">
+<div id="introVideoViewerModal" style="display: none;" onclick="if(event.target===this)closeIntroVideoViewer()">
     <div class="iv-viewer-box">
         <div class="iv-viewer-header">
             <div class="iv-viewer-header-left">

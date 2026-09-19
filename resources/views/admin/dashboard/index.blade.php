@@ -276,7 +276,7 @@
                 </p>
               </div>
             </div>
-            <a href="{{ route('admin.class-booking', ['sync_status' => 'failed_permanent']) }}" class="btn btn-primary btn-sm" style="background-color: #ef4444; border-color: #ef4444;">Review & Fix</a>
+            <a href="{{ route('admin.class-booking', ['sync_status' => 'failed_permanent']) }}#active-scheduled-classes" class="btn btn-primary btn-sm" style="background-color: #ef4444; border-color: #ef4444;">Review & Fix</a>
           </div>
         </div>
         @endif

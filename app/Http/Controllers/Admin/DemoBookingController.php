@@ -193,7 +193,10 @@ class DemoBookingController extends Controller
             'teacher_attended' => 'nullable|boolean',
             'student_attended' => 'nullable|boolean',
         ]);
-
+        
+        if (array_key_exists('teacher_attended', $validated)) {
+            $validated['status'] = $validated['teacher_attended'] ? 'completed' : 'scheduled';
+        }
         $demo->update($validated);
 
         return response()->json([
