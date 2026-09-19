@@ -44,8 +44,12 @@
                     <td>
                         @if($item->type === 'curriculum')
                             <span class="badge badge-info">Curriculum</span>
+                        @elseif($item->type === 'student')
+                            <span class="badge" style="background: rgba(52, 152, 219, 0.1); color: #2980b9;">Student Specific</span>
+                        @elseif($item->type === 'teacher')
+                            <span class="badge" style="background: rgba(155, 89, 182, 0.1); color: #8e44ad;">Teacher Specific</span>
                         @else
-                            <span class="badge badge-success">General</span>
+                            <span class="badge badge-success">General (Both)</span>
                         @endif
                     </td>
                     <td title="{{ $item->description }}">{{ Str::limit($item->description, 40) }}</td>
@@ -102,7 +106,9 @@
             <div class="mb-3">
                 <label class="form-label d-block mb-1">Type <span class="text-danger">*</span></label>
                 <select name="type" id="type" class="form-control w-100" required>
-                    <option value="general">General Resource</option>
+                    <option value="general">General Resource (Both)</option>
+                    <option value="student">Student Specific</option>
+                    <option value="teacher">Teacher Specific</option>
                 </select>
             </div>
             

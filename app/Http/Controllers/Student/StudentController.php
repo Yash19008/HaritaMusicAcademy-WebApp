@@ -314,7 +314,9 @@ class StudentController extends Controller
             $query->orderBy('sort_order');
         }])->where('is_active', true)->orderBy('sort_order')->get();
 
-        $generalFolders = $allFolders->where('type', 'general');
+        $generalFolders = $allFolders->filter(function($folder) {
+            return in_array($folder->type, ['general', 'student']);
+        });
         $student = auth()->user()->student;
         $courses = collect();
         if ($student) {

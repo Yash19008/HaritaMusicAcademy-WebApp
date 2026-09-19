@@ -18,7 +18,7 @@ class ResourceFolderController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:curriculum,general',
+            'type' => 'required|in:curriculum,general,student,teacher',
             'description' => 'nullable|string',
             'sort_order' => 'nullable|integer',
         ]);
@@ -38,7 +38,7 @@ class ResourceFolderController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:curriculum,general',
+            'type' => 'required|in:curriculum,general,student,teacher',
             'description' => 'nullable|string',
             'sort_order' => 'nullable|integer',
         ]);

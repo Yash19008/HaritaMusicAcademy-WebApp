@@ -257,7 +257,7 @@ class AdminController extends Controller
 
     public function getStudentJson(Student $student)
     {
-        $student->load(['courses', 'teacher', 'groups']);
+        $student->load(['courses', 'teacher', 'groups', 'user']);
         
         return response()->json([
             'id' => $student->id,
@@ -265,7 +265,7 @@ class AdminController extends Controller
             'email' => $student->email,
             'phone' => $student->phone,
             'country' => $student->country,
-            'timezone' => $student->timezone,
+            'timezone' => optional($student->user)->timezone ?? 'Asia/Kolkata',
             'teacher_id' => $student->teacher_id,
             'credits' => $student->credits,
             'joining_date' => $student->joining_date ? \Carbon\Carbon::parse($student->joining_date)->format('Y-m-d') : '',

@@ -72,6 +72,27 @@ class GoogleCalendarService
         }
     }
 
+    private function getRemindersPayload(): array
+    {
+        $reminders = \App\Models\ReminderConfig::enabled()->get();
+        if ($reminders->isEmpty()) {
+            return ['useDefault' => true];
+        }
+
+        $overrides = [];
+        foreach ($reminders as $reminder) {
+            $overrides[] = ['method' => 'popup', 'minutes' => $reminder->minutes_before];
+        }
+
+        // Limit to 5 overrides as per Google Calendar API limit
+        $overrides = array_slice($overrides, 0, 5);
+
+        return [
+            'useDefault' => false,
+            'overrides' => $overrides,
+        ];
+    }
+
     /**
      * Create a Google Calendar event with a Meet link for a class booking.
      */
@@ -105,6 +126,7 @@ class GoogleCalendarService
                     'timeZone' => $timezone,
                 ],
                 'attendees'   => $attendees,
+                'reminders'   => $this->getRemindersPayload(),
                 'conferenceData' => [
                     'createRequest' => [
                         'requestId' => 'harita-' . $booking->id . '-' . Str::uuid(),
@@ -175,6 +197,7 @@ class GoogleCalendarService
                     'timeZone' => $timezone,
                 ],
                 'attendees'   => $attendees,
+                'reminders'   => $this->getRemindersPayload(),
             ];
 
             $response = Http::timeout(10)->retry(2, 500)->withToken($token)
@@ -238,6 +261,7 @@ class GoogleCalendarService
                     'timeZone' => $timezone,
                 ],
                 'attendees'   => $attendees,
+                'reminders'   => $this->getRemindersPayload(),
             ];
 
             $response = Http::timeout(10)->retry(2, 500)->withToken($token)
