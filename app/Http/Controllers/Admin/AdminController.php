@@ -352,8 +352,15 @@ class AdminController extends Controller
         $imported = 0;
         $skipped  = 0;
         $errors   = [];
+        $rowCount = 0;
 
         while (($row = fgetcsv($handle)) !== false) {
+            $rowCount++;
+            if ($rowCount > 500) {
+                $skipped++;
+                $errors[] = "Row limit of 500 exceeded. Stopping import.";
+                break;
+            }
             if (count($row) < 2) continue;
             $data = array_combine($header, array_map('trim', $row));
 
@@ -922,6 +929,11 @@ class AdminController extends Controller
 
     public function exportReports(Request $request)
     {
+        $request->validate([
+            'start_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
+        ]);
+
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         
@@ -940,6 +952,37 @@ class AdminController extends Controller
         $startOfMonth = now()->startOfMonth();
         $endOfMonth = now()->endOfMonth();
 
+        // Pre-aggregate data to avoid N+1 queries
+        $classesTakenCount = \App\Models\ClassBooking::where('status', 'completed')
+            ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('teacher_id, count(*) as count')
+            ->groupBy('teacher_id')
+            ->pluck('count', 'teacher_id');
+
+        $demosCount = \App\Models\DemoBooking::where('status', 'completed')
+            ->whereBetween('scheduled_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('teacher_id, count(*) as count')
+            ->groupBy('teacher_id')
+            ->pluck('count', 'teacher_id');
+
+        $referralsCount = \App\Models\Referral::where('referrer_role', 'teacher')
+            ->where('status', 'approved')
+            ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('referrer_id, count(*) as count')
+            ->groupBy('referrer_id')
+            ->pluck('count', 'referrer_id');
+
+        $opportunitiesCount = \App\Models\Opportunity::where('status', 'accepted')
+            ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('accepted_teacher_id, count(*) as count')
+            ->groupBy('accepted_teacher_id')
+            ->pluck('count', 'accepted_teacher_id');
+
+        $demoPct = (float) \App\Models\Setting::get('opportunity_teacher_pct', 20);
+        $refBonusRs = (float) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
+        $oppBonusRs = (float) \App\Models\Setting::get('opportunity_bonus_rs', 100);
+        $defaultRate = (float) \App\Models\Setting::get('default_per_class_rate', 500);
+
         // Auto-generate/update pending payrolls on page load for the current month
         $teachers = Teacher::where('status', 'Active')->get();
         foreach ($teachers as $teacher) {
@@ -950,31 +993,15 @@ class AdminController extends Controller
 
             // Only auto-update if it's pending (not yet paid)
             if (!$payroll->exists || $payroll->status === 'pending') {
-                $classesTaken = ClassBooking::where('teacher_id', $teacher->id)
-                    ->where('status', 'completed')
-                    ->whereBetween('starts_at', [$startOfMonth, $endOfMonth])
-                    ->count();
-
-                $demoOpportunities = DemoBooking::where('teacher_id', $teacher->id)
-                    ->where('status', 'completed')
-                    ->whereBetween('scheduled_at', [$startOfMonth, $endOfMonth])
-                    ->count();
-
-                $approvedReferrals = \App\Models\Referral::where('referrer_id', $teacher->user_id)
-                    ->where('referrer_role', 'teacher')
-                    ->where('status', 'approved')
-                    ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
-                    ->count();
-
-                $acceptedOpportunities = \App\Models\Opportunity::where('accepted_teacher_id', $teacher->id)
-                    ->where('status', 'accepted')
-                    ->whereBetween('updated_at', [$startOfMonth, $endOfMonth])
-                    ->count();
+                $classesTaken = $classesTakenCount[$teacher->id] ?? 0;
+                $demoOpportunities = $demosCount[$teacher->id] ?? 0;
+                $approvedReferrals = $referralsCount[$teacher->user_id] ?? 0;
+                $acceptedOpportunities = $opportunitiesCount[$teacher->id] ?? 0;
 
                 $opportunityTaken = $demoOpportunities + $approvedReferrals + $acceptedOpportunities;
 
                 if (!$payroll->exists || $payroll->per_class_rate == 0) {
-                    $payroll->per_class_rate = 500; 
+                    $payroll->per_class_rate = $defaultRate; 
                 }
 
                 $rate = $payroll->per_class_rate;
@@ -983,10 +1010,6 @@ class AdminController extends Controller
                 $payroll->emergency_classes = $acceptedOpportunities;
                 $payroll->referrals = $approvedReferrals;
                 $payroll->opportunity_taken = $opportunityTaken;
-                
-                $demoPct = (float) \App\Models\Setting::get('opportunity_teacher_pct', 20);
-                $refBonusRs = (float) \App\Models\Setting::get('referral_bonus_teacher_rs', 500);
-                $oppBonusRs = (float) \App\Models\Setting::get('opportunity_bonus_rs', 100);
                 
                 $demoSalary = $demoOpportunities * ($demoPct / 100) * $rate;
                 $referralSalary = $approvedReferrals * $refBonusRs;

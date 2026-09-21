@@ -25,7 +25,9 @@ class ResourceFileController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = $file->getClientOriginalName();
+        $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $extension = $file->getClientOriginalExtension();
+        $fileName = $originalName . '_' . time() . '.' . $extension;
         $fileSize = $file->getSize();
         
         $path = $file->store('resource_files', 'public');

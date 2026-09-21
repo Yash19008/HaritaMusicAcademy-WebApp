@@ -18,7 +18,7 @@ class RoleAccess
 
         // If route requires admin, let any internal staff (non-student, non-teacher) pass.
         // Spatie will handle fine-grained permissions inside.
-        if ($role === 'admin' && !$user->hasAnyRole(['student', 'teacher'])) {
+        if ($role === 'admin' && $user->hasRole('admin')) {
             return $next($request);
         }
 

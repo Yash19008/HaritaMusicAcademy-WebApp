@@ -54,7 +54,7 @@ class LandingController extends Controller
         ]);
 
         try {
-            $admins = User::where('role', 'admin')->get();
+            $admins = User::role('admin')->get();
             Notification::send($admins, new DemoBookedNotification($payment));
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error("Failed to send demo notification: " . $e->getMessage());

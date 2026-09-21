@@ -257,7 +257,7 @@ class StudentController extends Controller
         if (! $student) return back()->withErrors(['error' => 'Student profile not found.']);
 
         $request->validate([
-            'intro_video' => ['required', 'file', 'mimes:mp4,mov,avi,webm', 'max:102400'],
+            'intro_video' => ['required', 'file', 'mimetypes:video/mp4,video/quicktime,video/x-msvideo,video/webm', 'max:102400'],
         ]);
 
         // Delete old video if exists

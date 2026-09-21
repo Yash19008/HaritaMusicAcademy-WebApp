@@ -146,6 +146,39 @@ class BookingService
         if ($isOnLeave) {
             return false;
         }
+
+        // Check availability window
+        $fromTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_from ?? '08:00:00'));
+        $toTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_to ?? '20:00:00'));
+        if ($toTime->lessThan($fromTime)) {
+            // Handles overnight shift (e.g., 22:00 to 06:00 next day)
+            // If the start time is before the fromTime but after the toTime, it's outside.
+            // Wait, for overnight shifts, if $startsAt is 01:00, it's < fromTime (22:00) but < toTime (06:00).
+            // Actually, in the index method, I used $toTime->addDay() if $toTime < $fromTime.
+            $toTime->addDay();
+        }
+        
+        // Wait, the index method does something specific for display, but here we just need to ensure the slot is within the window.
+        // If it's a day-by-day availability, usually the shifts are within the same day. Let's just use the addDay logic.
+        $checkStartsAt = $startsAt->copy();
+        $checkEndsAt = $endsAt->copy();
+        
+        // If the shift is overnight, and the slot is in the morning, we should compare it with the previous day's shift.
+        // To be safe, if we just use the simple logic for now assuming same day:
+        $fromTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_from ?? '08:00:00'));
+        $toTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_to ?? '20:00:00'));
+        if ($toTime->lessThan($fromTime)) {
+            $toTime->addDay();
+        }
+        
+        if ($startsAt->format('H:i:s') < ($teacher->available_from ?? '08:00:00') && $startsAt->format('H:i:s') < ($teacher->available_to ?? '20:00:00') && ($teacher->available_to ?? '20:00:00') < ($teacher->available_from ?? '08:00:00')) {
+             $fromTime->subDay();
+             $toTime->subDay();
+        }
+        
+        if ($checkEndsAt->greaterThan($toTime) || $checkStartsAt->lessThan($fromTime)) {
+            return false;
+        }
         
         // Check existing bookings
         $hasOverlap = ClassBooking::where('teacher_id', $teacher->id)
@@ -597,6 +630,22 @@ class BookingService
             if ($startsAt->toDateString() >= $leave->from_date && $startsAt->toDateString() <= $leave->to_date) {
                 return false;
             }
+        }
+
+        // Check availability window
+        $fromTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_from ?? '08:00:00'));
+        $toTime = Carbon::parse($startsAt->toDateString() . ' ' . ($teacher->available_to ?? '20:00:00'));
+        if ($toTime->lessThan($fromTime)) {
+            $toTime->addDay();
+        }
+        
+        if ($startsAt->format('H:i:s') < ($teacher->available_from ?? '08:00:00') && $startsAt->format('H:i:s') < ($teacher->available_to ?? '20:00:00') && ($teacher->available_to ?? '20:00:00') < ($teacher->available_from ?? '08:00:00')) {
+             $fromTime->subDay();
+             $toTime->subDay();
+        }
+        
+        if ($endsAt->greaterThan($toTime) || $startsAt->lessThan($fromTime)) {
+            return false;
         }
 
         foreach ($existingBookings as $booking) {

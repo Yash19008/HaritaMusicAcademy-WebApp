@@ -10,12 +10,15 @@ Artisan::command('inspire', function () {
 
 Schedule::command('app:send-class-reminders')
     ->everyMinute()
-    ->withoutOverlapping(2);
+    ->withoutOverlapping(2)
+    ->emailOutputOnFailure('info@haritamusicacademy.com');
 
 Schedule::command('app:sync-google-calendar')
     ->everyMinute()
-    ->withoutOverlapping(2);
+    ->withoutOverlapping(2)
+    ->emailOutputOnFailure('info@haritamusicacademy.com');
 
 Schedule::command('app:auto-complete-classes')
     ->everyMinute()
-    ->withoutOverlapping(2);
+    ->withoutOverlapping(2)
+    ->emailOutputOnFailure('info@haritamusicacademy.com');

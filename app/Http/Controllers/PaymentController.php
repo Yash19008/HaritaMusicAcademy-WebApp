@@ -165,7 +165,7 @@ class PaymentController extends Controller
             // Send confirmation email and admin notification
             try {
                 Mail::to($payment->email)->send(new PaymentConfirmationMail($payment));
-                $admins = User::where('role', 'admin')->get();
+                $admins = User::role('admin')->get();
                 Notification::send($admins, new DemoBookedNotification($payment));
             } catch (Throwable $e) {
                 Log::error("Failed to send payment confirmation email/notification for Payment #{$payment->id}: " . $e->getMessage());
@@ -233,7 +233,7 @@ class PaymentController extends Controller
                     // Send confirmation email and admin notification
                     try {
                         Mail::to($payment->email)->send(new PaymentConfirmationMail($payment));
-                        $admins = User::where('role', 'admin')->get();
+                        $admins = User::role('admin')->get();
                         Notification::send($admins, new DemoBookedNotification($payment));
                     } catch (Throwable $e) {
                         Log::error("Failed to send payment confirmation email/notification via webhook for Payment #{$payment->id}: " . $e->getMessage());
