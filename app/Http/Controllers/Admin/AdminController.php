@@ -523,6 +523,8 @@ class AdminController extends Controller
             'joining_date'   => ['nullable', 'date'],
             'rating'         => ['nullable', 'numeric', 'min:0', 'max:5'],
             'level'          => ['nullable', 'string'],
+            'available_from' => ['nullable', 'date_format:H:i'],
+            'available_to'   => ['nullable', 'date_format:H:i'],
             'emergency_contact_name'  => ['nullable', 'string'],
             'emergency_contact_phone' => ['nullable', 'string'],
         ]);
@@ -577,6 +579,8 @@ class AdminController extends Controller
             'joining_date'   => ['nullable', 'date'],
             'rating'         => ['nullable', 'numeric', 'min:0', 'max:5'],
             'level'          => ['nullable', 'string'],
+            'available_from' => ['nullable', 'date_format:H:i'],
+            'available_to'   => ['nullable', 'date_format:H:i'],
             'emergency_contact_name'  => ['nullable', 'string'],
             'emergency_contact_phone' => ['nullable', 'string'],
         ]);

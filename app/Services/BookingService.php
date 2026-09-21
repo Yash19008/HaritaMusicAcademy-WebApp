@@ -42,9 +42,17 @@ class BookingService
             return []; // Teacher is on leave
         }
 
-        // 3. Generate all slots (8 AM to 2 AM next day, 40-min intervals)
-        $startTime = $targetDate->copy()->setTime(8, 0, 0);
-        $endTime = $targetDate->copy()->addDay()->setTime(2, 0, 0);
+        // 3. Generate all slots based on teacher availability (40-min intervals)
+        $fromTime = $teacher->available_from ?? '08:00:00';
+        $toTime = $teacher->available_to ?? '20:00:00';
+
+        $startTime = Carbon::parse($targetDate->format('Y-m-d') . ' ' . $fromTime);
+        $endTime = Carbon::parse($targetDate->format('Y-m-d') . ' ' . $toTime);
+
+        // If end time is before or equal to start time (e.g. 20:00 to 02:00), it means it rolls over past midnight.
+        if ($endTime->lessThanOrEqualTo($startTime)) {
+            $endTime->addDay();
+        }
         
         $slots = [];
         $current = $startTime->copy();

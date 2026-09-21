@@ -272,6 +272,17 @@
                         </div>
                     </div>
 
+                    <div class="grid grid-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Available From</label>
+                            <input type="time" name="available_from" id="tfAvailableFrom" class="form-control" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Available To</label>
+                            <input type="time" name="available_to" id="tfAvailableTo" class="form-control" value="20:00">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label class="form-label">Short Biography</label>
                         <textarea name="bio" id="tfBio" class="form-control" style="height:60px;"
@@ -320,6 +331,8 @@
                         'per_class_rate' => $t->per_class_rate ?? '',
                         'certifications' => $t->certifications ?? '',
                         'week_off' => $t->week_off ?? '',
+                        'available_from' => $t->available_from ? substr($t->available_from, 0, 5) : '08:00',
+                        'available_to' => $t->available_to ? substr($t->available_to, 0, 5) : '20:00',
                         'youtube_url' => $t->youtube_url ?? '',
                         'bio' => $t->bio ?? '',
                     ];
@@ -330,6 +343,8 @@
 
         function openAddTeacher() {
             document.getElementById('teacherForm').reset();
+            document.getElementById('tfAvailableFrom').value = '08:00';
+            document.getElementById('tfAvailableTo').value = '20:00';
             document.querySelectorAll('input[name="week_off[]"]').forEach(cb => cb.checked = false);
             document.querySelectorAll('input[name="categories[]"]').forEach(cb => cb.checked = false);
             document.getElementById('tfMethod').value = 'POST';
@@ -356,6 +371,8 @@
             document.getElementById('tfClassFee').value = t.per_class_rate;
             document.getElementById('tfCertifications').value = t.certifications;
             document.getElementById('tfYoutube').value = t.youtube_url;
+            document.getElementById('tfAvailableFrom').value = t.available_from;
+            document.getElementById('tfAvailableTo').value = t.available_to;
             document.getElementById('tfBio').value = t.bio;
 
             // Tick categories checkboxes
